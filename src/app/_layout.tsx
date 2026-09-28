@@ -1,18 +1,99 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { useEffect } from 'react';
+import { AppState, Platform, useColorScheme } from 'react-native';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { AuthProvider, useAuth, useProfile } from '@/lib/auth';
+import { ChurchProvider, useChurch } from '@/lib/church';
+import { useRememberInviteLinks } from '@/lib/invite';
+import { registerForPushNotifications } from '@/lib/push';
+import { isConfigured } from '@/lib/supabase';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
+});
+
+// Refetch when the app comes back to the foreground, so approvals show up without a manual refresh.
+if (Platform.OS !== 'web') {
+  AppState.addEventListener('change', (state) => focusManager.setFocused(state === 'active'));
+}
+
+export default function RootLayout() {
   const colorScheme = useColorScheme();
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ChurchProvider>
+            <RootNavigator />
+          </ChurchProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </ThemeProvider>
+  );
+}
+
+function RootNavigator() {
+  const { session, loading: authLoading } = useAuth();
+  const profile = useProfile();
+  const { state } = useChurch();
+  useRememberInviteLinks();
+
+  const signedIn = isConfigured && !!session;
+  const loading = authLoading || (signedIn && (profile.isPending || state === 'loading'));
+  const needsName = signedIn && !profile.isPending && !profile.data?.full_name;
+  const onboarded = signedIn && !loading && !needsName;
+
+  useEffect(() => {
+    if (!loading) SplashScreen.hideAsync();
+  }, [loading]);
+
+  useEffect(() => {
+    if (session?.user.id) registerForPushNotifications(session.user.id).catch(() => {});
+  }, [session?.user.id]);
+
+  // Keep the splash screen up until we know where the person belongs. Rendering the
+  // navigator earlier would send an opened link (like an invite) to the wrong screen.
+  if (loading) return null;
+
+  return (
+    <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
+      <Stack.Protected guard={!isConfigured}>
+        <Stack.Screen name="setup-needed" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={isConfigured && !signedIn}>
+        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={needsName}>
+        <Stack.Screen name="welcome" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={onboarded && state === 'none'}>
+        <Stack.Screen name="start" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={onboarded && state === 'waiting'}>
+        <Stack.Screen name="waiting" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={onboarded && state === 'ready'}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="church-settings" options={{ title: 'Church settings' }} />
+        <Stack.Screen name="member/[id]" options={{ title: 'Member' }} />
+        <Stack.Screen name="profile" options={{ title: 'Your profile' }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={onboarded}>
+        <Stack.Screen name="join" options={{ title: 'Join a church' }} />
+        <Stack.Screen name="register" options={{ title: 'Register a church' }} />
+        <Stack.Screen name="switch-church" options={{ title: 'Your churches', presentation: 'modal' }} />
+        <Stack.Screen name="review-churches" options={{ title: 'Verify churches' }} />
+      </Stack.Protected>
+    </Stack>
   );
 }

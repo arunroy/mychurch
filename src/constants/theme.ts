@@ -1,6 +1,6 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Neutral colours for light and dark mode. Each church adds its own accent colour on top
+ * (see useAccent), so nothing here should be brand-coloured.
  */
 
 import '@/global.css';
@@ -14,6 +14,8 @@ export const Colors = {
     backgroundElement: '#F0F0F3',
     backgroundSelected: '#E0E1E6',
     textSecondary: '#60646C',
+    danger: '#B42318',
+    dangerBackground: '#FEE4E2',
   },
   dark: {
     text: '#ffffff',
@@ -21,8 +23,15 @@ export const Colors = {
     backgroundElement: '#212225',
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',
+    danger: '#FDA29B',
+    dangerBackground: '#55160C',
   },
 } as const;
+
+export const DEFAULT_ACCENT = '#3B5BDB';
+
+/** Colours a Pastor can pick for their church. All keep white text readable. */
+export const ACCENT_CHOICES = ['#3B5BDB', '#2F9E44', '#C2255C', '#7048E8', '#E8590C', '#0C8599', '#5C3D2E', '#343A40'];
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
