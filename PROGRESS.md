@@ -56,6 +56,7 @@
 ### Phase 4: Store release
 
 - [ ] EAS project, app icons and splash in MyChurch branding
+- [ ] Optional "tap to sign in" link in the sign-in email alongside the code (needs universal links / app links on a domain we control)
 - [ ] Privacy policy and terms
 - [ ] Report content, account deletion (both stores require these)
 - [ ] App Store and Google Play listings
