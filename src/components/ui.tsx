@@ -35,7 +35,7 @@ export function Screen({
   const theme = useTheme();
   const inner = <View style={styles.content}>{children}</View>;
   return (
-    <SafeAreaView edges={edges} style={[styles.screen, { backgroundColor: theme.background }]}>
+    <SafeAreaView edges={edges} style={[styles.screen, { backgroundColor: theme.page }]}>
       {scroll ? (
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll}>
           {inner}
@@ -239,7 +239,7 @@ export function Chip({
 export function Loading() {
   const theme = useTheme();
   return (
-    <View style={[styles.center, { backgroundColor: theme.background }]}>
+    <View style={[styles.center, { backgroundColor: theme.page }]}>
       <ActivityIndicator />
     </View>
   );

@@ -35,6 +35,42 @@ export const ACCENT_CHOICES = ['#3B5BDB', '#2F9E44', '#C2255C', '#7048E8', '#E85
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+/**
+ * Background gradients a person can choose for the whole app. Each has a soft version for light
+ * mode (dark text stays readable) and a deep one for dark mode (white text stays readable).
+ */
+export const GRADIENTS = [
+  { id: 'dawn', name: 'Dawn', light: ['#FFE9D6', '#FFC9DC'], dark: ['#3A1F2E', '#1D1B3D'] },
+  { id: 'ocean', name: 'Ocean', light: ['#D6F0FF', '#C9F5EA'], dark: ['#0B2A44', '#0B3B3B'] },
+  { id: 'meadow', name: 'Meadow', light: ['#E3F7D3', '#CDEFE0'], dark: ['#15321E', '#0F3432'] },
+  { id: 'twilight', name: 'Twilight', light: ['#E6DCFF', '#CFE0FF'], dark: ['#2A1F55', '#15254D'] },
+  { id: 'sunset', name: 'Sunset', light: ['#FFF0C7', '#FFD2C2'], dark: ['#47280F', '#45182A'] },
+  { id: 'mist', name: 'Mist', light: ['#ECEFF4', '#D9E2EC'], dark: ['#1F252D', '#2B3440'] },
+] as const;
+
+export type GradientId = (typeof GRADIENTS)[number]['id'];
+
+export function findGradient(id: string | null | undefined) {
+  return GRADIENTS.find((g) => g.id === id);
+}
+
+/**
+ * Surfaces when a gradient shows through. Cards are see-through so the gradient still shows, and
+ * `background` (used inside inputs) stays solid enough to read.
+ */
+export const GradientSurfaces = {
+  light: {
+    background: 'rgba(255,255,255,0.92)',
+    backgroundElement: 'rgba(255,255,255,0.72)',
+    backgroundSelected: 'rgba(0,0,0,0.08)',
+  },
+  dark: {
+    background: 'rgba(0,0,0,0.40)',
+    backgroundElement: 'rgba(255,255,255,0.10)',
+    backgroundSelected: 'rgba(255,255,255,0.18)',
+  },
+} as const;
+
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */

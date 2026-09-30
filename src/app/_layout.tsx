@@ -1,16 +1,18 @@
 import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { AppState, Platform } from 'react-native';
+import { AppState, Platform, StyleSheet, View } from 'react-native';
 
+import { Colors, findGradient } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth, useProfile } from '@/lib/auth';
 import { ChurchProvider, useChurch } from '@/lib/church';
 import { useRememberInviteLinks } from '@/lib/invite';
 import { registerForPushNotifications } from '@/lib/push';
 import { isConfigured } from '@/lib/supabase';
-import { ThemePreferenceProvider } from '@/lib/theme-preference';
+import { ThemePreferenceProvider, useThemePreference } from '@/lib/theme-preference';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,18 +35,40 @@ export default function RootLayout() {
 
 function ThemedApp() {
   const colorScheme = useColorScheme();
+  const { gradient } = useThemePreference();
+  const colors = findGradient(gradient)?.[colorScheme];
+
+  // With a gradient chosen, the navigator's own backgrounds go clear so the gradient shows through every screen.
+  const base = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
+  const navigationTheme = colors ? { ...base, colors: { ...base.colors, background: 'transparent', card: 'transparent' } } : base;
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <ChurchProvider>
-            <RootNavigator />
-          </ChurchProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <View style={[styles.root, { backgroundColor: Colors[colorScheme].background }]}>
+      {colors ? (
+        <LinearGradient
+          colors={[...colors]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+      ) : null}
+      <ThemeProvider value={navigationTheme}>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <ChurchProvider>
+              <RootNavigator />
+            </ChurchProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+});
 
 function RootNavigator() {
   const { session, loading: authLoading } = useAuth();

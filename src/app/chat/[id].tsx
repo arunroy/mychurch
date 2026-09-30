@@ -62,7 +62,7 @@ function Chat({ userId }: { userId: string }) {
   }
 
   return (
-    <SafeAreaView edges={['bottom']} style={[styles.screen, { backgroundColor: theme.background }]}>
+    <SafeAreaView edges={['bottom']} style={[styles.screen, { backgroundColor: theme.page }]}>
       <Stack.Screen options={{ title: partner }} />
       <KeyboardAvoidingView
         style={styles.screen}

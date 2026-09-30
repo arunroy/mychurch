@@ -2,11 +2,12 @@ import { router } from 'expo-router';
 
 import { AnnouncementCards } from '@/components/announcement-cards';
 import { ChurchHeader } from '@/components/church-header';
+import { HomeShortcuts } from '@/components/home-shortcuts';
 import { InviteCard } from '@/components/invite-card';
 import { VerseCard } from '@/components/verse-card';
 import { Body, Button, Card, Heading, Screen } from '@/components/ui';
 import { useProfile } from '@/lib/auth';
-import { ROLE_LABELS, useActiveChurch, usePermissions } from '@/lib/church';
+import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useMembers } from '@/lib/members';
 
 export default function HomeScreen() {
@@ -24,15 +25,13 @@ export default function HomeScreen() {
 
       <Card>
         <Heading>Welcome, {firstName}</Heading>
-        <Body muted>
-          You&apos;re {active.role === 'member' ? 'a member' : `the ${ROLE_LABELS[active.role]}`} here.
-          {approvedCount > 1 ? ` ${approvedCount} people are part of this church on MyChurch.` : ''}
-        </Body>
       </Card>
 
       <AnnouncementCards />
 
       <VerseCard />
+
+      <HomeShortcuts />
 
       {isLeader && pending.length > 0 ? (
         <Card>
@@ -47,7 +46,7 @@ export default function HomeScreen() {
 
       <Card>
         <Heading>Coming soon</Heading>
-        <Body muted>Announcements and sermons will appear here.</Body>
+        <Body muted>Sermons will appear here.</Body>
       </Card>
     </Screen>
   );
