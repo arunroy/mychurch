@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar, Button, ErrorText, Title, useAccent } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
@@ -12,6 +12,19 @@ import { confirm } from '@/lib/confirm';
 import { messageTime } from '@/lib/dates';
 import type { ChatPost } from '@/lib/database.types';
 import { friendlyError, publicUrl } from '@/lib/supabase';
+
+function useKeyboardOpen() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setOpen(true));
+    const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setOpen(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return open;
+}
 
 export default function ChatTab() {
   const userId = useUserId();
@@ -30,6 +43,10 @@ function ChurchChat({ userId }: { userId: string }) {
   const remove = useRemoveChatPost(church_id);
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const keyboardOpen = useKeyboardOpen();
+  // The tab bar floats over the screen: its own height plus the phone's bottom safe area.
+  const tabBarHeight = Platform.select({ ios: 49, android: 80 }) ?? 0;
+  const clearance = tabBarHeight + useSafeAreaInsets().bottom;
 
   async function onSend() {
     const body = text.trim();
@@ -114,7 +131,12 @@ function ChurchChat({ userId }: { userId: string }) {
 
         <ErrorText>{error ?? (posts.error ? friendlyError(posts.error) : null)}</ErrorText>
 
-        <View style={[styles.composer, { borderTopColor: theme.backgroundSelected }]}>
+        {/* Keep the message box clear of the tab bar; the keyboard covers the bar, so no gap is needed then. */}
+        <View
+          style={[
+            styles.composer,
+            { borderTopColor: theme.backgroundSelected, paddingBottom: Spacing.two + (keyboardOpen ? 0 : clearance) },
+          ]}>
           <TextInput
             value={text}
             onChangeText={setText}
