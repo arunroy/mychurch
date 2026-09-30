@@ -43,7 +43,7 @@ export default function CalendarScreen() {
               key={event.id}
               title={event.title}
               subtitle={[eventTimeText(event), event.location].filter(Boolean).join(' · ')}
-              onPress={() => router.push(`/event/${event.id}`)}
+              onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}
             />
           ))}
         </Card>

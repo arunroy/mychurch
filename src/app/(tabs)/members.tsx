@@ -39,7 +39,7 @@ export default function MembersScreen() {
         title={isMe ? `${memberName(member)} (you)` : memberName(member)}
         subtitle={member.role === 'member' ? undefined : ROLE_LABELS[member.role]}
         left={<Avatar name={memberName(member)} uri={publicUrl('avatars', member.profile?.avatar_path)} />}
-        onPress={isLeader && !isMe ? () => router.push(`/member/${member.user_id}`) : undefined}
+        onPress={!isMe ? () => router.push(`/member/${member.user_id}`) : undefined}
       />
     );
   }

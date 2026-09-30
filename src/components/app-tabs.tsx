@@ -3,7 +3,7 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useAccent } from '@/components/ui';
 import { useTheme } from '@/hooks/use-theme';
 
-export default function AppTabs({ pendingCount }: { pendingCount: number }) {
+export default function AppTabs({ pendingCount, unreadCount }: { pendingCount: number; unreadCount: number }) {
   const theme = useTheme();
   const accent = useAccent();
 
@@ -27,6 +27,12 @@ export default function AppTabs({ pendingCount }: { pendingCount: number }) {
       <NativeTabs.Trigger name="calendar">
         <NativeTabs.Trigger.Label>Calendar</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'calendar', selected: 'calendar' }} md="calendar_month" />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="messages">
+        <NativeTabs.Trigger.Label>Messages</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: 'bubble.left', selected: 'bubble.left.fill' }} md="chat" />
+        {unreadCount > 0 ? <NativeTabs.Trigger.Badge>{String(unreadCount)}</NativeTabs.Trigger.Badge> : null}
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="more">

@@ -89,6 +89,8 @@ function RootNavigator() {
         <Stack.Screen name="verse-edit" options={{ title: 'Verse' }} />
         <Stack.Screen name="event/[id]" options={{ title: 'Event' }} />
         <Stack.Screen name="event-edit" options={{ title: 'Event' }} />
+        <Stack.Screen name="new-message" options={{ title: 'New message' }} />
+        <Stack.Screen name="chat/[id]" options={{ title: 'Chat' }} />
         <Stack.Screen name="profile" options={{ title: 'Your profile' }} />
       </Stack.Protected>
 

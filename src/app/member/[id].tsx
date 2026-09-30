@@ -2,6 +2,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
 import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, Title } from '@/components/ui';
+import { startConversation } from '@/lib/messages';
 import type { MemberRole } from '@/lib/database.types';
 import { ROLE_LABELS, useActiveChurch, usePermissions } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
@@ -19,20 +20,33 @@ const ROLE_DESCRIPTIONS: Record<MemberRole, string> = {
 export default function MemberScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { church } = useActiveChurch();
-  const { canChangeRoles, isPastor } = usePermissions();
+  const { canChangeRoles, isPastor, isLeader } = usePermissions();
   const members = useMembers(church.id);
   const setRole = useSetRole(church.id);
   const remove = useRemoveMember(church.id);
   const [error, setError] = useState<string | null>(null);
+  const [opening, setOpening] = useState(false);
 
   const member = members.data?.find((m) => m.user_id === id);
   if (!member) return null;
   const name = memberName(member);
-  const canRemove = member.role === 'member' || isPastor;
+  const canRemove = isLeader && (member.role === 'member' || isPastor);
 
   function changeRole(role: MemberRole) {
     setError(null);
     setRole.mutate({ userId: member!.user_id, role }, { onError: (e) => setError(friendlyError(e)) });
+  }
+
+  async function openChat() {
+    setOpening(true);
+    setError(null);
+    try {
+      const conversationId = await startConversation(church.id, member!.user_id);
+      router.replace({ pathname: '/chat/[id]', params: { id: conversationId, name } });
+    } catch (e) {
+      setError(friendlyError(e));
+      setOpening(false);
+    }
   }
 
   function removeMember() {
@@ -60,6 +74,8 @@ export default function MemberScreen() {
       </Body>
 
       <ErrorText>{error}</ErrorText>
+
+      {member.status === 'approved' ? <Button title={`Message ${name}`} onPress={openChat} loading={opening} /> : null}
 
       {canChangeRoles && member.status === 'approved' ? (
         <Card>

@@ -40,6 +40,12 @@ export function formatTime(date: Date) {
   return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 
+/** Time for today's messages, and the day for older ones. */
+export function messageTime(date: Date) {
+  if (dateKey(date) === dateKey()) return formatTime(date);
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
 export function addDays(key: string, days: number) {
   const date = parseDateKey(key);
   date.setDate(date.getDate() + days);

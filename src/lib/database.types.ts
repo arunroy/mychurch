@@ -92,6 +92,32 @@ export type ChurchEvent = {
   updated_at: string;
 };
 
+export type Message = {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+};
+
+export type ConversationSummary = {
+  id: string;
+  other_user_id: string;
+  other_name: string;
+  other_avatar_path: string | null;
+  last_message_at: string;
+  last_message_preview: string;
+  last_sender_id: string | null;
+  unread: boolean;
+};
+
+export type Messageable = {
+  user_id: string;
+  full_name: string;
+  avatar_path: string | null;
+  role: MemberRole;
+};
+
 export type ChurchSearchResult = Pick<Church, 'id' | 'name' | 'city' | 'accent_color' | 'logo_path'>;
 
 export type ChurchForReview = {
@@ -150,6 +176,12 @@ export type Database = {
           Relationship<'events_created_by_fkey', 'created_by', 'profiles'>,
         ]
       >;
+      messages: Table<
+        Message,
+        Pick<Message, 'conversation_id' | 'sender_id' | 'body'>,
+        never,
+        [Relationship<'messages_conversation_id_fkey', 'conversation_id', 'conversations'>]
+      >;
       push_tokens: Table<
         PushToken,
         Pick<PushToken, 'token' | 'user_id' | 'platform'> & { updated_at?: string },
@@ -172,6 +204,10 @@ export type Database = {
       set_church_status: { Args: { p_church: string; p_status: ChurchStatus }; Returns: undefined };
       list_churches_for_review: { Args: { p_status?: ChurchStatus }; Returns: ChurchForReview[] };
       is_platform_admin: { Args: Record<string, never>; Returns: boolean };
+      start_conversation: { Args: { p_church: string; p_other: string }; Returns: string };
+      mark_conversation_read: { Args: { p_conversation: string }; Returns: undefined };
+      my_conversations: { Args: { p_church: string }; Returns: ConversationSummary[] };
+      messageable_members: { Args: { p_church: string }; Returns: Messageable[] };
     };
     Enums: {
       church_status: ChurchStatus;
