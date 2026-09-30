@@ -2,13 +2,15 @@ import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { AppState, Platform, useColorScheme } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth, useProfile } from '@/lib/auth';
 import { ChurchProvider, useChurch } from '@/lib/church';
 import { useRememberInviteLinks } from '@/lib/invite';
 import { registerForPushNotifications } from '@/lib/push';
 import { isConfigured } from '@/lib/supabase';
+import { ThemePreferenceProvider } from '@/lib/theme-preference';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,6 +24,14 @@ if (Platform.OS !== 'web') {
 }
 
 export default function RootLayout() {
+  return (
+    <ThemePreferenceProvider>
+      <ThemedApp />
+    </ThemePreferenceProvider>
+  );
+}
+
+function ThemedApp() {
   const colorScheme = useColorScheme();
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

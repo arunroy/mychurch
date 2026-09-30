@@ -29,6 +29,7 @@
 - [x] Church settings: logo, name, city, contact email, colour, approval on/off, directory on/off
 - [x] Profile: photo, name, show or hide yourself in the directory
 - [x] Switch between churches
+- [x] Theme: choose System, Light or Dark in More; remembered on the device
 - [x] Push token registration (sending comes with announcements)
 - [ ] Create the Supabase project and run the migration
 - [ ] Try it end to end on a phone with two test churches

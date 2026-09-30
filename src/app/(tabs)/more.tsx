@@ -1,14 +1,24 @@
 import { router } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 import { InviteCard } from '@/components/invite-card';
-import { Avatar, Card, Row, Screen, Title } from '@/components/ui';
+import { Avatar, Body, Card, Chip, Heading, Row, Screen, Title } from '@/components/ui';
+import { Spacing } from '@/constants/theme';
 import { signOut, useIsPlatformAdmin, useProfile } from '@/lib/auth';
 import { ROLE_LABELS, useActiveChurch, useChurch, usePermissions } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
 import { useMembers } from '@/lib/members';
 import { publicUrl } from '@/lib/supabase';
+import { useThemePreference, type ThemePreference } from '@/lib/theme-preference';
+
+const THEME_CHOICES: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
 
 export default function MoreScreen() {
+  const { preference: themePreference, setPreference: setThemePreference } = useThemePreference();
   const profile = useProfile();
   const active = useActiveChurch();
   const { memberships } = useChurch();
@@ -56,8 +66,27 @@ export default function MoreScreen() {
       </Card>
 
       <Card>
+        <Heading>Appearance</Heading>
+        <View style={styles.chips}>
+          {THEME_CHOICES.map((choice) => (
+            <Chip
+              key={choice.value}
+              label={choice.label}
+              selected={themePreference === choice.value}
+              onPress={() => setThemePreference(choice.value)}
+            />
+          ))}
+        </View>
+        <Body muted>System follows your phone&apos;s light or dark setting.</Body>
+      </Card>
+
+      <Card>
         <Row title="Sign out" onPress={() => confirm('Sign out?', 'You can sign back in with your email any time.', 'Sign out', signOut)} />
       </Card>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+});
