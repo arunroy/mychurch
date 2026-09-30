@@ -17,9 +17,14 @@ export default function WelcomeScreen() {
     if (!userId) return;
     setBusy(true);
     setError(null);
-    const { error: saveError } = await supabase.from('profiles').update({ full_name: name.trim() }).eq('id', userId);
-    if (saveError) {
-      setError(friendlyError(saveError));
+    const { data, error: saveError } = await supabase
+      .from('profiles')
+      .update({ full_name: name.trim() })
+      .eq('id', userId)
+      .select('id');
+    if (saveError || !data?.length) {
+      // No row updated means the account has no profile (it was created before the database was set up).
+      setError(saveError ? friendlyError(saveError) : "Your account isn't set up yet. Ask the app's admin for help.");
       setBusy(false);
       return;
     }
