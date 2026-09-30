@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { AppState, Platform, StyleSheet, View } from 'react-native';
 
-import { Colors, findGradient } from '@/constants/theme';
+import { Colors, findTheme } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth, useProfile } from '@/lib/auth';
 import { ChurchProvider, useChurch } from '@/lib/church';
@@ -35,10 +35,10 @@ export default function RootLayout() {
 
 function ThemedApp() {
   const colorScheme = useColorScheme();
-  const { gradient } = useThemePreference();
-  const colors = findGradient(gradient)?.[colorScheme];
+  const { themeId } = useThemePreference();
+  const colors = findTheme(themeId)?.[colorScheme].gradient;
 
-  // With a gradient chosen, the navigator's own backgrounds go clear so the gradient shows through every screen.
+  // With a theme chosen, the navigator's own backgrounds go clear so the gradient shows through every screen.
   const base = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
   const navigationTheme = colors ? { ...base, colors: { ...base.colors, background: 'transparent', card: 'transparent' } } : base;
 

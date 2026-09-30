@@ -30,7 +30,7 @@
 - [x] Profile: photo, name, show or hide yourself in the directory
 - [x] Switch between churches
 - [x] Theme: choose System, Light or Dark in More; remembered on the device
-- [x] UI revamp: six background gradients (plus plain), a bigger bottom menu with icons and badges, church features (members, prayer, polls, daily verse, announcements, settings) as tiles on Home
+- [x] UI revamp: theme settings with 12 matched themes (background gradient, text and accent colours checked for contrast, light and dark) plus plain, a bigger bottom menu with icons and badges, church features (members, prayer, polls, daily verse, announcements, settings) as tiles on Home
 - [x] Push token registration (sending comes with announcements)
 - [ ] Create the Supabase project and run the migration
 - [ ] Try it end to end on a phone with two test churches

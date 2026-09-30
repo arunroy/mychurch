@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, useAccent } from '@/components/ui';
+import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, useAccentText } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserId } from '@/lib/auth';
@@ -37,7 +37,7 @@ function PollCard({ poll, userId }: { poll: PollSummary; userId: string }) {
   const { church_id } = useActiveChurch();
   const { isLeader } = usePermissions();
   const theme = useTheme();
-  const accent = useAccent();
+  const accentText = useAccentText();
   const vote = useVote(church_id);
   const close = useClosePoll(church_id);
   const remove = useDeletePoll(church_id);
@@ -89,9 +89,9 @@ function PollCard({ poll, userId }: { poll: PollSummary; userId: string }) {
             onPress={() => toggle(option.id)}
             accessibilityRole={poll.multiple ? 'checkbox' : 'radio'}
             accessibilityState={{ checked: chosen, disabled: poll.is_closed }}
-            style={[styles.option, { borderColor: chosen ? accent : theme.backgroundSelected }]}>
+            style={[styles.option, { borderColor: chosen ? accentText : theme.backgroundSelected }]}>
             <View style={[styles.bar, { width: `${share * 100}%`, backgroundColor: theme.backgroundSelected }]} />
-            <Text style={[styles.mark, { color: accent }]}>{chosen ? '✓' : ''}</Text>
+            <Text style={[styles.mark, { color: accentText }]}>{chosen ? '✓' : ''}</Text>
             <Text style={[styles.label, { color: theme.text }]}>{option.label}</Text>
             {showResults && option.votes !== null ? (
               <Text style={[styles.count, { color: theme.textSecondary }]}>{option.votes}</Text>

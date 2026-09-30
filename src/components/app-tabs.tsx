@@ -3,7 +3,7 @@ import { TabList, TabSlot, TabTrigger, Tabs, type TabTriggerSlotProps } from 'ex
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useAccent } from '@/components/ui';
+import { useAccentText } from '@/components/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { TAB_BAR_CONTENT_HEIGHT } from '@/lib/tab-bar';
@@ -69,8 +69,8 @@ function TabButton({
   ...props
 }: TabTriggerSlotProps & { label: string; icon: IconName; activeIcon: IconName; badge?: number }) {
   const theme = useTheme();
-  const accent = useAccent();
-  const color = isFocused ? accent : theme.textSecondary;
+  const accentText = useAccentText();
+  const color = isFocused ? accentText : theme.textSecondary;
 
   return (
     <Pressable

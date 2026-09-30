@@ -53,7 +53,7 @@ function Chat({ userId }: { userId: string }) {
           <Text selectable style={[styles.body, { color: mine ? '#FFFFFF' : theme.text }]}>
             {item.body}
           </Text>
-          <Text style={[styles.time, { color: mine ? 'rgba(255,255,255,0.75)' : theme.textSecondary }]}>
+          <Text style={[styles.time, { color: mine ? 'rgba(255,255,255,0.85)' : theme.textSecondary }]}>
             {messageTime(new Date(item.created_at))}
           </Text>
         </View>

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 
-import { AppearanceCard } from '@/components/appearance-card';
+import { ThemeSettingsCard } from '@/components/theme-settings-card';
 import { InviteCard } from '@/components/invite-card';
 import { Avatar, Card, Row, Screen, Title } from '@/components/ui';
 import { signOut, useIsPlatformAdmin, useProfile } from '@/lib/auth';
@@ -8,7 +8,7 @@ import { ROLE_LABELS, useActiveChurch, useChurch } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
 import { publicUrl } from '@/lib/supabase';
 
-// Your profile, appearance and account. Church features (members, prayer, polls and so on) live on Home.
+// Your profile, theme settings and account. Church features (members, prayer, polls and so on) live on Home.
 export default function MoreScreen() {
   const profile = useProfile();
   const active = useActiveChurch();
@@ -29,7 +29,7 @@ export default function MoreScreen() {
         />
       </Card>
 
-      <AppearanceCard />
+      <ThemeSettingsCard />
 
       <InviteCard />
 

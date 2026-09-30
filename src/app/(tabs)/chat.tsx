@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Avatar, Button, ErrorText, Title, useAccent } from '@/components/ui';
+import { Avatar, Button, ErrorText, Title, useAccent, useAccentText } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserId } from '@/lib/auth';
@@ -27,6 +27,7 @@ function ChurchChat({ userId }: { userId: string }) {
   const { isLeader } = usePermissions();
   const theme = useTheme();
   const accent = useAccent();
+  const accentText = useAccentText();
   const posts = useChurchChat(church_id);
   const post = usePostToChat(church_id, userId);
   const remove = useRemoveChatPost(church_id);
@@ -85,13 +86,13 @@ function ChurchChat({ userId }: { userId: string }) {
           </View>
         ) : null}
         <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement }]}>
-          <Text style={[styles.sender, { color: mine ? 'rgba(255,255,255,0.85)' : accent }]}>
+          <Text style={[styles.sender, { color: mine ? 'rgba(255,255,255,0.92)' : accentText }]}>
             {mine ? 'You' : item.sender_name || 'Church member'}
           </Text>
           <Text selectable style={[styles.body, { color: mine ? '#FFFFFF' : theme.text }]}>
             {item.body}
           </Text>
-          <Text style={[styles.time, { color: mine ? 'rgba(255,255,255,0.75)' : theme.textSecondary }]}>
+          <Text style={[styles.time, { color: mine ? 'rgba(255,255,255,0.85)' : theme.textSecondary }]}>
             {messageTime(new Date(item.created_at))}
           </Text>
         </View>

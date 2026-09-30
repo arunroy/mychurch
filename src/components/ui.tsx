@@ -18,9 +18,18 @@ import { DEFAULT_ACCENT, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useChurch } from '@/lib/church';
 
-/** The active church's colour, used for buttons and highlights. */
+/** Fills buttons and selected chips (white text on top): the chosen theme's colour, or the church's own on the plain look. */
 export function useAccent() {
-  return useChurch().active?.church.accent_color ?? DEFAULT_ACCENT;
+  const theme = useTheme();
+  const churchColour = useChurch().active?.church.accent_color ?? DEFAULT_ACCENT;
+  return theme.accent ?? churchColour;
+}
+
+/** The same colour for text and icons on the background, adjusted to stay readable on the chosen theme. */
+export function useAccentText() {
+  const theme = useTheme();
+  const churchColour = useChurch().active?.church.accent_color ?? DEFAULT_ACCENT;
+  return theme.accentText ?? churchColour;
 }
 
 export function Screen({
