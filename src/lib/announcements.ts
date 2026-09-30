@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { Announcement } from './database.types';
+import { callFunction } from './functions';
 import { supabase } from './supabase';
 
 /** The notices still showing, newest first. This is what everyone sees on Home. */
@@ -39,20 +40,21 @@ export function useAllAnnouncements(churchId: string, enabled: boolean) {
   });
 }
 
-export type AnnouncementInput = { title: string; body: string; expiresAt: Date | null };
+export type AnnouncementInput = { title: string; body: string; expiresAt: Date | null; notify: boolean };
 
-export function usePostAnnouncement(churchId: string, userId: string) {
+/** Posts a notice, and with `notify` sends a push notification to the church. Resolves to how many devices it reached. */
+export function usePostAnnouncement(churchId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ title, body, expiresAt }: AnnouncementInput) => {
-      const { error } = await supabase.from('announcements').insert({
+    mutationFn: async ({ title, body, expiresAt, notify }: AnnouncementInput): Promise<number> => {
+      const result = await callFunction<{ notified: number }>('post-announcement', {
         church_id: churchId,
-        author_id: userId,
         title,
         body,
         expires_at: expiresAt ? expiresAt.toISOString() : null,
+        notify,
       });
-      if (error) throw error;
+      return result.notified;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['announcements', churchId] }),
   });

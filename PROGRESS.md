@@ -37,7 +37,7 @@
 ### Phase 1: The Pastor's voice
 
 - [x] Announcements: the Pastor, elders and admins post notices (optional expiry) that show on everyone's Home screen
-- [ ] Announcement push notifications
+- [x] Announcement push notifications (sent when a leader posts, if they leave "Send a notification" on; needs an EAS project and a real phone)
 - [x] Daily verse: Pastor picks translation, book, chapter and verses (no typing or pasting; the save-daily-verse function fetches and stores the text); reflection; schedule ahead
 - [ ] Sermon videos: optional YouTube channel per church, or add videos by hand
 - [x] Church calendar: a shared Calendar tab; any member adds events, only the creator or a leader edits or deletes

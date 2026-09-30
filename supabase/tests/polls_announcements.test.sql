@@ -66,13 +66,16 @@ insert into public.memberships (church_id, user_id, role, status) values
 -- Announcements
 -- ---------------------------------------------------------------------------
 
-select pg_temp.act_as(:elder_a);
+-- Announcements are posted by the post-announcement function (service role, which is the owner
+-- here), after it has checked the caller leads the church. Nobody inserts directly.
 insert into public.announcements (church_id, author_id, title, body, expires_at)
 values (:'church_a', :elder_a, 'Service at 10am', 'Doors open at 9:30.', now() + interval '3 days');
 insert into public.announcements (church_id, author_id, title, expires_at)
 values (:'church_a', :elder_a, 'Old news', now() - interval '1 day');
-select pg_temp.fails(format('insert into public.announcements (church_id, author_id, title) values (%L, %L, ''in someone else''''s name'')', :'church_a', :pastor_a),
-  'an announcement cannot be posted in someone else''s name');
+
+select pg_temp.act_as(:elder_a);
+select pg_temp.fails(format('insert into public.announcements (church_id, author_id, title) values (%L, %L, ''posted directly'')', :'church_a', :elder_a),
+  'even a leader cannot insert an announcement directly');
 select pg_temp.check(pg_temp.count_of('select * from public.announcements') = 2, 'a leader sees every announcement, expired too');
 reset role;
 

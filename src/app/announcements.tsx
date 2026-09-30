@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Loading, Screen, TextField } from '@/components/ui';
+import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Loading, Screen, TextField, ToggleRow } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
-import { useUserId } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useAllAnnouncements, usePostAnnouncement, useRemoveAnnouncement } from '@/lib/announcements';
 import { confirm } from '@/lib/confirm';
@@ -16,8 +15,6 @@ const DURATIONS: Duration[] = [...SHORT_DURATIONS, { label: 'Until I remove it',
 // Leaders (Pastor, elders, admins) post notices that appear on everyone's Home screen.
 export default function AnnouncementsScreen() {
   const { isLeader } = usePermissions();
-  const userId = useUserId();
-  if (!userId) return <Loading />;
   if (!isLeader) {
     return (
       <Screen edges={['bottom']}>
@@ -25,7 +22,7 @@ export default function AnnouncementsScreen() {
       </Screen>
     );
   }
-  return <Manager userId={userId} />;
+  return <Manager />;
 }
 
 function statusOf(item: Announcement) {
@@ -33,22 +30,32 @@ function statusOf(item: Announcement) {
   return new Date(item.expires_at) > new Date() ? `Showing until ${shortDate(item.expires_at)}` : 'Expired';
 }
 
-function Manager({ userId }: { userId: string }) {
+function Manager() {
   const { church_id } = useActiveChurch();
   const all = useAllAnnouncements(church_id, true);
-  const post = usePostAnnouncement(church_id, userId);
+  const post = usePostAnnouncement(church_id);
   const remove = useRemoveAnnouncement(church_id);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [days, setDays] = useState<number | null>(7);
+  const [notify, setNotify] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
 
   async function onPost() {
     setError(null);
+    setResult(null);
     try {
-      await post.mutateAsync({ title: title.trim(), body: body.trim(), expiresAt: endsAfter(days) });
+      const reached = await post.mutateAsync({ title: title.trim(), body: body.trim(), expiresAt: endsAfter(days), notify });
       setTitle('');
       setBody('');
+      setResult(
+        !notify
+          ? 'Posted on everyone’s Home screen.'
+          : reached === 0
+            ? 'Posted on everyone’s Home screen. No phones were notified: nobody has turned notifications on yet.'
+            : `Posted, and ${reached === 1 ? '1 phone was' : `${reached} phones were`} notified.`,
+      );
     } catch (e) {
       setError(friendlyError(e));
     }
@@ -67,6 +74,7 @@ function Manager({ userId }: { userId: string }) {
   return (
     <Screen edges={['bottom']}>
       <ErrorText>{error ?? (all.error ? friendlyError(all.error) : null)}</ErrorText>
+      {result ? <Body>{result}</Body> : null}
 
       <Card>
         <Heading>New announcement</Heading>
@@ -85,6 +93,12 @@ function Manager({ userId }: { userId: string }) {
             <Chip key={d.label} label={d.label} selected={d.days === days} onPress={() => setDays(d.days)} />
           ))}
         </View>
+        <ToggleRow
+          title="Send a notification"
+          subtitle="Alerts members' phones, as well as showing on Home."
+          value={notify}
+          onValueChange={setNotify}
+        />
         <Button title="Post to everyone" onPress={onPost} loading={post.isPending} disabled={!title.trim()} />
       </Card>
 

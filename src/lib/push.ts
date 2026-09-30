@@ -5,6 +5,18 @@ import { Platform } from 'react-native';
 
 import { supabase } from './supabase';
 
+// Show notifications that arrive while the app is open, instead of swallowing them.
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
+
 /**
  * Asks for notification permission and saves this device's push token so the
  * server can reach it. Quietly does nothing where push can't work: simulators,
