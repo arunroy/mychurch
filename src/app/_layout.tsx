@@ -86,6 +86,9 @@ function RootNavigator() {
         <Stack.Screen name="church-settings" options={{ title: 'Church settings' }} />
         <Stack.Screen name="members" options={{ title: 'Members' }} />
         <Stack.Screen name="member/[id]" options={{ title: 'Member' }} />
+        <Stack.Screen name="polls" options={{ title: 'Polls' }} />
+        <Stack.Screen name="poll-new" options={{ title: 'New poll' }} />
+        <Stack.Screen name="announcements" options={{ title: 'Announcements' }} />
         <Stack.Screen name="daily-verse" options={{ title: 'Daily verse' }} />
         <Stack.Screen name="verse-edit" options={{ title: 'Verse' }} />
         <Stack.Screen name="event/[id]" options={{ title: 'Event' }} />

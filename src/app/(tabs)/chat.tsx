@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -7,7 +8,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserId } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
-import { useChurchChat, usePostToChat, useRemoveChatPost } from '@/lib/church-chat';
+import { useChurchChat, useMarkChatRead, usePostToChat, useRemoveChatPost } from '@/lib/church-chat';
 import { confirm } from '@/lib/confirm';
 import { messageTime } from '@/lib/dates';
 import type { ChatPost } from '@/lib/database.types';
@@ -41,12 +42,23 @@ function ChurchChat({ userId }: { userId: string }) {
   const posts = useChurchChat(church_id);
   const post = usePostToChat(church_id, userId);
   const remove = useRemoveChatPost(church_id);
+  const markRead = useMarkChatRead(church_id);
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const keyboardOpen = useKeyboardOpen();
   // The tab bar floats over the screen: its own height plus the phone's bottom safe area.
   const tabBarHeight = Platform.select({ ios: 49, android: 80 }) ?? 0;
   const clearance = tabBarHeight + useSafeAreaInsets().bottom;
+
+  // Looking at the chat counts as reading it: when the tab opens, and for each new message while it's open.
+  const newest = posts.data?.[0]?.id;
+  useFocusEffect(
+    useCallback(() => {
+      markRead();
+      // markRead only closes over the query client and church id.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [church_id, newest]),
+  );
 
   async function onSend() {
     const body = text.trim();

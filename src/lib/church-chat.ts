@@ -65,3 +65,45 @@ export function useRemoveChatPost(churchId: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['church-chat', churchId] }),
   });
 }
+
+/** How many messages from other people the chat has that you haven't seen. */
+export function useChatUnreadCount(churchId: string) {
+  const queryClient = useQueryClient();
+  const unread = useQuery({
+    queryKey: ['church-chat-unread', churchId],
+    queryFn: async (): Promise<number> => {
+      const { data, error } = await supabase.rpc('church_chat_unread_count', { p_church: churchId });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Call once, near the top of the signed-in screens: a new message anywhere updates the badge.
+  useEffect(() => {
+    const refresh = () => queryClient.invalidateQueries({ queryKey: ['church-chat-unread', churchId] });
+    const channel = supabase
+      .channel(`church-chat-unread:${churchId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'church_chat_messages', filter: `church_id=eq.${churchId}` },
+        refresh,
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') refresh();
+      });
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [churchId, queryClient]);
+
+  return unread.data ?? 0;
+}
+
+/** Marks the chat as read up to now, and clears the badge. */
+export function useMarkChatRead(churchId: string) {
+  const queryClient = useQueryClient();
+  return async () => {
+    const { error } = await supabase.rpc('mark_church_chat_read', { p_church: churchId });
+    if (!error) await queryClient.invalidateQueries({ queryKey: ['church-chat-unread', churchId] });
+  };
+}

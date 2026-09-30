@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 
+import { AnnouncementCards } from '@/components/announcement-cards';
 import { ChurchHeader } from '@/components/church-header';
 import { InviteCard } from '@/components/invite-card';
 import { VerseCard } from '@/components/verse-card';
@@ -28,6 +29,8 @@ export default function HomeScreen() {
           {approvedCount > 1 ? ` ${approvedCount} people are part of this church on MyChurch.` : ''}
         </Body>
       </Card>
+
+      <AnnouncementCards />
 
       <VerseCard />
 

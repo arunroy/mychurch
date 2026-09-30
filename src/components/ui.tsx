@@ -207,6 +207,35 @@ export function Avatar({ name, uri, color, size = 40 }: { name: string; uri?: st
   );
 }
 
+/** A small rounded toggle, used for choices such as a translation or how long something shows. */
+export function Chip({
+  label,
+  selected,
+  onPress,
+  wide,
+}: {
+  label: string;
+  selected?: boolean;
+  onPress: () => void;
+  wide?: boolean;
+}) {
+  const theme = useTheme();
+  const accent = useAccent();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: !!selected }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.chip,
+        wide ? styles.chipWide : null,
+        { backgroundColor: selected ? accent : theme.backgroundSelected, opacity: pressed ? 0.7 : 1 },
+      ]}>
+      <Text style={{ color: selected ? '#FFFFFF' : theme.text, fontSize: 15, fontWeight: selected ? 600 : 400 }}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export function Loading() {
   const theme = useTheme();
   return (
@@ -253,4 +282,6 @@ const styles = StyleSheet.create({
   rowText: { flex: 1, gap: 2 },
   chevron: { fontSize: 24 },
   avatar: { alignItems: 'center', justifyContent: 'center' },
+  chip: { minWidth: 44, minHeight: 40, borderRadius: 10, paddingHorizontal: Spacing.three, alignItems: 'center', justifyContent: 'center' },
+  chipWide: { minWidth: 64 },
 });

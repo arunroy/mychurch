@@ -106,6 +106,38 @@ export type Message = {
   created_at: string;
 };
 
+export type Announcement = {
+  id: string;
+  church_id: string;
+  author_id: string;
+  title: string;
+  body: string;
+  /** Null means it stays until a leader removes it. */
+  expires_at: string | null;
+  created_at: string;
+};
+
+export type PollOption = {
+  id: string;
+  label: string;
+  /** Null while the totals are hidden: until you have voted, or the poll has closed. */
+  votes: number | null;
+};
+
+export type PollSummary = {
+  id: string;
+  creator_id: string;
+  creator_name: string;
+  question: string;
+  multiple: boolean;
+  closes_at: string | null;
+  is_closed: boolean;
+  created_at: string;
+  total_voters: number | null;
+  my_option_ids: string[];
+  options: PollOption[];
+};
+
 export type ChatPost = {
   id: string;
   sender_id: string;
@@ -197,6 +229,12 @@ export type Database = {
         never,
         [Relationship<'messages_conversation_id_fkey', 'conversation_id', 'conversations'>]
       >;
+      announcements: Table<
+        Announcement,
+        Pick<Announcement, 'church_id' | 'author_id' | 'title'> & Partial<Pick<Announcement, 'body' | 'expires_at'>>,
+        never,
+        [Relationship<'announcements_church_id_fkey', 'church_id', 'churches'>]
+      >;
       church_chat_messages: Table<
         { id: string; church_id: string; sender_id: string; body: string; created_at: string },
         { church_id: string; sender_id: string; body: string },
@@ -227,6 +265,16 @@ export type Database = {
       is_platform_admin: { Args: Record<string, never>; Returns: boolean };
       start_conversation: { Args: { p_church: string; p_other: string }; Returns: string };
       mark_conversation_read: { Args: { p_conversation: string }; Returns: undefined };
+      create_poll: {
+        Args: { p_church: string; p_question: string; p_options: string[]; p_multiple?: boolean; p_closes_at?: string | null };
+        Returns: string;
+      };
+      cast_vote: { Args: { p_poll: string; p_options: string[] }; Returns: undefined };
+      close_poll: { Args: { p_poll: string }; Returns: undefined };
+      delete_poll: { Args: { p_poll: string }; Returns: undefined };
+      church_polls: { Args: { p_church: string }; Returns: PollSummary[] };
+      church_chat_unread_count: { Args: { p_church: string }; Returns: number };
+      mark_church_chat_read: { Args: { p_church: string }; Returns: undefined };
       church_chat_feed: { Args: { p_church: string; p_limit?: number }; Returns: ChatPost[] };
       my_conversations: { Args: { p_church: string }; Returns: ConversationSummary[] };
       messageable_members: { Args: { p_church: string }; Returns: Messageable[] };

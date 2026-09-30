@@ -96,6 +96,20 @@ select pg_temp.check((select count(*) = 0 from public.church_chat_messages), 'th
 -- Pending people and other churches are shut out.
 insert into public.church_chat_messages (church_id, sender_id, body) values (:'church_a', :member_a, 'Still here');
 
+-- The unread count covers other people's messages, and clears once the chat is read.
+select pg_temp.act_as(:pastor_a);
+select pg_temp.check(public.church_chat_unread_count(:'church_a') = 1, 'the Pastor has one unread message');
+select public.mark_church_chat_read(:'church_a');
+select pg_temp.check(public.church_chat_unread_count(:'church_a') = 0, 'reading the chat clears the unread count');
+select pg_temp.fails('select * from public.church_chat_reads', 'read markers are not readable directly');
+reset role;
+select pg_temp.act_as(:member_a);
+select pg_temp.check(public.church_chat_unread_count(:'church_a') = 0, 'your own messages are never unread');
+reset role;
+select pg_temp.act_as(:pending_a);
+select pg_temp.check(public.church_chat_unread_count(:'church_a') = 0, 'someone waiting for approval has none');
+reset role;
+
 select pg_temp.act_as(:pending_a);
 select pg_temp.check(pg_temp.count_of('select * from public.church_chat_messages') = 0, 'someone waiting for approval reads nothing');
 select pg_temp.check(pg_temp.count_of(format('select * from public.church_chat_feed(%L)', :'church_a')) = 0, 'and gets nothing from the feed');

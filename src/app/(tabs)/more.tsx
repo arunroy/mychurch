@@ -39,6 +39,10 @@ export default function MoreScreen() {
           subtitle={pendingCount > 0 ? `${pendingCount} waiting to join` : undefined}
           onPress={() => router.push('/members')}
         />
+        <Row title="Polls" subtitle="Ask the church a question, or vote" onPress={() => router.push('/polls')} />
+        {isLeader ? (
+          <Row title="Announcements" subtitle="Post a notice on everyone's Home screen" onPress={() => router.push('/announcements')} />
+        ) : null}
         {isPastor ? (
           <Row title="Daily verse" subtitle="Choose and schedule the verse and reflection" onPress={() => router.push('/daily-verse')} />
         ) : null}

@@ -6,7 +6,7 @@ import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 // The web has no native tab bar, so draw a simple one along the bottom.
-export default function AppTabs({ pendingCount, unreadCount }: { pendingCount: number; unreadCount: number }) {
+export default function AppTabs({ pendingCount, unreadCount, chatUnread }: { pendingCount: number; unreadCount: number; chatUnread: number }) {
   const theme = useTheme();
   return (
     <Tabs>
@@ -19,7 +19,7 @@ export default function AppTabs({ pendingCount, unreadCount }: { pendingCount: n
           <TabButton label="Calendar" />
         </TabTrigger>
         <TabTrigger name="chat" href="/chat" asChild>
-          <TabButton label="Chat" />
+          <TabButton label={chatUnread > 0 ? `Chat (${chatUnread})` : 'Chat'} />
         </TabTrigger>
         <TabTrigger name="messages" href="/messages" asChild>
           <TabButton label={unreadCount > 0 ? `Messages (${unreadCount})` : 'Messages'} />

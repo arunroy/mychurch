@@ -35,7 +35,8 @@
 
 ### Phase 1: The Pastor's voice
 
-- [ ] Flash announcements (Pastor only, expiry, push to the church)
+- [x] Announcements: the Pastor, elders and admins post notices (optional expiry) that show on everyone's Home screen
+- [ ] Announcement push notifications
 - [x] Daily verse: Pastor picks translation, book, chapter and verses (no typing or pasting; the save-daily-verse function fetches and stores the text); reflection; schedule ahead
 - [ ] Sermon videos: optional YouTube channel per church, or add videos by hand
 - [x] Church calendar: a shared Calendar tab; any member adds events, only the creator or a leader edits or deletes
@@ -44,7 +45,7 @@
 ### Phase 2: Connection
 
 - [x] Private messages: any member can message any other member, including the Pastor; live while the chat is open; only the two people can read it
-- [x] Church chat: a public room in its own Chat tab; every approved member reads and posts, authors and leaders remove messages; Members moved into More
+- [x] Church chat: a public room in its own Chat tab; every approved member reads and posts, authors and leaders remove messages; Members moved into More; unread badge on the Chat tab
 - [ ] Message notifications (push when a message arrives while the app is closed)
 - [ ] Message the elders (group inbox, or one elder)
 - [ ] Anonymous messages to the Pastor (no sender stored, day-only timestamps, unlinkable rate limit, optional reply code)
@@ -52,7 +53,7 @@
 
 ### Phase 3: Engagement
 
-- [ ] Polls (single or multiple choice, results live or after closing)
+- [x] Polls: any member starts one (single or multiple choice, optional closing time); votes are private; results show after you vote or when it closes
 - [ ] Q&A (named or anonymous questions, public answers)
 - [ ] Church photo album with elder approval
 

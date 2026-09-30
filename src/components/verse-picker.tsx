@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Body, TextField, useAccent } from '@/components/ui';
+import { Body, Chip, TextField } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { lookUpPassage, type Passage } from '@/lib/bible';
@@ -23,24 +23,6 @@ export function toPassage(draft: PassageDraft): Passage | null {
 }
 
 type Panel = 'book' | 'chapter' | 'start' | 'end' | null;
-
-function Chip({ label, selected, onPress, wide }: { label: string; selected?: boolean; onPress: () => void; wide?: boolean }) {
-  const theme = useTheme();
-  const accent = useAccent();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: !!selected }}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.chip,
-        wide ? styles.chipWide : null,
-        { backgroundColor: selected ? accent : theme.backgroundSelected, opacity: pressed ? 0.7 : 1 },
-      ]}>
-      <Text style={{ color: selected ? '#FFFFFF' : theme.text, fontSize: 15, fontWeight: selected ? 600 : 400 }}>{label}</Text>
-    </Pressable>
-  );
-}
 
 /** A labelled box that shows the current choice and opens its list when tapped. */
 function Selector({ label, value, open, onPress }: { label: string; value: string; open: boolean; onPress: () => void }) {
@@ -216,8 +198,6 @@ const styles = StyleSheet.create({
   label: { fontSize: 15, fontWeight: 600 },
   hint: { fontSize: 14, lineHeight: 19 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  chip: { minWidth: 44, minHeight: 40, borderRadius: 10, paddingHorizontal: Spacing.three, alignItems: 'center', justifyContent: 'center' },
-  chipWide: { minWidth: 64 },
   selectors: { flexDirection: 'row', gap: Spacing.two },
   selector: { flex: 1, gap: Spacing.one },
   selectorBox: { minHeight: 50, borderRadius: 12, borderWidth: 1, paddingHorizontal: Spacing.three, justifyContent: 'center' },
