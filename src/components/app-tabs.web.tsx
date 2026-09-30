@@ -18,6 +18,9 @@ export default function AppTabs({ pendingCount }: { pendingCount: number }) {
         <TabTrigger name="members" href="/members" asChild>
           <TabButton label={pendingCount > 0 ? `Members (${pendingCount})` : 'Members'} />
         </TabTrigger>
+        <TabTrigger name="calendar" href="/calendar" asChild>
+          <TabButton label="Calendar" />
+        </TabTrigger>
         <TabTrigger name="more" href="/more" asChild>
           <TabButton label="More" />
         </TabTrigger>

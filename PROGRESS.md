@@ -38,7 +38,8 @@
 - [ ] Flash announcements (Pastor only, expiry, push to the church)
 - [x] Daily verse: Pastor types a reference, text fills in from a public-domain Bible; reflection; schedule ahead
 - [ ] Sermon videos: optional YouTube channel per church, or add videos by hand
-- [ ] Events and church calendar with RSVP, reminders, add to phone calendar
+- [x] Church calendar: a shared Calendar tab; any member adds events, only the creator or a leader edits or deletes
+- [ ] Calendar extras: RSVP, reminders, add to phone calendar, date and time pickers
 
 ### Phase 2: Connection
 

@@ -79,6 +79,19 @@ export type DailyVerse = {
   updated_at: string;
 };
 
+export type ChurchEvent = {
+  id: string;
+  church_id: string;
+  title: string;
+  description: string;
+  location: string;
+  starts_at: string;
+  ends_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ChurchSearchResult = Pick<Church, 'id' | 'name' | 'city' | 'accent_color' | 'logo_path'>;
 
 export type ChurchForReview = {
@@ -126,6 +139,16 @@ export type Database = {
           Partial<Pick<DailyVerse, 'translation' | 'reflection'>>,
         Partial<Pick<DailyVerse, 'reference' | 'verse_text' | 'translation' | 'reflection' | 'updated_at'>>,
         [Relationship<'daily_verses_church_id_fkey', 'church_id', 'churches'>]
+      >;
+      events: Table<
+        ChurchEvent,
+        Pick<ChurchEvent, 'church_id' | 'title' | 'starts_at' | 'created_by'> &
+          Partial<Pick<ChurchEvent, 'description' | 'location' | 'ends_at'>>,
+        Partial<Pick<ChurchEvent, 'title' | 'description' | 'location' | 'starts_at' | 'ends_at' | 'updated_at'>>,
+        [
+          Relationship<'events_church_id_fkey', 'church_id', 'churches'>,
+          Relationship<'events_created_by_fkey', 'created_by', 'profiles'>,
+        ]
       >;
       push_tokens: Table<
         PushToken,

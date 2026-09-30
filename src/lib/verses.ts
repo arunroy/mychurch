@@ -1,28 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { dateKey, isValidDateKey } from './dates';
 import type { DailyVerse } from './database.types';
 import { supabase } from './supabase';
-
-/** Today (or any day) as the plain YYYY-MM-DD the database stores, in the phone's own time zone. */
-export function dateKey(date = new Date()) {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${date.getFullYear()}-${month}-${day}`;
-}
-
-/** Reads a YYYY-MM-DD key as a local date, avoiding the off-by-one that `new Date('2026-09-30')` causes west of UTC. */
-export function parseDateKey(key: string) {
-  const [year, month, day] = key.split('-').map(Number);
-  return new Date(year, month - 1, day);
-}
-
-export function isValidDateKey(key: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(key) && dateKey(parseDateKey(key)) === key;
-}
-
-export function formatVerseDate(key: string) {
-  return parseDateKey(key).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
-}
 
 export function useTodaysVerse(churchId: string) {
   const today = dateKey();

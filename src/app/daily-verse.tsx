@@ -2,8 +2,9 @@ import { router } from 'expo-router';
 
 import { Body, Button, Card, ErrorText, Heading, Loading, Row, Screen } from '@/components/ui';
 import { useActiveChurch } from '@/lib/church';
+import { dateKey, formatDay, parseDateKey } from '@/lib/dates';
 import { friendlyError } from '@/lib/supabase';
-import { dateKey, formatVerseDate, parseDateKey, useUpcomingVerses } from '@/lib/verses';
+import { useUpcomingVerses } from '@/lib/verses';
 
 function nextFreeDate(taken: string[]) {
   const day = parseDateKey(dateKey());
@@ -41,7 +42,7 @@ export default function DailyVerseScreen() {
             <Row
               key={verse.verse_date}
               title={verse.reference}
-              subtitle={`${verse.verse_date === today ? 'Today' : formatVerseDate(verse.verse_date)}${
+              subtitle={`${verse.verse_date === today ? 'Today' : formatDay(verse.verse_date)}${
                 verse.reflection ? ' · with reflection' : ''
               }`}
               onPress={() => router.push({ pathname: '/verse-edit', params: { date: verse.verse_date } })}

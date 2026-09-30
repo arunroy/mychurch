@@ -65,9 +65,9 @@ Push notifications don't work in Expo Go on Android, or anywhere until the app h
 | Role | Can |
 |---|---|
 | Pastor | Everything below, plus change roles, church settings and the join code |
-| Elder | Approve and remove members, see the join code |
-| Church admin | Church settings, approve members, join code |
-| Member | See the church and its directory |
+| Elder | Approve and remove members, see the join code, edit or delete any calendar event |
+| Church admin | Church settings, approve members, join code, edit or delete any calendar event |
+| Member | See the church and its directory, add calendar events, edit or delete their own |
 | Pending | See only their own request until approved |
 | Platform admin | Verify or suspend churches; can't see any church's members or content |
 

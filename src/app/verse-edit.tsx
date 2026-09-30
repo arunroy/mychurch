@@ -6,16 +6,10 @@ import { useUserId } from '@/lib/auth';
 import { lookUpVerse, TRANSLATION_NAME } from '@/lib/bible';
 import { useActiveChurch } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
+import { dateKey, formatDay, isValidDateKey } from '@/lib/dates';
 import type { DailyVerse } from '@/lib/database.types';
 import { friendlyError } from '@/lib/supabase';
-import {
-  dateKey,
-  formatVerseDate,
-  isValidDateKey,
-  useDeleteVerse,
-  useSaveVerse,
-  useVerseForDate,
-} from '@/lib/verses';
+import { useDeleteVerse, useSaveVerse, useVerseForDate } from '@/lib/verses';
 
 // The Pastor writes or edits one day's verse. The database only lets the Pastor do this.
 export default function VerseEditScreen() {
@@ -100,7 +94,7 @@ function VerseForm({
   }
 
   function onDelete() {
-    confirm('Delete this verse?', `The verse for ${formatVerseDate(date)} will be removed.`, 'Delete', async () => {
+    confirm('Delete this verse?', `The verse for ${formatDay(date)} will be removed.`, 'Delete', async () => {
       try {
         await remove.mutateAsync(date);
         router.back();
@@ -125,7 +119,7 @@ function VerseForm({
           autoCorrect={false}
           keyboardType="numbers-and-punctuation"
           maxLength={10}
-          hint={dateOk ? formatVerseDate(dateText) : 'Use the form 2026-09-30.'}
+          hint={dateOk ? formatDay(dateText) : 'Use the form 2026-09-30.'}
         />
         {existing ? <Body muted>This day already has a verse. Saving replaces it.</Body> : null}
       </Card>

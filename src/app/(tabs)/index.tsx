@@ -44,7 +44,7 @@ export default function HomeScreen() {
 
       <Card>
         <Heading>Coming soon</Heading>
-        <Body muted>Announcements, sermons and the church calendar will appear here.</Body>
+        <Body muted>Announcements and sermons will appear here.</Body>
       </Card>
     </Screen>
   );

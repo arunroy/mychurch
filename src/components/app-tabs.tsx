@@ -24,6 +24,11 @@ export default function AppTabs({ pendingCount }: { pendingCount: number }) {
         {pendingCount > 0 ? <NativeTabs.Trigger.Badge>{String(pendingCount)}</NativeTabs.Trigger.Badge> : null}
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="calendar">
+        <NativeTabs.Trigger.Label>Calendar</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: 'calendar', selected: 'calendar' }} md="calendar_month" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="more">
         <NativeTabs.Trigger.Label>More</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="ellipsis.circle" md="more_horiz" />

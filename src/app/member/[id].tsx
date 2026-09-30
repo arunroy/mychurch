@@ -10,8 +10,8 @@ import { friendlyError, publicUrl } from '@/lib/supabase';
 
 const ROLE_DESCRIPTIONS: Record<MemberRole, string> = {
   pastor: 'Runs the church in the app, including settings, roles and the private Pastor inbox.',
-  elder: 'Approves members, and will create events and polls and answer questions.',
-  admin: 'Church office or tech help: settings, members and events. Can’t read private messages.',
+  elder: 'Approves members, can remove any event from the calendar, and will run polls and answer questions.',
+  admin: 'Church office or tech help: settings, members and the calendar. Can’t read private messages.',
   member: 'Takes part in everything shared with the church.',
 };
 

@@ -2,7 +2,8 @@ import { router } from 'expo-router';
 
 import { Body, Button, Card, Heading } from '@/components/ui';
 import { useActiveChurch, usePermissions } from '@/lib/church';
-import { formatVerseDate, useTodaysVerse } from '@/lib/verses';
+import { formatDay } from '@/lib/dates';
+import { useTodaysVerse } from '@/lib/verses';
 
 /** Today's verse and reflection on the Home screen. Leaders get a nudge to add one when it's missing. */
 export function VerseCard() {
@@ -26,7 +27,7 @@ export function VerseCard() {
   const { reference, verse_text, translation, reflection, verse_date } = verse.data;
   return (
     <Card>
-      <Body muted>{`Verse of the day · ${formatVerseDate(verse_date)}`}</Body>
+      <Body muted>{`Verse of the day · ${formatDay(verse_date)}`}</Body>
       <Heading>{reference}</Heading>
       <Body>{`“${verse_text}”`}</Body>
       {translation ? <Body muted>{translation}</Body> : null}
