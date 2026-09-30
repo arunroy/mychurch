@@ -106,6 +106,15 @@ export type Message = {
   created_at: string;
 };
 
+export type ChatPost = {
+  id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_avatar_path: string | null;
+  body: string;
+  created_at: string;
+};
+
 export type ConversationSummary = {
   id: string;
   other_user_id: string;
@@ -188,6 +197,12 @@ export type Database = {
         never,
         [Relationship<'messages_conversation_id_fkey', 'conversation_id', 'conversations'>]
       >;
+      church_chat_messages: Table<
+        { id: string; church_id: string; sender_id: string; body: string; created_at: string },
+        { church_id: string; sender_id: string; body: string },
+        never,
+        [Relationship<'church_chat_messages_church_id_fkey', 'church_id', 'churches'>]
+      >;
       push_tokens: Table<
         PushToken,
         Pick<PushToken, 'token' | 'user_id' | 'platform'> & { updated_at?: string },
@@ -212,6 +227,7 @@ export type Database = {
       is_platform_admin: { Args: Record<string, never>; Returns: boolean };
       start_conversation: { Args: { p_church: string; p_other: string }; Returns: string };
       mark_conversation_read: { Args: { p_conversation: string }; Returns: undefined };
+      church_chat_feed: { Args: { p_church: string; p_limit?: number }; Returns: ChatPost[] };
       my_conversations: { Args: { p_church: string }; Returns: ConversationSummary[] };
       messageable_members: { Args: { p_church: string }; Returns: Messageable[] };
     };

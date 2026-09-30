@@ -78,7 +78,10 @@ Deno.serve(async (request) => {
     p_church: church_id,
     p_roles: ['pastor'],
   });
-  if (roleError) return reply(500, { error: 'Could not check your role.' });
+  if (roleError) {
+    console.error('save-daily-verse role check failed', roleError);
+    return reply(500, { error: `Could not check your role (${roleError.code ?? 'error'}).` });
+  }
   if (!isPastor) return reply(403, { error: 'Only the Pastor can set the verse of the day.' });
 
   const reference = formatReference(displayBook(book), chapter, verse_start, verse_end);
@@ -120,6 +123,9 @@ Deno.serve(async (request) => {
     )
     .select()
     .single();
-  if (error) return reply(500, { error: 'Could not save the verse.' });
+  if (error) {
+    console.error('save-daily-verse upsert failed', error);
+    return reply(500, { error: `Could not save the verse (${error.code ?? 'database error'}).` });
+  }
   return reply(200, { verse: data });
 });

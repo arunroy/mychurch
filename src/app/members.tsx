@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, TextField, Title } from '@/components/ui';
+import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, TextField } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useUserId } from '@/lib/auth';
 import { ROLE_LABELS, useActiveChurch, usePermissions } from '@/lib/church';
@@ -45,9 +45,7 @@ export default function MembersScreen() {
   }
 
   return (
-    <Screen edges={['top']}>
-      <Title>Members</Title>
-
+    <Screen edges={['bottom']}>
       {members.isPending ? <ActivityIndicator /> : null}
       <ErrorText>{error ?? (members.error ? friendlyError(members.error) : null)}</ErrorText>
 

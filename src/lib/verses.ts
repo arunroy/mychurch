@@ -90,9 +90,15 @@ export function useSaveVerse(churchId: string) {
         body: { ...input, church_id: churchId },
       });
       if (error) {
-        // The function explains what went wrong in its JSON body.
-        const body = error instanceof FunctionsHttpError ? await error.context.json().catch(() => null) : null;
-        throw new Error(body?.error ?? 'Could not save the verse. Try again.');
+        // The function explains what went wrong in its JSON body; the platform (missing function,
+        // bad token) answers with `message` instead. Keep the status so a failure can be traced.
+        if (error instanceof FunctionsHttpError) {
+          const status = error.context.status;
+          const body = await error.context.json().catch(() => null);
+          if (body?.error) throw new Error(body.error);
+          throw new Error(`Could not save the verse (${status}${body?.message ? `: ${body.message}` : ''}).`);
+        }
+        throw new Error(`Could not reach the server to save the verse (${error.message}).`);
       }
     },
     onSuccess: invalidate,

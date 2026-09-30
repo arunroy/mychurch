@@ -84,6 +84,7 @@ function RootNavigator() {
       <Stack.Protected guard={onboarded && state === 'ready'}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="church-settings" options={{ title: 'Church settings' }} />
+        <Stack.Screen name="members" options={{ title: 'Members' }} />
         <Stack.Screen name="member/[id]" options={{ title: 'Member' }} />
         <Stack.Screen name="daily-verse" options={{ title: 'Daily verse' }} />
         <Stack.Screen name="verse-edit" options={{ title: 'Verse' }} />

@@ -15,17 +15,17 @@ export default function AppTabs({ pendingCount, unreadCount }: { pendingCount: n
         <TabTrigger name="index" href="/" asChild>
           <TabButton label="Home" />
         </TabTrigger>
-        <TabTrigger name="members" href="/members" asChild>
-          <TabButton label={pendingCount > 0 ? `Members (${pendingCount})` : 'Members'} />
-        </TabTrigger>
         <TabTrigger name="calendar" href="/calendar" asChild>
           <TabButton label="Calendar" />
+        </TabTrigger>
+        <TabTrigger name="chat" href="/chat" asChild>
+          <TabButton label="Chat" />
         </TabTrigger>
         <TabTrigger name="messages" href="/messages" asChild>
           <TabButton label={unreadCount > 0 ? `Messages (${unreadCount})` : 'Messages'} />
         </TabTrigger>
         <TabTrigger name="more" href="/more" asChild>
-          <TabButton label="More" />
+          <TabButton label={pendingCount > 0 ? `More (${pendingCount})` : 'More'} />
         </TabTrigger>
       </TabList>
     </Tabs>

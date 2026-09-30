@@ -5,13 +5,16 @@ import { Avatar, Card, Row, Screen, Title } from '@/components/ui';
 import { signOut, useIsPlatformAdmin, useProfile } from '@/lib/auth';
 import { ROLE_LABELS, useActiveChurch, useChurch, usePermissions } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
+import { useMembers } from '@/lib/members';
 import { publicUrl } from '@/lib/supabase';
 
 export default function MoreScreen() {
   const profile = useProfile();
   const active = useActiveChurch();
   const { memberships } = useChurch();
-  const { canEditChurch, isPastor } = usePermissions();
+  const { canEditChurch, isPastor, isLeader } = usePermissions();
+  const members = useMembers(active.church_id);
+  const pendingCount = isLeader ? (members.data?.filter((m) => m.status === 'pending').length ?? 0) : 0;
   const isPlatformAdmin = useIsPlatformAdmin();
   const name = profile.data?.full_name ?? '';
 
@@ -31,6 +34,11 @@ export default function MoreScreen() {
       <InviteCard />
 
       <Card>
+        <Row
+          title="Members"
+          subtitle={pendingCount > 0 ? `${pendingCount} waiting to join` : undefined}
+          onPress={() => router.push('/members')}
+        />
         {isPastor ? (
           <Row title="Daily verse" subtitle="Choose and schedule the verse and reflection" onPress={() => router.push('/daily-verse')} />
         ) : null}

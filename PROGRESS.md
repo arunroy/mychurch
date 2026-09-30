@@ -44,6 +44,7 @@
 ### Phase 2: Connection
 
 - [x] Private messages: any member can message any other member, including the Pastor; live while the chat is open; only the two people can read it
+- [x] Church chat: a public room in its own Chat tab; every approved member reads and posts, authors and leaders remove messages; Members moved into More
 - [ ] Message notifications (push when a message arrives while the app is closed)
 - [ ] Message the elders (group inbox, or one elder)
 - [ ] Anonymous messages to the Pastor (no sender stored, day-only timestamps, unlinkable rate limit, optional reply code)
