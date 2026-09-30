@@ -50,7 +50,7 @@
 - [ ] Message notifications (push when a message arrives while the app is closed)
 - [ ] Message the elders (group inbox, or one elder)
 - [ ] Anonymous messages to the Pastor (no sender stored, day-only timestamps, unlinkable rate limit, optional reply code)
-- [ ] Prayer requests with visibility choices and "I prayed"
+- [x] Prayer requests: share with the church, leaders or the Pastor only; "I prayed" counts; authors mark them answered
 
 ### Phase 3: Engagement
 

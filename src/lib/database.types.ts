@@ -138,6 +138,22 @@ export type PollSummary = {
   options: PollOption[];
 };
 
+export type PrayerVisibility = 'church' | 'leaders' | 'pastor';
+
+export type PrayerRequest = {
+  id: string;
+  author_id: string;
+  author_name: string;
+  author_avatar_path: string | null;
+  body: string;
+  visibility: PrayerVisibility;
+  answered: boolean;
+  answered_at: string | null;
+  created_at: string;
+  prayer_count: number;
+  i_prayed: boolean;
+};
+
 export type ChatPost = {
   id: string;
   sender_id: string;
@@ -265,6 +281,14 @@ export type Database = {
       is_platform_admin: { Args: Record<string, never>; Returns: boolean };
       start_conversation: { Args: { p_church: string; p_other: string }; Returns: string };
       mark_conversation_read: { Args: { p_conversation: string }; Returns: undefined };
+      create_prayer_request: {
+        Args: { p_church: string; p_body: string; p_visibility?: PrayerVisibility };
+        Returns: string;
+      };
+      prayer_feed: { Args: { p_church: string }; Returns: PrayerRequest[] };
+      toggle_prayed: { Args: { p_request: string }; Returns: boolean };
+      set_prayer_answered: { Args: { p_request: string; p_answered: boolean }; Returns: undefined };
+      delete_prayer_request: { Args: { p_request: string }; Returns: undefined };
       create_poll: {
         Args: { p_church: string; p_question: string; p_options: string[]; p_multiple?: boolean; p_closes_at?: string | null };
         Returns: string;
