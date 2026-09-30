@@ -88,7 +88,9 @@ function ChurchChat({ userId }: { userId: string }) {
           </View>
         ) : null}
         <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement }]}>
-          {!mine && startsRun ? <Text style={[styles.sender, { color: accent }]}>{item.sender_name || 'Church member'}</Text> : null}
+          <Text style={[styles.sender, { color: mine ? 'rgba(255,255,255,0.85)' : accent }]}>
+            {mine ? 'You' : item.sender_name || 'Church member'}
+          </Text>
           <Text selectable style={[styles.body, { color: mine ? '#FFFFFF' : theme.text }]}>
             {item.body}
           </Text>
