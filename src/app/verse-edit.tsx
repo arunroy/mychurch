@@ -2,8 +2,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
 import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, TextField } from '@/components/ui';
-import { useUserId } from '@/lib/auth';
-import { lookUpVerse, TRANSLATION_NAME } from '@/lib/bible';
+import { PassagePreview, toPassage, usePassagePreview, VersePicker, type PassageDraft } from '@/components/verse-picker';
+import { findBook, findTranslation } from '@/lib/bible-books';
 import { useActiveChurch } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
 import { dateKey, formatDay, isValidDateKey } from '@/lib/dates';
@@ -11,7 +11,8 @@ import type { DailyVerse } from '@/lib/database.types';
 import { friendlyError } from '@/lib/supabase';
 import { useDeleteVerse, useSaveVerse, useVerseForDate } from '@/lib/verses';
 
-// The Pastor writes or edits one day's verse. The database only lets the Pastor do this.
+// The Pastor picks one day's verse: translation, book, chapter and verses. The verse text is never
+// typed; the save-daily-verse function fetches it. Only the Pastor can save (the function checks).
 export default function VerseEditScreen() {
   const { date } = useLocalSearchParams<{ date?: string }>();
   const [chosenDate, setChosenDate] = useState(date && isValidDateKey(date) ? date : dateKey());
@@ -20,7 +21,7 @@ export default function VerseEditScreen() {
 
   if (existing.isPending && isValidDateKey(chosenDate)) return <Loading />;
 
-  // Keyed by date so switching to a day that already has a verse loads that verse's text.
+  // Keyed by date so switching to a day that already has a verse loads that verse's pick.
   return (
     <VerseForm
       key={`${chosenDate}:${existing.data?.updated_at ?? 'new'}`}
@@ -29,6 +30,21 @@ export default function VerseEditScreen() {
       existing={existing.data ?? null}
     />
   );
+}
+
+/** Starts from the saved pick. Verses saved before the picker existed have no book, so the Pastor picks again. */
+function draftFrom(existing: DailyVerse | null): PassageDraft {
+  const translation = findTranslation(existing?.translation_code ?? '')?.code ?? 'web';
+  if (existing?.book && findBook(existing.book) && existing.chapter && existing.verse_start) {
+    return {
+      translation,
+      book: existing.book,
+      chapter: existing.chapter,
+      verseStart: existing.verse_start,
+      verseEnd: existing.verse_end ?? existing.verse_start,
+    };
+  }
+  return { translation, book: null, chapter: 1, verseStart: 1, verseEnd: 1 };
 }
 
 function VerseForm({
@@ -41,18 +57,16 @@ function VerseForm({
   existing: DailyVerse | null;
 }) {
   const { church_id } = useActiveChurch();
-  const userId = useUserId();
-  const save = useSaveVerse(church_id, userId!);
+  const save = useSaveVerse(church_id);
   const remove = useDeleteVerse(church_id);
 
   const [dateText, setDateText] = useState(date);
-  const [reference, setReference] = useState(existing?.reference ?? '');
-  const [text, setText] = useState(existing?.verse_text ?? '');
-  const [translation, setTranslation] = useState(existing?.translation ?? '');
+  const [passage, setPassage] = useState<PassageDraft>(() => draftFrom(existing));
   const [reflection, setReflection] = useState(existing?.reflection ?? '');
-  const [looking, setLooking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const chosen = toPassage(passage);
+  const preview = usePassagePreview(chosen);
   const dateOk = isValidDateKey(dateText);
 
   function changeDate(value: string) {
@@ -60,32 +74,18 @@ function VerseForm({
     if (isValidDateKey(value) && value !== date) onDateChange(value);
   }
 
-  async function fillIn() {
-    setLooking(true);
-    setError(null);
-    try {
-      const found = await lookUpVerse(reference);
-      setReference(found.reference);
-      setText(found.text);
-      setTranslation(TRANSLATION_NAME);
-    } catch (e) {
-      setError(friendlyError(e));
-    }
-    setLooking(false);
-  }
-
   async function onSave() {
+    if (!chosen) return;
     setError(null);
     try {
       await save.mutateAsync({
-        exists: !!existing,
-        input: {
-          verse_date: date,
-          reference: reference.trim(),
-          verse_text: text.trim(),
-          translation: translation.trim(),
-          reflection: reflection.trim(),
-        },
+        verse_date: date,
+        translation_code: chosen.translation,
+        book: chosen.book,
+        chapter: chosen.chapter,
+        verse_start: chosen.verseStart,
+        verse_end: chosen.verseEnd,
+        reflection: reflection.trim(),
       });
       router.back();
     } catch (e) {
@@ -126,34 +126,8 @@ function VerseForm({
 
       <Card>
         <Heading>Verse</Heading>
-        <TextField
-          label="Reference"
-          value={reference}
-          onChangeText={setReference}
-          placeholder="John 3:16"
-          maxLength={100}
-          returnKeyType="search"
-          onSubmitEditing={fillIn}
-        />
-        <Button
-          title="Fill in the verse text"
-          variant="secondary"
-          onPress={fillIn}
-          loading={looking}
-          disabled={!reference.trim()}
-        />
-        <TextField
-          label="Verse text"
-          value={text}
-          onChangeText={(value) => {
-            setText(value);
-            setTranslation('');
-          }}
-          multiline
-          maxLength={4000}
-          style={{ minHeight: 110, paddingTop: 12, textAlignVertical: 'top' }}
-          hint={translation ? `${translation}, public domain. You can edit it.` : 'Fill it in from the reference, or type it yourself.'}
-        />
+        <VersePicker value={passage} onChange={setPassage} />
+        <PassagePreview passage={chosen} />
       </Card>
 
       <Card>
@@ -172,7 +146,7 @@ function VerseForm({
         title={existing ? 'Save changes' : 'Save verse'}
         onPress={onSave}
         loading={save.isPending}
-        disabled={!dateOk || !reference.trim() || !text.trim()}
+        disabled={!dateOk || !chosen || !preview.isSuccess}
       />
       {existing ? <Button title="Delete this verse" variant="danger" onPress={onDelete} loading={remove.isPending} /> : null}
       <Gap />

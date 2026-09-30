@@ -1,26 +1,36 @@
-// Looks a reference up in the World English Bible, a public-domain translation, through bible-api.com
-// (free, no key). The Pastor can edit the text afterwards, and can always type it in by hand.
+// Previews a picked passage through bible-api.com (free, no key; public-domain translations only).
+// This is a preview so the Pastor can see what they chose. The save-daily-verse function fetches
+// the text again on the server, and that copy is the one stored.
 
-const TRANSLATION_ID = 'web';
-export const TRANSLATION_NAME = 'World English Bible';
+import { displayBook, formatReference, type TranslationCode } from './bible-books';
+
+export type Passage = {
+  translation: TranslationCode;
+  book: string;
+  chapter: number;
+  verseStart: number;
+  verseEnd: number;
+};
 
 export type VerseLookup = { reference: string; text: string };
 
-export async function lookUpVerse(reference: string): Promise<VerseLookup> {
-  const query = reference.trim();
-  if (!query) throw new Error('Type a reference first, like John 3:16.');
+export async function lookUpPassage(passage: Passage, signal?: AbortSignal): Promise<VerseLookup> {
+  const reference = formatReference(displayBook(passage.book), passage.chapter, passage.verseStart, passage.verseEnd);
 
   let response: Response;
   try {
-    response = await fetch(`https://bible-api.com/${encodeURIComponent(query)}?translation=${TRANSLATION_ID}`);
-  } catch {
-    throw new Error('Check your internet connection, or type the verse in yourself.');
+    response = await fetch(
+      `https://bible-api.com/${encodeURIComponent(reference)}?translation=${passage.translation}`,
+      { signal },
+    );
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    throw new Error('Check your internet connection and try again.');
   }
-  if (response.status === 404) throw new Error(`Couldn't find "${query}". Try a form like John 3:16 or Psalm 23:1-4.`);
-  if (!response.ok) throw new Error('The Bible lookup is unavailable right now. You can type the verse in yourself.');
+  if (!response.ok) throw new Error('The Bible text is unavailable right now. Try again in a moment.');
 
-  const body: { reference?: string; text?: string } = await response.json();
+  const body: { text?: string } = await response.json();
   const text = body.text?.replace(/\s+/g, ' ').trim();
-  if (!text) throw new Error(`Couldn't find "${query}". Try a form like John 3:16 or Psalm 23:1-4.`);
-  return { reference: body.reference?.trim() || query, text };
+  if (!text) throw new Error('The Bible text is unavailable right now. Try again in a moment.');
+  return { reference, text };
 }

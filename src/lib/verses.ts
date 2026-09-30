@@ -1,5 +1,7 @@
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { TranslationCode } from './bible-books';
 import { dateKey, isValidDateKey } from './dates';
 import type { DailyVerse } from './database.types';
 import { supabase } from './supabase';
@@ -58,7 +60,16 @@ export function useVerseForDate(churchId: string, date: string) {
   });
 }
 
-export type VerseInput = Pick<DailyVerse, 'verse_date' | 'reference' | 'verse_text' | 'translation' | 'reflection'>;
+/** What the Pastor picks. There is no verse text: the server fetches it from the Bible. */
+export type VerseInput = {
+  verse_date: string;
+  translation_code: TranslationCode;
+  book: string;
+  chapter: number;
+  verse_start: number;
+  verse_end: number;
+  reflection: string;
+};
 
 function useInvalidateVerses(churchId: string) {
   const queryClient = useQueryClient();
@@ -70,24 +81,18 @@ function useInvalidateVerses(churchId: string) {
     ]);
 }
 
-/** Saves the verse for a day: adds it, or replaces what was there. */
-export function useSaveVerse(churchId: string, userId: string) {
+/** Saves the verse for a day: adds it, or replaces what was there. The function stores the text. */
+export function useSaveVerse(churchId: string) {
   const invalidate = useInvalidateVerses(churchId);
   return useMutation({
-    mutationFn: async ({ input, exists }: { input: VerseInput; exists: boolean }) => {
-      if (exists) {
-        const { verse_date, ...changes } = input;
-        const { error } = await supabase
-          .from('daily_verses')
-          .update({ ...changes, updated_at: new Date().toISOString() })
-          .eq('church_id', churchId)
-          .eq('verse_date', verse_date);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('daily_verses')
-          .insert({ ...input, church_id: churchId, created_by: userId });
-        if (error) throw error;
+    mutationFn: async (input: VerseInput) => {
+      const { error } = await supabase.functions.invoke('save-daily-verse', {
+        body: { ...input, church_id: churchId },
+      });
+      if (error) {
+        // The function explains what went wrong in its JSON body.
+        const body = error instanceof FunctionsHttpError ? await error.context.json().catch(() => null) : null;
+        throw new Error(body?.error ?? 'Could not save the verse. Try again.');
       }
     },
     onSuccess: invalidate,

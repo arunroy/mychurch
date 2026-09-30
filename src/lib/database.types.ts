@@ -74,6 +74,12 @@ export type DailyVerse = {
   verse_text: string;
   translation: string;
   reflection: string;
+  /** Set when the verse was picked; rows from before the picker have none of these. */
+  book: string | null;
+  chapter: number | null;
+  verse_start: number | null;
+  verse_end: number | null;
+  translation_code: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
