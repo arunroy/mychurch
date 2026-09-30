@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 
 import { ChurchHeader } from '@/components/church-header';
 import { InviteCard } from '@/components/invite-card';
+import { VerseCard } from '@/components/verse-card';
 import { Body, Button, Card, Heading, Screen } from '@/components/ui';
 import { useProfile } from '@/lib/auth';
 import { ROLE_LABELS, useActiveChurch, usePermissions } from '@/lib/church';
@@ -28,6 +29,8 @@ export default function HomeScreen() {
         </Body>
       </Card>
 
+      <VerseCard />
+
       {isLeader && pending.length > 0 ? (
         <Card>
           <Heading>
@@ -41,7 +44,7 @@ export default function HomeScreen() {
 
       <Card>
         <Heading>Coming soon</Heading>
-        <Body muted>Announcements, the daily verse, sermons and the church calendar will appear here.</Body>
+        <Body muted>Announcements, sermons and the church calendar will appear here.</Body>
       </Card>
     </Screen>
   );

@@ -11,7 +11,7 @@ export default function MoreScreen() {
   const profile = useProfile();
   const active = useActiveChurch();
   const { memberships } = useChurch();
-  const { canEditChurch } = usePermissions();
+  const { canEditChurch, isPastor } = usePermissions();
   const isPlatformAdmin = useIsPlatformAdmin();
   const name = profile.data?.full_name ?? '';
 
@@ -31,6 +31,9 @@ export default function MoreScreen() {
       <InviteCard />
 
       <Card>
+        {isPastor ? (
+          <Row title="Daily verse" subtitle="Choose and schedule the verse and reflection" onPress={() => router.push('/daily-verse')} />
+        ) : null}
         {canEditChurch ? <Row title="Church settings" onPress={() => router.push('/church-settings')} /> : null}
         {memberships.length > 1 ? (
           <Row title="Switch church" subtitle={`You belong to ${memberships.length}`} onPress={() => router.push('/switch-church')} />

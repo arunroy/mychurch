@@ -85,6 +85,8 @@ function RootNavigator() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="church-settings" options={{ title: 'Church settings' }} />
         <Stack.Screen name="member/[id]" options={{ title: 'Member' }} />
+        <Stack.Screen name="daily-verse" options={{ title: 'Daily verse' }} />
+        <Stack.Screen name="verse-edit" options={{ title: 'Verse' }} />
         <Stack.Screen name="profile" options={{ title: 'Your profile' }} />
       </Stack.Protected>
 

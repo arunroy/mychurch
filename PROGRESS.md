@@ -36,7 +36,7 @@
 ### Phase 1: The Pastor's voice
 
 - [ ] Flash announcements (Pastor only, expiry, push to the church)
-- [ ] Daily verse: Pastor types a reference, text fills in from a public-domain Bible; reflection; schedule ahead
+- [x] Daily verse: Pastor types a reference, text fills in from a public-domain Bible; reflection; schedule ahead
 - [ ] Sermon videos: optional YouTube channel per church, or add videos by hand
 - [ ] Events and church calendar with RSVP, reminders, add to phone calendar
 
