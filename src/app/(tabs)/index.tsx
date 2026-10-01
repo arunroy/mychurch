@@ -5,7 +5,7 @@ import { ChurchHeader } from '@/components/church-header';
 import { HomeShortcuts } from '@/components/home-shortcuts';
 import { InviteCard } from '@/components/invite-card';
 import { VerseCard } from '@/components/verse-card';
-import { Body, Button, Card, Heading, Screen } from '@/components/ui';
+import { Button, Card, Heading, Screen } from '@/components/ui';
 import { useProfile } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useMembers } from '@/lib/members';
@@ -43,11 +43,6 @@ export default function HomeScreen() {
       ) : null}
 
       {isLeader && approvedCount <= 1 ? <InviteCard /> : null}
-
-      <Card>
-        <Heading>Coming soon</Heading>
-        <Body muted>Sermons will appear here.</Body>
-      </Card>
     </Screen>
   );
 }

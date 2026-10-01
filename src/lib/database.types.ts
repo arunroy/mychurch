@@ -106,6 +106,29 @@ export type Message = {
   created_at: string;
 };
 
+export type Sermon = {
+  id: string;
+  church_id: string;
+  created_by: string | null;
+  title: string;
+  speaker: string;
+  sermon_date: string;
+  /** The main passage as shown, like "John 3:16-18". Empty when none was chosen. */
+  reference: string;
+  book: string | null;
+  chapter: number | null;
+  verse_start: number | null;
+  verse_end: number | null;
+  /** Where to read the sermon, such as a SermonCentral page. The app stores no sermon text. */
+  read_url: string | null;
+  /** A video or audio link. */
+  media_url: string | null;
+  /** Drafts are visible to leaders only. */
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Announcement = {
   id: string;
   church_id: string;
@@ -244,6 +267,21 @@ export type Database = {
         Pick<Message, 'conversation_id' | 'sender_id' | 'body'>,
         never,
         [Relationship<'messages_conversation_id_fkey', 'conversation_id', 'conversations'>]
+      >;
+      sermons: Table<
+        Sermon,
+        Pick<Sermon, 'church_id' | 'created_by' | 'title' | 'sermon_date'> &
+          Partial<Pick<Sermon, 'speaker' | 'reference' | 'book' | 'chapter' | 'verse_start' | 'verse_end' | 'read_url' | 'media_url' | 'published'>>,
+        Partial<
+          Pick<
+            Sermon,
+            'title' | 'speaker' | 'sermon_date' | 'reference' | 'book' | 'chapter' | 'verse_start' | 'verse_end' | 'read_url' | 'media_url' | 'published' | 'updated_at'
+          >
+        >,
+        [
+          Relationship<'sermons_church_id_fkey', 'church_id', 'churches'>,
+          Relationship<'sermons_created_by_fkey', 'created_by', 'profiles'>,
+        ]
       >;
       announcements: Table<
         Announcement,

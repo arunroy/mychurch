@@ -57,9 +57,18 @@ function NumberGrid({ from, to, selected, onPick }: { from: number; to: number; 
 
 /**
  * Pick a translation, book, chapter and verses. There is nowhere to type or paste verse text:
- * the only text field filters the book list.
+ * the only text field filters the book list. Pass `showTranslation={false}` where only the passage
+ * matters, such as naming a sermon's scripture.
  */
-export function VersePicker({ value, onChange }: { value: PassageDraft; onChange: (next: PassageDraft) => void }) {
+export function VersePicker({
+  value,
+  onChange,
+  showTranslation = true,
+}: {
+  value: PassageDraft;
+  onChange: (next: PassageDraft) => void;
+  showTranslation?: boolean;
+}) {
   const theme = useTheme();
   const [panel, setPanel] = useState<Panel>(null);
   const [filter, setFilter] = useState('');
@@ -71,23 +80,25 @@ export function VersePicker({ value, onChange }: { value: PassageDraft; onChange
 
   return (
     <View style={styles.wrap}>
-      <View style={styles.field}>
-        <Text style={[styles.label, { color: theme.text }]}>Translation</Text>
-        <View style={styles.grid}>
-          {TRANSLATIONS.map((t) => (
-            <Chip
-              key={t.code}
-              label={t.short}
-              wide
-              selected={t.code === value.translation}
-              onPress={() => onChange({ ...value, translation: t.code })}
-            />
-          ))}
+      {showTranslation ? (
+        <View style={styles.field}>
+          <Text style={[styles.label, { color: theme.text }]}>Translation</Text>
+          <View style={styles.grid}>
+            {TRANSLATIONS.map((t) => (
+              <Chip
+                key={t.code}
+                label={t.short}
+                wide
+                selected={t.code === value.translation}
+                onPress={() => onChange({ ...value, translation: t.code })}
+              />
+            ))}
+          </View>
+          <Text style={[styles.hint, { color: theme.textSecondary }]}>
+            {TRANSLATIONS.find((t) => t.code === value.translation)?.name}, public domain.
+          </Text>
         </View>
-        <Text style={[styles.hint, { color: theme.textSecondary }]}>
-          {TRANSLATIONS.find((t) => t.code === value.translation)?.name}, public domain.
-        </Text>
-      </View>
+      ) : null}
 
       <Selector label="Book" value={value.book ?? 'Choose a book'} open={panel === 'book'} onPress={() => toggle('book')} />
       {panel === 'book' ? (

@@ -122,6 +122,9 @@ function RootNavigator() {
         <Stack.Screen name="member/[id]" options={{ title: 'Member' }} />
         <Stack.Screen name="polls" options={{ title: 'Polls' }} />
         <Stack.Screen name="poll-new" options={{ title: 'New poll' }} />
+        <Stack.Screen name="sermons" options={{ title: 'Sermons' }} />
+        <Stack.Screen name="sermon/[id]" options={{ title: 'Sermon' }} />
+        <Stack.Screen name="sermon-edit" options={{ title: 'Sermon' }} />
         <Stack.Screen name="prayer" options={{ title: 'Prayer requests' }} />
         <Stack.Screen name="prayer-new" options={{ title: 'Share a request' }} />
         <Stack.Screen name="announcements" options={{ title: 'Announcements' }} />
