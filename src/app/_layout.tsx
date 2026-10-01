@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, type Href } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -76,14 +76,16 @@ const styles = StyleSheet.create({
 // Privacy/terms can be the only screen in the stack (opened before sign-in, or restored
 // directly to one of these routes), so the default back arrow may not appear. This always
 // has somewhere to go: back if there's history, otherwise to wherever the person belongs.
-function CloseLegalScreen() {
+// "/" only exists for church members (it's the tabs screen, behind a guard), so everyone
+// else is sent to the screen their sign-in state allows.
+function CloseLegalScreen({ home }: { home: Href }) {
   const theme = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Close"
       hitSlop={8}
-      onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+      onPress={() => (router.canGoBack() ? router.back() : router.replace(home))}
       style={styles.closeButton}>
       <Ionicons name="close" size={24} color={theme.text} />
     </Pressable>
@@ -115,10 +117,23 @@ function RootNavigator() {
   // navigator earlier would send an opened link (like an invite) to the wrong screen.
   if (loading) return null;
 
+  const home: Href = !isConfigured
+    ? '/setup-needed'
+    : !signedIn
+      ? '/sign-in'
+      : needsName
+        ? '/welcome'
+        : state === 'none'
+          ? '/start'
+          : state === 'waiting'
+            ? '/waiting'
+            : '/';
+  const closeLegal = () => <CloseLegalScreen home={home} />;
+
   return (
     <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
-      <Stack.Screen name="privacy" options={{ title: 'Privacy policy', headerLeft: CloseLegalScreen }} />
-      <Stack.Screen name="terms" options={{ title: 'Terms of use', headerLeft: CloseLegalScreen }} />
+      <Stack.Screen name="privacy" options={{ title: 'Privacy policy', headerLeft: closeLegal }} />
+      <Stack.Screen name="terms" options={{ title: 'Terms of use', headerLeft: closeLegal }} />
 
       <Stack.Protected guard={!isConfigured}>
         <Stack.Screen name="setup-needed" options={{ headerShown: false }} />
@@ -143,6 +158,8 @@ function RootNavigator() {
       <Stack.Protected guard={onboarded && state === 'ready'}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="church-settings" options={{ title: 'Church settings' }} />
+        <Stack.Screen name="bible" options={{ title: 'Bible' }} />
+        <Stack.Screen name="special-days" options={{ title: 'Birthdays and anniversaries' }} />
         <Stack.Screen name="members" options={{ title: 'Members' }} />
         <Stack.Screen name="member/[id]" options={{ title: 'Member' }} />
         <Stack.Screen name="polls" options={{ title: 'Polls' }} />

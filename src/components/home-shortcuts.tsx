@@ -15,7 +15,7 @@ import { usePendingSermonCount } from '@/lib/sermons';
 type Shortcut = {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
-  path: '/members' | '/reports' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
+  path: '/bible' | '/special-days' | '/members' | '/reports' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
   badge?: number;
   show: boolean;
 };
@@ -32,6 +32,7 @@ export function HomeShortcuts() {
   const reportsToReview = useOpenReportCount(church_id, isLeader, isPlatformAdmin);
 
   const shortcuts: Shortcut[] = [
+    { label: 'Bible', icon: 'book-outline', path: '/bible', show: true },
     { label: 'Members', icon: 'people', path: '/members', badge: pending, show: true },
     { label: 'Sermons', icon: 'mic', path: '/sermons', badge: sermonsToReview, show: true },
     { label: 'Questions & answers', icon: 'help-circle', path: '/qa', badge: unanswered, show: true },
@@ -39,6 +40,7 @@ export function HomeShortcuts() {
     { label: 'Polls', icon: 'stats-chart', path: '/polls', show: true },
     { label: 'Daily verse', icon: 'book', path: '/daily-verse', show: isPastor },
     { label: 'Reports', icon: 'flag', path: '/reports', badge: reportsToReview, show: isLeader || isPlatformAdmin },
+    { label: 'Birthdays and anniversaries', icon: 'gift', path: '/special-days', show: isLeader },
     { label: 'Announcements', icon: 'megaphone', path: '/announcements', show: isLeader },
     { label: 'Church settings', icon: 'settings', path: '/church-settings', show: canEditChurch },
   ];

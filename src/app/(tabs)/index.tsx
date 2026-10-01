@@ -4,6 +4,7 @@ import { AnnouncementCards } from '@/components/announcement-cards';
 import { ChurchHeader } from '@/components/church-header';
 import { HomeShortcuts } from '@/components/home-shortcuts';
 import { InviteCard } from '@/components/invite-card';
+import { SpecialDaysCard } from '@/components/special-days-card';
 import { VerseCard } from '@/components/verse-card';
 import { Button, Card, Heading, Screen } from '@/components/ui';
 import { useProfile } from '@/lib/auth';
@@ -30,6 +31,8 @@ export default function HomeScreen() {
       <AnnouncementCards />
 
       <VerseCard />
+
+      <SpecialDaysCard />
 
       <HomeShortcuts />
 

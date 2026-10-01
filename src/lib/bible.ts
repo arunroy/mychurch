@@ -14,6 +14,33 @@ export type Passage = {
 
 export type VerseLookup = { reference: string; text: string };
 
+export type ChapterText = { reference: string; verses: { number: number; text: string }[] };
+
+/** A whole chapter, verse by verse, for the Bible reader. */
+export async function lookUpChapter(
+  translation: TranslationCode,
+  book: string,
+  chapter: number,
+  signal?: AbortSignal,
+): Promise<ChapterText> {
+  const reference = `${displayBook(book)} ${chapter}`;
+  const unavailable = 'The Bible text is unavailable right now. Try again in a moment.';
+
+  let response: Response;
+  try {
+    response = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}?translation=${translation}`, { signal });
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    throw new Error('Check your internet connection and try again.');
+  }
+  if (!response.ok) throw new Error(unavailable);
+
+  const body: { verses?: { verse: number; text: string }[] } = await response.json();
+  const verses = body.verses?.map((v) => ({ number: v.verse, text: v.text.replace(/\s+/g, ' ').trim() }));
+  if (!verses?.length) throw new Error(unavailable);
+  return { reference, verses };
+}
+
 export async function lookUpPassage(passage: Passage, signal?: AbortSignal): Promise<VerseLookup> {
   const reference = formatReference(displayBook(passage.book), passage.chapter, passage.verseStart, passage.verseEnd);
 

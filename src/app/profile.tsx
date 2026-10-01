@@ -1,11 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { router } from 'expo-router';
-import { Avatar, Body, Button, Card, ErrorText, Screen, TextField, ToggleRow } from '@/components/ui';
+import { Avatar, Body, Button, Card, Chip, ErrorText, Heading, Screen, TextField, ToggleRow } from '@/components/ui';
+import { Spacing } from '@/constants/theme';
 import { useProfile, useUserId } from '@/lib/auth';
 import { useActiveChurch, useChurch } from '@/lib/church';
 import { pickAndUploadImage } from '@/lib/images';
+import { daysInMonth, MONTHS } from '@/lib/special-days';
 import { friendlyError, publicUrl, supabase } from '@/lib/supabase';
 
 export default function ProfileScreen() {
@@ -15,7 +18,9 @@ export default function ProfileScreen() {
   const { refresh } = useChurch();
   const queryClient = useQueryClient();
   const [name, setName] = useState(profile.data?.full_name ?? '');
-  const [busy, setBusy] = useState<'name' | 'photo' | 'directory' | null>(null);
+  const [busy, setBusy] = useState<'name' | 'photo' | 'directory' | 'birthday' | null>(null);
+  const [birthMonth, setBirthMonth] = useState<number | null>(profile.data?.birth_month ?? null);
+  const [birthDay, setBirthDay] = useState(profile.data?.birth_day ? String(profile.data.birth_day) : '');
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -27,6 +32,30 @@ export default function ProfileScreen() {
     else {
       await queryClient.invalidateQueries({ queryKey: ['profile', userId] });
       setSaved(true);
+    }
+    setBusy(null);
+  }
+
+  const dayNumber = Number(birthDay);
+  const birthdayValid =
+    birthMonth !== null && Number.isInteger(dayNumber) && dayNumber >= 1 && dayNumber <= daysInMonth(birthMonth);
+  const birthdayChanged = birthMonth !== (profile.data?.birth_month ?? null) || dayNumber !== (profile.data?.birth_day ?? 0);
+
+  async function saveBirthday(clear: boolean) {
+    setBusy('birthday');
+    setError(null);
+    const { error: saveError } = await supabase
+      .from('profiles')
+      .update(clear ? { birth_month: null, birth_day: null } : { birth_month: birthMonth, birth_day: dayNumber })
+      .eq('id', userId);
+    if (saveError) setError(friendlyError(saveError));
+    else {
+      if (clear) {
+        setBirthMonth(null);
+        setBirthDay('');
+      }
+      await queryClient.invalidateQueries({ queryKey: ['profile', userId] });
+      await queryClient.invalidateQueries({ queryKey: ['special-days'] });
     }
     setBusy(null);
   }
@@ -83,9 +112,29 @@ export default function ProfileScreen() {
       />
 
       <Card>
+        <Heading>Your birthday</Heading>
+        <Body muted>Your church sees it on Home so they can wish and pray for you. The year is never saved.</Body>
+        <View style={styles.chips}>
+          {MONTHS.map((label, i) => (
+            <Chip key={label} label={label.slice(0, 3)} selected={birthMonth === i + 1} onPress={() => setBirthMonth(i + 1)} />
+          ))}
+        </View>
+        <TextField label="Day" value={birthDay} onChangeText={setBirthDay} keyboardType="number-pad" maxLength={2} placeholder="14" />
+        <Button
+          title="Save birthday"
+          onPress={() => saveBirthday(false)}
+          loading={busy === 'birthday'}
+          disabled={!birthdayValid || !birthdayChanged}
+        />
+        {profile.data?.birth_month ? (
+          <Button title="Remove my birthday" variant="secondary" onPress={() => saveBirthday(true)} disabled={busy === 'birthday'} />
+        ) : null}
+      </Card>
+
+      <Card>
         <ToggleRow
           title={`Show me in the ${active.church.name} directory`}
-          subtitle="Leaders can always see you."
+          subtitle="Leaders can always see you. Your birthday is hidden from the church too if you turn this off."
           value={active.directory_visible}
           onValueChange={setDirectoryVisible}
           disabled={busy === 'directory'}
@@ -99,3 +148,7 @@ export default function ProfileScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+});

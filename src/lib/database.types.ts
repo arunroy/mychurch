@@ -25,7 +25,39 @@ export type Profile = {
   id: string;
   full_name: string;
   avatar_path: string | null;
+  /** Month and day only, never the year. Both are set together or both are null. */
+  birth_month: number | null;
+  birth_day: number | null;
   created_at: string;
+};
+
+export type SpecialDayKind = 'birthday' | 'anniversary';
+
+/** A date leaders added to the church's list. */
+export type SpecialDay = {
+  id: string;
+  church_id: string;
+  kind: SpecialDayKind;
+  name: string;
+  month: number;
+  day: number;
+  /** Anniversaries only, so Home can say how many years. */
+  year: number | null;
+  created_by: string;
+  created_at: string;
+};
+
+/** One row of the church's combined list: leader-added ('added') or a member's own birthday ('member'). */
+export type SpecialDayEntry = {
+  id: string;
+  source: 'added' | 'member';
+  kind: SpecialDayKind;
+  name: string;
+  month: number;
+  day: number;
+  year: number | null;
+  user_id: string | null;
+  avatar_path: string | null;
 };
 
 export type Church = {
@@ -379,7 +411,13 @@ export type Database = {
       profiles: Table<
         Profile,
         { id: string; full_name?: string; avatar_path?: string | null },
-        { full_name?: string; avatar_path?: string | null }
+        { full_name?: string; avatar_path?: string | null; birth_month?: number | null; birth_day?: number | null }
+      >;
+      special_days: Table<
+        SpecialDay,
+        Pick<SpecialDay, 'church_id' | 'kind' | 'name' | 'month' | 'day' | 'created_by'> & Partial<Pick<SpecialDay, 'year'>>,
+        never,
+        [Relationship<'special_days_church_id_fkey', 'church_id', 'churches'>]
       >;
       platform_admins: Table<{ user_id: string }, never, never>;
       churches: Table<
@@ -551,6 +589,7 @@ export type Database = {
       cast_vote: { Args: { p_poll: string; p_options: string[] }; Returns: undefined };
       close_poll: { Args: { p_poll: string }; Returns: undefined };
       delete_poll: { Args: { p_poll: string }; Returns: undefined };
+      church_special_days: { Args: { p_church: string }; Returns: SpecialDayEntry[] };
       church_polls: { Args: { p_church: string }; Returns: PollSummary[] };
       church_chat_unread_count: { Args: { p_church: string }; Returns: number };
       mark_church_chat_read: { Args: { p_church: string }; Returns: undefined };
