@@ -79,6 +79,24 @@ A church always keeps at least one Pastor.
 - **Reporting** uses the `content_reports` table and functions (migration `20261010000000_content_reports.sql`). Church leaders review reports about members in the Reports tile on Home; reports about leaders go to platform admins.
 - **Account deletion** is the `delete-account` edge function. Deploy it with `npx supabase functions deploy delete-account --project-ref <ref>`.
 
+## Building the app with EAS
+
+`eas.json` has two build profiles: **preview** (an Android .apk you install directly on test phones) and **production** (what goes to the stores). Run EAS with `npx eas-cli@latest`.
+
+1. **Sign in and create the project:** `npx eas-cli@latest login`, then `npx eas-cli@latest init`. That writes the project id into `app.json`, which is what makes push notifications work on real phones.
+2. **Choose the app identifiers** (permanent once published) and add them to `app.json`: `expo.ios.bundleIdentifier` and `expo.android.package`, for example `com.yourname.mychurch`.
+3. **Give the cloud builds the Supabase settings.** `.env` is not uploaded to EAS, so set the two public values for each environment you build (use `preview` and `production`):
+   ```
+   npx eas-cli@latest env:set --name EXPO_PUBLIC_SUPABASE_URL --value https://<project>.supabase.co --environment preview --visibility plaintext
+   npx eas-cli@latest env:set --name EXPO_PUBLIC_SUPABASE_KEY --value <the publishable key> --environment preview --visibility plaintext
+   ```
+   Repeat with `--environment production`.
+4. **Push notifications on Android** need a Firebase service account key uploaded to EAS (`npx eas-cli@latest credentials`); see Expo's "Add Android FCM V1 credentials" guide. On iOS, EAS creates the push key for you the first time you build, if you have an Apple Developer account.
+5. **Build a test app:** `npx eas-cli@latest build --platform android --profile preview`, then install the .apk from the link EAS gives you.
+6. **Build for the stores:** `npx eas-cli@latest build --platform all --profile production`, then `npx eas-cli@latest submit`.
+
+The app icon, Android adaptive icon and splash screen in `assets/images/` are **plain placeholders** (a white cross on the app's blue). Replace them with the real logo before the store listing: a 1024x1024 square PNG with no transparency for `icon.png`, and matching foreground, monochrome and splash images.
+
 ## Checks
 
 ```bash

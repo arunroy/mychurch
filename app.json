@@ -8,9 +8,14 @@
     "scheme": "mychurch",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.mychurch.app",
+      "icon": "./assets/images/icon.png",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.mychurch.app",
       "adaptiveIcon": {
         "backgroundColor": "#3B5BDB",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

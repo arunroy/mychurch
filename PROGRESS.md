@@ -62,7 +62,7 @@
 
 ### Phase 4: Store release
 
-- [ ] EAS project, app icons and splash in MyChurch branding
+- [ ] EAS project, app icons and splash in MyChurch branding. Prepared: `eas.json` (preview and production profiles), placeholder icons and splash, steps in the README. Still needs: your Expo login and `eas init`, the app identifiers in `app.json`, Supabase settings in EAS, real artwork, and developer accounts
 - [ ] Optional "tap to sign in" link in the sign-in email alongside the code (needs universal links / app links on a domain we control)
 - [x] Privacy policy and terms: shown in the app (from the sign-in screen and More) and built as web pages in `docs/` for the store listings (`npm run build:legal`). Set `supportEmail` in `src/lib/legal.json` and have the text reviewed before publishing
 - [x] Report content: any member can report chat, private and elders messages, prayer requests, questions, polls, sermons, events and members; leaders review reports about members, and the app administrators review reports about leaders. Report only: no blocking yet (Apple may ask for it)
