@@ -1,23 +1,33 @@
 import { useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Body, Button, Card, Chip, ErrorText, Heading, Loading, Screen, TextField } from '@/components/ui';
+import { Body, Button, Card, Chip, ErrorText, Heading, Loading, Screen, TextField, useAccentText } from '@/components/ui';
+import { VerseNoteSheet } from '@/components/verse-note-sheet';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { lookUpChapter } from '@/lib/bible';
-import { BIBLE_BOOKS, displayBook, TRANSLATIONS, type TranslationCode } from '@/lib/bible-books';
+import { useChapterNotes } from '@/lib/bible-notes';
+import { BIBLE_BOOKS, displayBook, formatReference, TRANSLATIONS, type TranslationCode } from '@/lib/bible-books';
 
 // A simple reader open to everyone: pick a translation, a book and a chapter, then read.
+// Tap a verse to keep a private note on it.
 export default function BibleScreen() {
   const theme = useTheme();
+  const accent = useAccentText();
   const [translation, setTranslation] = useState<TranslationCode>('web');
-  // Study screens can open the reader at a book; otherwise it starts at John 1.
+  // Study screens and the notes list can open the reader at a book and chapter; otherwise it starts at John 1.
   const params = useLocalSearchParams<{ book?: string; chapter?: string }>();
   const startBook = BIBLE_BOOKS.findIndex((b) => b.name === params.book);
+  const startChapter = Number(params.chapter);
   const [bookIndex, setBookIndex] = useState(startBook >= 0 ? startBook : 42);
-  const [chapter, setChapter] = useState(1);
+  const [chapter, setChapter] = useState(
+    startBook >= 0 && Number.isInteger(startChapter) && startChapter >= 1 && startChapter <= BIBLE_BOOKS[startBook].verses.length
+      ? startChapter
+      : 1,
+  );
+  const [noteVerse, setNoteVerse] = useState<number | null>(null);
   const [picking, setPicking] = useState<'book' | 'chapter' | null>(null);
   const [filter, setFilter] = useState('');
 
@@ -29,6 +39,10 @@ export default function BibleScreen() {
     queryFn: ({ signal }) => lookUpChapter(translation, book.name, chapter, signal),
   });
 
+  const notes = useChapterNotes(book.name, chapter);
+  const noted = notes.data;
+  const openVerse = noteVerse === null ? undefined : text.data?.verses.find((v) => v.number === noteVerse);
+
   const hasPrevious = chapter > 1 || bookIndex > 0;
   const hasNext = chapter < book.verses.length || bookIndex < BIBLE_BOOKS.length - 1;
 
@@ -36,6 +50,7 @@ export default function BibleScreen() {
     setBookIndex(nextBook);
     setChapter(nextChapter);
     setPicking(null);
+    setNoteVerse(null);
   }
   function previous() {
     if (chapter > 1) go(bookIndex, chapter - 1);
@@ -103,21 +118,47 @@ export default function BibleScreen() {
         {text.isPending ? <Loading /> : null}
         {text.isError ? <ErrorText>{text.error.message}</ErrorText> : null}
         {text.data ? (
-          <Text style={[styles.passage, { color: theme.text }]} selectable>
-            {text.data.verses.map((v) => (
-              <Text key={v.number}>
-                <Text style={[styles.number, { color: theme.textSecondary }]}>{v.number} </Text>
-                {v.text}{' '}
-              </Text>
-            ))}
-          </Text>
+          <>
+            <Body muted>Tap a verse to add a note. Verses with a note are marked ✎.</Body>
+            <Text style={[styles.passage, { color: theme.text }]}>
+              {text.data.verses.map((v) => {
+                const hasNote = !!noted?.has(v.number);
+                return (
+                  <Text
+                    key={v.number}
+                    onPress={() => setNoteVerse(v.number)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${hasNote ? 'Edit note on' : 'Add a note to'} verse ${v.number}`}>
+                    <Text style={[styles.number, { color: hasNote ? accent : theme.textSecondary }]}>
+                      {hasNote ? `${v.number}✎ ` : `${v.number} `}
+                    </Text>
+                    <Text style={hasNote ? { backgroundColor: theme.backgroundSelected } : undefined}>{v.text}</Text>{' '}
+                  </Text>
+                );
+              })}
+            </Text>
+          </>
         ) : null}
       </Card>
+
+      {openVerse ? (
+        <VerseNoteSheet
+          key={openVerse.number}
+          reference={formatReference(displayBook(book.name), chapter, openVerse.number, openVerse.number)}
+          verseText={openVerse.text}
+          book={book.name}
+          chapter={chapter}
+          verse={openVerse.number}
+          existing={noted?.get(openVerse.number) ?? null}
+          onClose={() => setNoteVerse(null)}
+        />
+      ) : null}
 
       <View style={styles.row}>
         {hasPrevious ? <Button title="Previous" variant="secondary" onPress={previous} /> : null}
         {hasNext ? <Button title="Next" onPress={next} /> : null}
       </View>
+      <Button title="My notes" variant="secondary" onPress={() => router.push('/bible-notes')} />
     </Screen>
   );
 }

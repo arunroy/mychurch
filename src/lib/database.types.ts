@@ -60,6 +60,18 @@ export type SpecialDayEntry = {
   avatar_path: string | null;
 };
 
+/** A person's private note on one verse. It follows the verse, not the translation. */
+export type BibleNote = {
+  id: string;
+  user_id: string;
+  book: string;
+  chapter: number;
+  verse: number;
+  body: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type QuizLevel = 'little' | 'kids' | 'youth';
 
 /** A multiple-choice question a leader wrote. */
@@ -432,6 +444,12 @@ export type Database = {
         Profile,
         { id: string; full_name?: string; avatar_path?: string | null },
         { full_name?: string; avatar_path?: string | null; birth_month?: number | null; birth_day?: number | null }
+      >;
+      bible_notes: Table<
+        BibleNote,
+        Pick<BibleNote, 'user_id' | 'book' | 'chapter' | 'verse' | 'body'>,
+        Pick<BibleNote, 'body' | 'updated_at'>,
+        []
       >;
       quiz_questions: Table<
         QuizQuestion,

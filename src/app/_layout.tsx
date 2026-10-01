@@ -159,6 +159,7 @@ function RootNavigator() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="church-settings" options={{ title: 'Church settings' }} />
         <Stack.Screen name="bible" options={{ title: 'Bible' }} />
+        <Stack.Screen name="bible-notes" options={{ title: 'My notes' }} />
         <Stack.Screen name="bible-study" options={{ title: 'Bible study' }} />
         <Stack.Screen name="bible-study/christ" options={{ title: 'Jesus quick reference' }} />
         <Stack.Screen name="bible-study/doctrines" options={{ title: 'New Testament doctrines' }} />
