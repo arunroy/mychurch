@@ -8,6 +8,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useMembers } from '@/lib/members';
 import { useUnansweredCount } from '@/lib/qa';
+import { usePendingSermonCount } from '@/lib/sermons';
 
 type Shortcut = {
   label: string;
@@ -24,10 +25,11 @@ export function HomeShortcuts() {
   const members = useMembers(church_id);
   const pending = isLeader ? (members.data?.filter((m) => m.status === 'pending').length ?? 0) : 0;
   const unanswered = useUnansweredCount(church_id, isPastor);
+  const sermonsToReview = usePendingSermonCount(church_id, isPastor);
 
   const shortcuts: Shortcut[] = [
     { label: 'Members', icon: 'people', path: '/members', badge: pending, show: true },
-    { label: 'Sermons', icon: 'mic', path: '/sermons', show: true },
+    { label: 'Sermons', icon: 'mic', path: '/sermons', badge: sermonsToReview, show: true },
     { label: 'Questions & answers', icon: 'help-circle', path: '/qa', badge: unanswered, show: true },
     { label: 'Prayer requests', icon: 'heart', path: '/prayer', show: true },
     { label: 'Polls', icon: 'stats-chart', path: '/polls', show: true },

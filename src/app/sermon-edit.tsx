@@ -1,30 +1,31 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
 
 import { DateField } from '@/components/date-time-fields';
+import { passageFields, passageFromSaved, ScriptureField } from '@/components/scripture-field';
 import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, TextField, ToggleRow } from '@/components/ui';
-import { VersePicker, type PassageDraft } from '@/components/verse-picker';
-import { Spacing } from '@/constants/theme';
+import type { PassageDraft } from '@/components/verse-picker';
 import { useUserId } from '@/lib/auth';
-import { displayBook, findBook, formatReference } from '@/lib/bible-books';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { dateKey, formatDay, isValidDateKey } from '@/lib/dates';
-import type { Sermon } from '@/lib/database.types';
+import type { SermonDetail } from '@/lib/database.types';
 import { isWebLink, useSaveSermon, useSermon } from '@/lib/sermons';
 import { friendlyError } from '@/lib/supabase';
 
-// Adds a sermon, or with ?id= edits one. Leaders only; the database enforces that too.
+const MAX_TEXT = 8000;
+
+// Adds one of the Pastor's own sermons, or with ?id= edits one. Only the Pastor; the database enforces that too.
+// Members write articles and suggest outside sermons through their own screens, which go to the Pastor for review.
 export default function SermonEditScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { church_id } = useActiveChurch();
-  const { isLeader } = usePermissions();
+  const { isPastor } = usePermissions();
   const sermon = useSermon(church_id, id);
 
-  if (!isLeader) {
+  if (!isPastor) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>Only the Pastor, elders and church admins can add or change sermons.</Body>
+        <Body muted>Only the Pastor can add or change the church&apos;s own sermons.</Body>
       </Screen>
     );
   }
@@ -39,21 +40,7 @@ export default function SermonEditScreen() {
   return <SermonForm existing={sermon.data ?? null} />;
 }
 
-/** Starts from the saved passage. A sermon with no scripture starts with the picker closed. */
-function passageFrom(existing: Sermon | null): PassageDraft | null {
-  if (existing?.book && findBook(existing.book) && existing.chapter && existing.verse_start) {
-    return {
-      translation: 'web',
-      book: existing.book,
-      chapter: existing.chapter,
-      verseStart: existing.verse_start,
-      verseEnd: existing.verse_end ?? existing.verse_start,
-    };
-  }
-  return null;
-}
-
-function SermonForm({ existing }: { existing: Sermon | null }) {
+function SermonForm({ existing }: { existing: SermonDetail | null }) {
   const { church_id } = useActiveChurch();
   const userId = useUserId();
   const save = useSaveSermon(church_id, userId!);
@@ -61,22 +48,23 @@ function SermonForm({ existing }: { existing: Sermon | null }) {
   const [title, setTitle] = useState(existing?.title ?? '');
   const [speaker, setSpeaker] = useState(existing?.speaker ?? '');
   const [dateText, setDateText] = useState(existing?.sermon_date ?? dateKey());
-  const [passage, setPassage] = useState<PassageDraft | null>(() => passageFrom(existing));
+  const [passage, setPassage] = useState<PassageDraft | null>(() =>
+    passageFromSaved(existing?.book ?? null, existing?.chapter ?? null, existing?.verse_start ?? null, existing?.verse_end ?? null),
+  );
+  const [text, setText] = useState(existing?.body ?? '');
   const [readUrl, setReadUrl] = useState(existing?.read_url ?? '');
   const [mediaUrl, setMediaUrl] = useState(existing?.media_url ?? '');
   const [published, setPublished] = useState(existing?.published ?? true);
   const [error, setError] = useState<string | null>(null);
 
   const dateOk = isValidDateKey(dateText);
+  const body = text.trim();
   const read = readUrl.trim();
   const media = mediaUrl.trim();
   const readBad = read !== '' && !isWebLink(read);
   const mediaBad = media !== '' && !isWebLink(media);
-  const hasLink = read !== '' || media !== '';
-  const canSave = title.trim() !== '' && dateOk && hasLink && !readBad && !mediaBad;
-
-  const chosen = passage?.book ? passage : null;
-  const reference = chosen ? formatReference(displayBook(chosen.book!), chosen.chapter, chosen.verseStart, chosen.verseEnd) : '';
+  const hasContent = body !== '' || read !== '' || media !== '';
+  const canSave = title.trim() !== '' && dateOk && hasContent && !readBad && !mediaBad;
 
   async function onSave() {
     setError(null);
@@ -87,11 +75,8 @@ function SermonForm({ existing }: { existing: Sermon | null }) {
           title: title.trim(),
           speaker: speaker.trim(),
           sermon_date: dateText,
-          reference,
-          book: chosen?.book ?? null,
-          chapter: chosen ? chosen.chapter : null,
-          verse_start: chosen ? chosen.verseStart : null,
-          verse_end: chosen ? chosen.verseEnd : null,
+          ...passageFields(passage),
+          body: body || null,
           read_url: read || null,
           media_url: media || null,
           published,
@@ -116,27 +101,25 @@ function SermonForm({ existing }: { existing: Sermon | null }) {
 
       <Card>
         <Heading>Scripture (optional)</Heading>
-        {passage ? (
-          <>
-            <VersePicker value={passage} onChange={setPassage} showTranslation={false} />
-            {reference ? <Body>{reference}</Body> : null}
-            <Button title="Remove the passage" variant="secondary" onPress={() => setPassage(null)} />
-          </>
-        ) : (
-          <Button
-            title="Choose a passage"
-            variant="secondary"
-            onPress={() => setPassage({ translation: 'web', book: null, chapter: 1, verseStart: 1, verseEnd: 1 })}
-          />
-        )}
+        <ScriptureField value={passage} onChange={setPassage} />
       </Card>
 
       <Card>
-        <Heading>Links</Heading>
-        <Body muted>
-          The app doesn&apos;t keep sermon text. Add a link to where it can be read, such as its SermonCentral page, and/or a video or
-          audio link. Members tap through to open them.
-        </Body>
+        <Heading>Sermon text (optional)</Heading>
+        <TextField
+          label="Write or paste your own sermon"
+          value={text}
+          onChangeText={setText}
+          multiline
+          maxLength={MAX_TEXT}
+          style={{ minHeight: 180, paddingTop: 12, textAlignVertical: 'top' }}
+          hint={`${text.length} of ${MAX_TEXT} characters. Only add text you wrote or have permission to share.`}
+        />
+      </Card>
+
+      <Card>
+        <Heading>Links (optional)</Heading>
+        <Body muted>A link to read the sermon elsewhere, and/or a video or audio link. Members tap through to open them.</Body>
         <TextField
           label="Link to read the sermon"
           value={readUrl}
@@ -159,26 +142,20 @@ function SermonForm({ existing }: { existing: Sermon | null }) {
           maxLength={500}
           hint={mediaBad ? 'Start the link with https://' : undefined}
         />
-        {!hasLink ? <Body muted>Add at least one link.</Body> : null}
+        {!hasContent ? <Body muted>Add the sermon text, a link, or both.</Body> : null}
       </Card>
 
       <Card>
         <ToggleRow
           title="Published"
-          subtitle={published ? 'Everyone in the church can see this sermon.' : 'A draft: only church leaders can see it.'}
+          subtitle={published ? 'Everyone in the church can see this sermon.' : 'A draft: only you can see it.'}
           value={published}
           onValueChange={setPublished}
         />
       </Card>
 
-      <View style={styles.actions}>
-        <Button title={existing ? 'Save changes' : 'Add sermon'} onPress={onSave} loading={save.isPending} disabled={!canSave} />
-      </View>
+      <Button title={existing ? 'Save changes' : 'Add sermon'} onPress={onSave} loading={save.isPending} disabled={!canSave} />
       <Gap />
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  actions: { gap: Spacing.two },
-});

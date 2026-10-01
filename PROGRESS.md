@@ -41,6 +41,7 @@
 - [x] Announcement push notifications (sent when a leader posts, if they leave "Send a notification" on; needs an EAS project and a real phone)
 - [x] Daily verse: Pastor picks translation, book, chapter and verses (no typing or pasting; the save-daily-verse function fetches and stores the text); reflection; schedule ahead
 - [x] Sermons: leaders add a sermon with links to read it (for example on SermonCentral) and/or watch or listen; drafts, scripture, search. The app stores no sermon text, because SermonCentral has no API and its terms do not allow republishing
+- [x] Sermons from members and outside the church: members write articles (up to 8,000 characters) or share links to outside sermons; the Pastor approves or declines each before every member can see it. Pastor / Members / External filters (Pastor first), global search, and a tag on every sermon
 - [x] Church calendar: a shared Calendar tab; any member adds events, only the creator or a leader edits or deletes
 - [x] Calendar extras: Going / Maybe / Can't go with totals (names for the event's creator and leaders), a reminder on this phone, add to the phone's calendar, and date and time pickers on the event, verse and sermon forms
 

@@ -131,6 +131,8 @@ function RootNavigator() {
         <Stack.Screen name="qa" options={{ title: 'Questions & answers' }} />
         <Stack.Screen name="sermons" options={{ title: 'Sermons' }} />
         <Stack.Screen name="sermon/[id]" options={{ title: 'Sermon' }} />
+        <Stack.Screen name="sermon-write" options={{ title: 'Write an article' }} />
+        <Stack.Screen name="sermon-suggest" options={{ title: 'Share a sermon' }} />
         <Stack.Screen name="sermon-edit" options={{ title: 'Sermon' }} />
         <Stack.Screen name="prayer" options={{ title: 'Prayer requests' }} />
         <Stack.Screen name="prayer-new" options={{ title: 'Share a request' }} />

@@ -106,6 +106,49 @@ export type Message = {
   created_at: string;
 };
 
+export type SermonSource = 'pastor' | 'member' | 'external';
+export type SermonStatus = 'pending' | 'approved' | 'declined';
+
+/** One row of the sermon list. The text itself is left out; `SermonDetail` has it. */
+export type SermonItem = {
+  id: string;
+  source: SermonSource;
+  title: string;
+  speaker: string;
+  sermon_date: string;
+  reference: string;
+  status: SermonStatus;
+  published: boolean;
+  has_text: boolean;
+  /** Who wrote or shared it. Null for the Pastor's own sermons. */
+  author_name: string | null;
+  is_mine: boolean;
+  review_note: string | null;
+};
+
+export type SermonDetail = {
+  id: string;
+  church_id: string;
+  source: SermonSource;
+  title: string;
+  speaker: string;
+  sermon_date: string;
+  reference: string;
+  book: string | null;
+  chapter: number | null;
+  verse_start: number | null;
+  verse_end: number | null;
+  body: string | null;
+  read_url: string | null;
+  media_url: string | null;
+  published: boolean;
+  status: SermonStatus;
+  review_note: string | null;
+  reviewed_at: string | null;
+  author_name: string | null;
+  is_mine: boolean;
+};
+
 export type Sermon = {
   id: string;
   church_id: string;
@@ -123,8 +166,16 @@ export type Sermon = {
   read_url: string | null;
   /** A video or audio link. */
   media_url: string | null;
-  /** Drafts are visible to leaders only. */
+  /** Drafts are visible to the Pastor only. */
   published: boolean;
+  /** Who it comes from: the Pastor, a member's own article, or a link to an outside sermon. */
+  source: SermonSource;
+  /** A member's article text, or the short note on an external link. Null for the Pastor's link-only sermons. */
+  body: string | null;
+  /** Member and external entries wait for the Pastor's approval before every member can see them. */
+  status: SermonStatus;
+  review_note: string | null;
+  reviewed_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -348,11 +399,11 @@ export type Database = {
       sermons: Table<
         Sermon,
         Pick<Sermon, 'church_id' | 'created_by' | 'title' | 'sermon_date'> &
-          Partial<Pick<Sermon, 'speaker' | 'reference' | 'book' | 'chapter' | 'verse_start' | 'verse_end' | 'read_url' | 'media_url' | 'published'>>,
+          Partial<Pick<Sermon, 'speaker' | 'reference' | 'book' | 'chapter' | 'verse_start' | 'verse_end' | 'read_url' | 'media_url' | 'published' | 'body'>>,
         Partial<
           Pick<
             Sermon,
-            'title' | 'speaker' | 'sermon_date' | 'reference' | 'book' | 'chapter' | 'verse_start' | 'verse_end' | 'read_url' | 'media_url' | 'published' | 'updated_at'
+            'title' | 'speaker' | 'sermon_date' | 'reference' | 'book' | 'chapter' | 'verse_start' | 'verse_end' | 'read_url' | 'media_url' | 'published' | 'body' | 'updated_at'
           >
         >,
         [
@@ -396,6 +447,40 @@ export type Database = {
       is_platform_admin: { Args: Record<string, never>; Returns: boolean };
       start_conversation: { Args: { p_church: string; p_other: string }; Returns: string };
       mark_conversation_read: { Args: { p_conversation: string }; Returns: undefined };
+      submit_sermon: {
+        Args: {
+          p_church: string;
+          p_source: 'member' | 'external';
+          p_title: string;
+          p_speaker: string;
+          p_reference: string;
+          p_book: string | null;
+          p_chapter: number | null;
+          p_verse_start: number | null;
+          p_verse_end: number | null;
+          p_body: string | null;
+          p_url: string | null;
+        };
+        Returns: string;
+      };
+      edit_submission: {
+        Args: {
+          p_sermon: string;
+          p_title: string;
+          p_speaker: string;
+          p_reference: string;
+          p_book: string | null;
+          p_chapter: number | null;
+          p_verse_start: number | null;
+          p_verse_end: number | null;
+          p_body: string | null;
+          p_url: string | null;
+        };
+        Returns: undefined;
+      };
+      review_sermon: { Args: { p_sermon: string; p_approve: boolean; p_note?: string | null }; Returns: undefined };
+      sermon_feed: { Args: { p_church: string }; Returns: SermonItem[] };
+      sermon_detail: { Args: { p_sermon: string }; Returns: SermonDetail[] };
       ask_question: { Args: { p_church: string; p_body: string; p_anonymous?: boolean }; Returns: undefined };
       qa_feed: { Args: { p_church: string }; Returns: Question[] };
       set_question_visibility: { Args: { p_question: string; p_visibility: QuestionVisibility }; Returns: undefined };
