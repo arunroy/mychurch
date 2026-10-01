@@ -165,6 +165,8 @@ function RootNavigator() {
         <Stack.Screen name="bible-study/paul" options={{ title: "Paul's letters" }} />
         <Stack.Screen name="bible-study/books" options={{ title: 'Books of the Bible' }} />
         <Stack.Screen name="bible-study/promises" options={{ title: 'Promises and help' }} />
+        <Stack.Screen name="bible-study/quiz" options={{ title: 'Bible quiz' }} />
+        <Stack.Screen name="bible-study/quiz-questions" options={{ title: 'Quiz questions' }} />
         <Stack.Screen name="special-days" options={{ title: 'Birthdays and anniversaries' }} />
         <Stack.Screen name="members" options={{ title: 'Members' }} />
         <Stack.Screen name="member/[id]" options={{ title: 'Member' }} />

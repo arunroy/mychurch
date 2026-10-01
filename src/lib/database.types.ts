@@ -60,6 +60,26 @@ export type SpecialDayEntry = {
   avatar_path: string | null;
 };
 
+export type QuizLevel = 'little' | 'kids' | 'youth';
+
+/** A multiple-choice question a leader wrote. */
+export type QuizQuestion = {
+  id: string;
+  church_id: string;
+  created_by: string;
+  question: string;
+  /** Two to four choices. */
+  options: string[];
+  /** Position of the right choice in options, counting from 0. */
+  correct_index: number;
+  explanation: string;
+  reference: string;
+  level: QuizLevel;
+  /** The Monday of the week it features; null means the general pool. */
+  week_of: string | null;
+  created_at: string;
+};
+
 export type Church = {
   id: string;
   name: string;
@@ -412,6 +432,13 @@ export type Database = {
         Profile,
         { id: string; full_name?: string; avatar_path?: string | null },
         { full_name?: string; avatar_path?: string | null; birth_month?: number | null; birth_day?: number | null }
+      >;
+      quiz_questions: Table<
+        QuizQuestion,
+        Pick<QuizQuestion, 'church_id' | 'created_by' | 'question' | 'options' | 'correct_index' | 'level'> &
+          Partial<Pick<QuizQuestion, 'explanation' | 'reference' | 'week_of'>>,
+        never,
+        [Relationship<'quiz_questions_church_id_fkey', 'church_id', 'churches'>]
       >;
       special_days: Table<
         SpecialDay,
