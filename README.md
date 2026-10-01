@@ -65,13 +65,37 @@ Push notifications don't work in Expo Go on Android, or anywhere until the app h
 | Role | Can |
 |---|---|
 | Pastor | Everything below, plus change roles, church settings and the join code |
-| Elder | Approve and remove members, see the join code |
-| Church admin | Church settings, approve members, join code |
-| Member | See the church and its directory |
+| Elder | Approve and remove members, see the join code, edit or delete any calendar event |
+| Church admin | Church settings, approve members, join code, edit or delete any calendar event |
+| Member | See the church and its directory, add calendar events, edit or delete their own, send private messages to other members |
 | Pending | See only their own request until approved |
 | Platform admin | Verify or suspend churches; can't see any church's members or content |
 
 A church always keeps at least one Pastor.
+
+## Store release
+
+- **Privacy policy and terms** live in `src/lib/legal.json`. The app shows them, and `npm run build:legal` turns the same text into web pages in `docs/` (publish that folder, for example with GitHub Pages, and give the store listings the address of `docs/privacy.html`). Set `supportEmail` in that file before publishing. The text is a starting point; have it reviewed.
+- **Reporting** uses the `content_reports` table and functions (migration `20261010000000_content_reports.sql`). Church leaders review reports about members in the Reports tile on Home; reports about leaders go to platform admins.
+- **Account deletion** is the `delete-account` edge function. Deploy it with `npx supabase functions deploy delete-account --project-ref <ref>`.
+
+## Building the app with EAS
+
+`eas.json` has two build profiles: **preview** (an Android .apk you install directly on test phones) and **production** (what goes to the stores). Run EAS with `npx eas-cli@latest`.
+
+1. **Sign in and create the project:** `npx eas-cli@latest login`, then `npx eas-cli@latest init`. That writes the project id into `app.json`, which is what makes push notifications work on real phones.
+2. **Choose the app identifiers** (permanent once published) and add them to `app.json`: `expo.ios.bundleIdentifier` and `expo.android.package`, for example `com.yourname.mychurch`.
+3. **Give the cloud builds the Supabase settings.** `.env` is not uploaded to EAS, so set the two public values for each environment you build (use `preview` and `production`):
+   ```
+   npx eas-cli@latest env:set --name EXPO_PUBLIC_SUPABASE_URL --value https://<project>.supabase.co --environment preview --visibility plaintext
+   npx eas-cli@latest env:set --name EXPO_PUBLIC_SUPABASE_KEY --value <the publishable key> --environment preview --visibility plaintext
+   ```
+   Repeat with `--environment production`.
+4. **Push notifications on Android** need a Firebase service account key uploaded to EAS (`npx eas-cli@latest credentials`); see Expo's "Add Android FCM V1 credentials" guide. On iOS, EAS creates the push key for you the first time you build, if you have an Apple Developer account.
+5. **Build a test app:** `npx eas-cli@latest build --platform android --profile preview`, then install the .apk from the link EAS gives you.
+6. **Build for the stores:** `npx eas-cli@latest build --platform all --profile production`, then `npx eas-cli@latest submit`.
+
+The app icon, Android adaptive icon and splash screen in `assets/images/` are **plain placeholders** (a white cross on the app's blue). Replace them with the real logo before the store listing: a 1024x1024 square PNG with no transparency for `icon.png`, and matching foreground, monochrome and splash images.
 
 ## Checks
 
@@ -80,6 +104,8 @@ npx tsc --noEmit       # types
 npx expo lint          # lint
 npm run test:db        # database rules (needs Postgres 15+ installed locally)
 ```
+
+**Running the database tests on Windows:** install Postgres 15 or newer (for example `winget install PostgreSQL.PostgreSQL.16`; you only need the programs, not a running server) and run `npm run test:db` from **Git Bash**. The script finds Postgres under `C:\Program Files\PostgreSQL\<version>\bin`; if yours is elsewhere, point it there: `TEST_DB_PGBIN='/c/path/to/bin' npm run test:db`. It starts its own temporary server on port 54329 and removes it afterwards. On Linux and macOS it works the same way, and `.gitattributes` keeps the script's Unix line endings.
 
 ## Roadmap
 

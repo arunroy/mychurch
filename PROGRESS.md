@@ -29,36 +29,45 @@
 - [x] Church settings: logo, name, city, contact email, colour, approval on/off, directory on/off
 - [x] Profile: photo, name, show or hide yourself in the directory
 - [x] Switch between churches
+- [x] Theme: choose System, Light or Dark in More; remembered on the device
+- [x] UI revamp: theme settings with 12 matched themes (background gradient, text and accent colours checked for contrast, light and dark) plus plain, a bigger bottom menu with icons and badges, church features (members, prayer, polls, daily verse, announcements, settings) as tiles on Home
 - [x] Push token registration (sending comes with announcements)
 - [ ] Create the Supabase project and run the migration
 - [ ] Try it end to end on a phone with two test churches
 
 ### Phase 1: The Pastor's voice
 
-- [ ] Flash announcements (Pastor only, expiry, push to the church)
-- [ ] Daily verse: Pastor types a reference, text fills in from a public-domain Bible; reflection; schedule ahead
-- [ ] Sermon videos: optional YouTube channel per church, or add videos by hand
-- [ ] Events and church calendar with RSVP, reminders, add to phone calendar
+- [x] Announcements: the Pastor, elders and admins post notices (optional expiry) that show on everyone's Home screen
+- [x] Announcement push notifications (sent when a leader posts, if they leave "Send a notification" on; needs an EAS project and a real phone)
+- [x] Daily verse: Pastor picks translation, book, chapter and verses (no typing or pasting; the save-daily-verse function fetches and stores the text); reflection; schedule ahead
+- [x] Sermons: leaders add a sermon with links to read it (for example on SermonCentral) and/or watch or listen; drafts, scripture, search. The app stores no sermon text, because SermonCentral has no API and its terms do not allow republishing
+- [x] Sermons from members and outside the church: members write articles (up to 8,000 characters) or share links to outside sermons; the Pastor approves or declines each before every member can see it. Pastor / Members / External filters (Pastor first), global search, and a tag on every sermon
+- [x] Church calendar: a shared Calendar tab; any member adds events, only the creator or a leader edits or deletes
+- [x] Calendar extras: Going / Maybe / Can't go with totals (names for the event's creator and leaders), a reminder on this phone, add to the phone's calendar, and date and time pickers on the event, verse and sermon forms
 
 ### Phase 2: Connection
 
-- [ ] Message the Pastor (private 1:1)
-- [ ] Message the elders (group inbox, or one elder)
-- [ ] Anonymous messages to the Pastor (no sender stored, day-only timestamps, unlinkable rate limit, optional reply code)
-- [ ] Prayer requests with visibility choices and "I prayed"
+- [x] Private messages: any member can message any other member, including the Pastor; live while the chat is open; only the two people can read it
+- [x] Church chat: a public room in its own Chat tab; every approved member reads and posts, authors and leaders remove messages; Members moved into More; unread badge on the Chat tab
+- [x] Message notifications: a push when a private message arrives, and when the elders write or reply; tapping opens the conversation (needs an EAS project and a real phone)
+- [x] Message the elders: a shared inbox; a member writes once, every leader can read and reply under their own name
+- [x] Anonymous messages to the Pastor: no sender stored, day-only dates, a daily limit kept apart from the messages, and an optional reply code
+- [x] Prayer requests: share with the church, leaders or the Pastor only; "I prayed" counts; authors mark them answered
 
 ### Phase 3: Engagement
 
-- [ ] Polls (single or multiple choice, results live or after closing)
-- [ ] Q&A (named or anonymous questions, public answers)
+- [x] Polls: any member starts one (single or multiple choice, optional closing time); votes are private; results show after you vote or when it closes
+- [x] Q&A: members ask (anonymous questions store nothing about the asker); a question is private to the Pastor until they answer it and choose who sees it: only them, the church leaders, or the whole church
 - [ ] Church photo album with elder approval
 
 ### Phase 4: Store release
 
-- [ ] EAS project, app icons and splash in MyChurch branding
+- [ ] EAS project, app icons and splash in MyChurch branding. Prepared: `eas.json` (preview and production profiles), placeholder icons and splash, steps in the README. Still needs: your Expo login and `eas init`, the app identifiers in `app.json`, Supabase settings in EAS, real artwork, and developer accounts
 - [ ] Optional "tap to sign in" link in the sign-in email alongside the code (needs universal links / app links on a domain we control)
-- [ ] Privacy policy and terms
-- [ ] Report content, account deletion (both stores require these)
+- [x] Privacy policy and terms: shown in the app (from the sign-in screen and More) and built as web pages in `docs/` for the store listings (`npm run build:legal`). Set `supportEmail` in `src/lib/legal.json` and have the text reviewed before publishing
+- [x] Report content: any member can report chat, private and elders messages, prayer requests, questions, polls, sermons, events and members; leaders review reports about members, and the app administrators review reports about leaders. Report only: no blocking yet (Apple may ask for it)
+- [x] Account deletion: More, Delete my account removes the account and its data; a church's only Pastor must hand over first
+- [ ] Block users (Apple's guidelines for apps with member-written content expect it)
 - [ ] App Store and Google Play listings
 
 ## Future builds

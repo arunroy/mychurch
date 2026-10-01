@@ -18,9 +18,18 @@ import { DEFAULT_ACCENT, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useChurch } from '@/lib/church';
 
-/** The active church's colour, used for buttons and highlights. */
+/** Fills buttons and selected chips (white text on top): the chosen theme's colour, or the church's own on the plain look. */
 export function useAccent() {
-  return useChurch().active?.church.accent_color ?? DEFAULT_ACCENT;
+  const theme = useTheme();
+  const churchColour = useChurch().active?.church.accent_color ?? DEFAULT_ACCENT;
+  return theme.accent ?? churchColour;
+}
+
+/** The same colour for text and icons on the background, adjusted to stay readable on the chosen theme. */
+export function useAccentText() {
+  const theme = useTheme();
+  const churchColour = useChurch().active?.church.accent_color ?? DEFAULT_ACCENT;
+  return theme.accentText ?? churchColour;
 }
 
 export function Screen({
@@ -35,7 +44,7 @@ export function Screen({
   const theme = useTheme();
   const inner = <View style={styles.content}>{children}</View>;
   return (
-    <SafeAreaView edges={edges} style={[styles.screen, { backgroundColor: theme.background }]}>
+    <SafeAreaView edges={edges} style={[styles.screen, { backgroundColor: theme.page }]}>
       {scroll ? (
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll}>
           {inner}
@@ -207,10 +216,39 @@ export function Avatar({ name, uri, color, size = 40 }: { name: string; uri?: st
   );
 }
 
+/** A small rounded toggle, used for choices such as a translation or how long something shows. */
+export function Chip({
+  label,
+  selected,
+  onPress,
+  wide,
+}: {
+  label: string;
+  selected?: boolean;
+  onPress: () => void;
+  wide?: boolean;
+}) {
+  const theme = useTheme();
+  const accent = useAccent();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: !!selected }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.chip,
+        wide ? styles.chipWide : null,
+        { backgroundColor: selected ? accent : theme.backgroundSelected, opacity: pressed ? 0.7 : 1 },
+      ]}>
+      <Text style={{ color: selected ? '#FFFFFF' : theme.text, fontSize: 15, fontWeight: selected ? 600 : 400 }}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export function Loading() {
   const theme = useTheme();
   return (
-    <View style={[styles.center, { backgroundColor: theme.background }]}>
+    <View style={[styles.center, { backgroundColor: theme.page }]}>
       <ActivityIndicator />
     </View>
   );
@@ -253,4 +291,6 @@ const styles = StyleSheet.create({
   rowText: { flex: 1, gap: 2 },
   chevron: { fontSize: 24 },
   avatar: { alignItems: 'center', justifyContent: 'center' },
+  chip: { minWidth: 44, minHeight: 40, borderRadius: 10, paddingHorizontal: Spacing.three, alignItems: 'center', justifyContent: 'center' },
+  chipWide: { minWidth: 64 },
 });

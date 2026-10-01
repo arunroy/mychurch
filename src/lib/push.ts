@@ -1,9 +1,49 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
+import { router } from 'expo-router';
+import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 
 import { supabase } from './supabase';
+
+// Show notifications that arrive while the app is open, instead of swallowing them.
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
+
+/**
+ * Opens the right screen when someone taps a notification: a private message, or an event reminder.
+ * Pass `enabled` once the person is signed in and inside a church, so the screen can open.
+ */
+export function useOpenNotificationTarget(enabled: boolean) {
+  const last = Notifications.useLastNotificationResponse();
+  const handled = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || !enabled || !last) return;
+    if (last.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) return;
+    const id = last.notification.request.identifier;
+    if (handled.current === id) return;
+    handled.current = id;
+
+    const data = last.notification.request.content.data as Record<string, unknown>;
+    if (data.type === 'message' && typeof data.conversation_id === 'string') {
+      router.push({ pathname: '/chat/[id]', params: { id: data.conversation_id } });
+    } else if (data.type === 'elders' && typeof data.thread_id === 'string') {
+      router.push({ pathname: '/elders/[id]', params: { id: data.thread_id } });
+    } else if (data.type === 'event' && typeof data.event_id === 'string') {
+      router.push({ pathname: '/event/[id]', params: { id: data.event_id } });
+    }
+  }, [last, enabled]);
+}
 
 /**
  * Asks for notification permission and saves this device's push token so the

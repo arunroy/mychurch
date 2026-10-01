@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, TextField, Title } from '@/components/ui';
+import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, TextField } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useUserId } from '@/lib/auth';
 import { ROLE_LABELS, useActiveChurch, usePermissions } from '@/lib/church';
@@ -39,15 +39,13 @@ export default function MembersScreen() {
         title={isMe ? `${memberName(member)} (you)` : memberName(member)}
         subtitle={member.role === 'member' ? undefined : ROLE_LABELS[member.role]}
         left={<Avatar name={memberName(member)} uri={publicUrl('avatars', member.profile?.avatar_path)} />}
-        onPress={isLeader && !isMe ? () => router.push(`/member/${member.user_id}`) : undefined}
+        onPress={!isMe ? () => router.push(`/member/${member.user_id}`) : undefined}
       />
     );
   }
 
   return (
-    <Screen edges={['top']}>
-      <Title>Members</Title>
-
+    <Screen edges={['bottom']}>
       {members.isPending ? <ActivityIndicator /> : null}
       <ErrorText>{error ?? (members.error ? friendlyError(members.error) : null)}</ErrorText>
 
