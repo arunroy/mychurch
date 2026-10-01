@@ -64,8 +64,10 @@
 
 - [ ] EAS project, app icons and splash in MyChurch branding
 - [ ] Optional "tap to sign in" link in the sign-in email alongside the code (needs universal links / app links on a domain we control)
-- [ ] Privacy policy and terms
-- [ ] Report content, account deletion (both stores require these)
+- [x] Privacy policy and terms: shown in the app (from the sign-in screen and More) and built as web pages in `docs/` for the store listings (`npm run build:legal`). Set `supportEmail` in `src/lib/legal.json` and have the text reviewed before publishing
+- [x] Report content: any member can report chat, private and elders messages, prayer requests, questions, polls, sermons, events and members; leaders review reports about members, and the app administrators review reports about leaders. Report only: no blocking yet (Apple may ask for it)
+- [x] Account deletion: More, Delete my account removes the account and its data; a church's only Pastor must hand over first
+- [ ] Block users (Apple's guidelines for apps with member-written content expect it)
 - [ ] App Store and Google Play listings
 
 ## Future builds

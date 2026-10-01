@@ -45,6 +45,7 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
+    "build:legal": "node scripts/build-legal.js",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",

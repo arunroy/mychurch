@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ReportButton } from '@/components/report-sheet';
 import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, useAccentText } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -116,6 +117,8 @@ function PollCard({ poll, userId }: { poll: PollSummary; userId: string }) {
           disabled={selected.length === 0 || sameSet(selected, poll.my_option_ids)}
         />
       ) : null}
+
+      {poll.creator_id !== userId ? <ReportButton type="poll" targetId={poll.id} /> : null}
 
       {canManage ? (
         <View style={styles.manage}>

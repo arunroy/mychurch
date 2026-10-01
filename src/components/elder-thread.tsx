@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ReportSheet } from '@/components/report-sheet';
 import { Button, ErrorText, useAccent } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -36,6 +37,7 @@ export function ElderThread({
   const markRead = useMarkElderRead(churchId);
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [reporting, setReporting] = useState<ElderMessage | null>(null);
 
   // A member opening their thread, or getting a new reply while it is open, counts as reading it.
   const newest = messages.data?.[0]?.id;
@@ -67,7 +69,12 @@ export function ElderThread({
   function renderMessage({ item }: { item: ElderMessage }) {
     const mine = item.sender_id === userId;
     return (
-      <View style={[styles.bubbleRow, mine ? styles.mine : styles.theirs]}>
+      <Pressable
+        disabled={mine}
+        onLongPress={() => setReporting(item)}
+        delayLongPress={350}
+        accessibilityHint={mine ? undefined : 'Press and hold to report'}
+        style={[styles.bubbleRow, mine ? styles.mine : styles.theirs]}>
         <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement }]}>
           {!mine ? <Text style={[styles.sender, { color: theme.textSecondary }]}>{item.sender_name || 'Church member'}</Text> : null}
           <Text selectable style={[styles.body, { color: mine ? '#FFFFFF' : theme.text }]}>
@@ -77,7 +84,7 @@ export function ElderThread({
             {messageTime(new Date(item.created_at))}
           </Text>
         </View>
-      </View>
+      </Pressable>
     );
   }
 
@@ -124,6 +131,7 @@ export function ElderThread({
           <Button title="Send" onPress={onSend} loading={busy} disabled={!text.trim()} style={styles.send} />
         </View>
       </KeyboardAvoidingView>
+      {reporting ? <ReportSheet visible onClose={() => setReporting(null)} type="elders_message" targetId={reporting.id} /> : null}
     </SafeAreaView>
   );
 }

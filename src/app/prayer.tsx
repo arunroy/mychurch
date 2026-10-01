@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { ReportButton } from '@/components/report-sheet';
 import { Avatar, Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useUserId } from '@/lib/auth';
@@ -86,6 +87,8 @@ function RequestCard({ request, userId }: { request: PrayerRequest; userId: stri
         loading={pray.isPending}
         onPress={() => run(() => pray.mutateAsync(request.id))}
       />
+
+      {!mine ? <ReportButton type="prayer_request" targetId={request.id} /> : null}
 
       {mine ? (
         <Button

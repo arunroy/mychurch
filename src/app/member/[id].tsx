@@ -1,6 +1,7 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
+import { ReportButton } from '@/components/report-sheet';
 import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, Title } from '@/components/ui';
 import { startConversation } from '@/lib/messages';
 import type { MemberRole } from '@/lib/database.types';
@@ -76,6 +77,7 @@ export default function MemberScreen() {
       <ErrorText>{error}</ErrorText>
 
       {member.status === 'approved' ? <Button title={`Message ${name}`} onPress={openChat} loading={opening} /> : null}
+      {member.status === 'approved' ? <ReportButton type="member" targetId={member.user_id} label="Report this member" /> : null}
 
       {canChangeRoles && member.status === 'approved' ? (
         <Card>

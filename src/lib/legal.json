@@ -1,0 +1,144 @@
+{
+  "appName": "MyChurch",
+  "supportEmail": "",
+  "updated": "1 October 2026",
+  "privacy": {
+    "title": "Privacy policy",
+    "intro": "MyChurch helps a church stay connected. Each church has its own space in the app, run by its Pastor and leaders. This page explains what we collect, who can see it, and the choices you have. Please read it before you use the app.",
+    "sections": [
+      {
+        "heading": "What we collect",
+        "body": [
+          "Your account: the email address you sign in with, the name you choose, and a profile photo if you add one.",
+          "Your church membership: which churches you belong to, your role (member, elder, admin or Pastor), and whether you choose to appear in the member directory.",
+          "What you write and do in the app: church chat messages, private messages, messages to the elders, prayer requests and the prayers you add, polls you start and your votes, questions, articles and links you share, events you add and your RSVPs, and your reports about content.",
+          "Notifications: if you allow them, a token that lets your phone receive notifications from the app.",
+          "We do not collect your location, your contacts or an advertising ID. Adding an event to your calendar is done by your phone's own screen when you ask for it."
+        ]
+      },
+      {
+        "heading": "Anonymous messages and questions",
+        "body": [
+          "When you write to the Pastor anonymously, or ask an anonymous question, nothing stored with the message or question says who you are, and only the day it was sent is kept, not the time.",
+          "To stop abuse, the app keeps a small count of how many anonymous messages and questions each person sent today. That count is not linked to any message or question. Anyone with direct access to the database could see that a person used the service on a given day, so anonymous means anonymous inside the app, to other members and to your church's leaders.",
+          "If you ask for a reply, you are given a code. Only a scrambled form of the code is stored, so we cannot recover it for you."
+        ]
+      },
+      {
+        "heading": "Who can see what",
+        "body": [
+          "Church chat, shared prayer requests, shared questions, polls and approved sermons can be seen by the approved members of your church.",
+          "Private messages can be read only by the two people in the conversation.",
+          "Messages to the elders can be read by you and by your church's leaders (the Pastor, elders and church admins).",
+          "Prayer requests marked for leaders, or for the Pastor only, can be read only by them. Questions go to the Pastor first, who decides whether they stay private, go to the leaders, or are shared with the whole church.",
+          "Articles and links that members submit for the Sermons section are seen only by their author and the Pastor until the Pastor approves them.",
+          "Your email address is never shown to other members. Your name and photo are visible to the people you share a church with, and you can choose to be left out of the member directory in your profile."
+        ]
+      },
+      {
+        "heading": "How we use it",
+        "body": [
+          "We use your information to run the app: signing you in, showing your church's content, delivering messages and notifications, and keeping the app safe by reviewing reports.",
+          "We do not show advertising, we do not sell your information, and we do not use it to track you across other apps or sites."
+        ]
+      },
+      {
+        "heading": "Who we share it with",
+        "body": [
+          "Hosting and database: our service provider stores the app's data and sends the sign-in emails.",
+          "Notifications: push notifications are delivered through Expo and through Apple or Google.",
+          "We may disclose information if the law requires it, or to protect people from serious harm."
+        ]
+      },
+      {
+        "heading": "Keeping and deleting your information",
+        "body": [
+          "You can delete your account at any time in the app: More, then Delete my account.",
+          "Deleting your account removes your profile and photo, your church memberships, your messages and private conversations (the other person also loses those conversations), your chat messages, prayer requests and prayers, polls and votes, RSVPs, the articles and links you submitted, and your notification tokens.",
+          "Some things belong to the church rather than to you and stay, without your name: events and daily verses you added, and answers you gave as a leader. Anonymous messages and questions cannot be linked to you, so they stay.",
+          "Backups may keep deleted information for a short time before it is removed for good.",
+          "If you are the only Pastor of a church, you need to make someone else Pastor before you can delete your account."
+        ]
+      },
+      {
+        "heading": "Reporting and safety",
+        "body": [
+          "You can report content that is abusive, harassing, spam or otherwise inappropriate. Reports are reviewed by your church's leaders. A report about a leader goes to the app's administrators instead.",
+          "A report keeps a short copy of the reported text so that it can be reviewed even if it is later deleted. Church leaders can remove content and members from their church."
+        ]
+      },
+      {
+        "heading": "Children",
+        "body": [
+          "MyChurch is not for children under 13, and we do not knowingly collect their information. If you believe a child under 13 has an account, please contact us and we will remove it. Young people between 13 and 17 should use the app with the knowledge of a parent or guardian."
+        ]
+      },
+      {
+        "heading": "Your choices",
+        "body": [
+          "You can change your name and photo, and leave the member directory, in your profile.",
+          "You can turn notifications off in your phone's settings.",
+          "You can ask what we hold about you, or ask us to correct it, by contacting us."
+        ]
+      },
+      {
+        "heading": "Changes to this policy",
+        "body": [
+          "If we change this policy we will update the date at the top of this page. If a change is important, we will tell you in the app."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "title": "Terms of use",
+    "intro": "These terms apply when you use MyChurch. By signing in you agree to them and to the privacy policy.",
+    "sections": [
+      {
+        "heading": "Using the app",
+        "body": [
+          "You must be at least 13 years old. Use your real name so your church family knows who you are, keep your sign-in email secure, and do not share your account.",
+          "Each church sets its own community. A church's leaders decide who is approved to join, and they can remove a member."
+        ]
+      },
+      {
+        "heading": "What you post",
+        "body": [
+          "You are responsible for what you write and share. You keep ownership of it, and you allow the app to show it to the people you share it with in your church.",
+          "Do not post anything that is hateful, harassing, threatening, sexually explicit, or illegal, that bullies or targets a person, or that shares private information about someone without their permission.",
+          "Only share articles and sermons you wrote yourself or have permission to share. For sermons by other people, share a link to the original rather than copying their text."
+        ]
+      },
+      {
+        "heading": "Moderation",
+        "body": [
+          "Church leaders can remove content and members in their church. The Pastor reviews articles and outside sermon links before other members can see them, and can decline them.",
+          "You can report content you think breaks these terms. We may remove content, or suspend or remove accounts, that do."
+        ]
+      },
+      {
+        "heading": "Anonymous features",
+        "body": [
+          "Anonymous messages and questions are for honest questions, concerns and care. They are limited each day, and they must still follow these terms. Leaders can remove an anonymous question, but because nothing says who wrote it, they cannot tell who it was."
+        ]
+      },
+      {
+        "heading": "Ending your account",
+        "body": [
+          "You can delete your account at any time from More, then Delete my account. We or your church's leaders may also end an account that breaks these terms."
+        ]
+      },
+      {
+        "heading": "No guarantees",
+        "body": [
+          "The app is provided as it is. We work to keep it available and safe, but we cannot promise it will always work or be free from errors, and we are not responsible for what members post. To the extent the law allows, our liability for use of the app is limited."
+        ]
+      },
+      {
+        "heading": "Changes",
+        "body": [
+          "We may update these terms. The date at the top shows the latest version, and using the app after a change means you accept it."
+        ]
+      }
+    ]
+  }
+}

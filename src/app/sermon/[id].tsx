@@ -3,6 +3,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 
 import { SourceTag } from '@/components/sermon-tag';
+import { ReportButton } from '@/components/report-sheet';
 import { Body, Button, Card, ErrorText, Heading, Loading, Screen, TextField, Title } from '@/components/ui';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
@@ -127,6 +128,8 @@ export default function SermonScreen() {
           <Body muted>{`Opens ${linkSite(item.media_url)}`}</Body>
         </>
       ) : null}
+
+      {!official && !item.is_mine && !isPastor && item.status === 'approved' ? <ReportButton type="sermon" targetId={item.id} /> : null}
 
       {isPastor && !official && item.status === 'pending' ? (
         <Card>

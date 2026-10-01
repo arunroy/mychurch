@@ -1,8 +1,9 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ReportSheet } from '@/components/report-sheet';
 import { Button, ErrorText, useAccent } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -30,6 +31,7 @@ function Chat({ userId }: { userId: string }) {
   const send = useSendMessage(id, userId);
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [reporting, setReporting] = useState<Message | null>(null);
 
   const partner = conversations.data?.find((c) => c.id === id)?.other_name || name || 'Chat';
 
@@ -48,7 +50,12 @@ function Chat({ userId }: { userId: string }) {
   function renderMessage({ item }: { item: Message }) {
     const mine = item.sender_id === userId;
     return (
-      <View style={[styles.bubbleRow, mine ? styles.mine : styles.theirs]}>
+      <Pressable
+        disabled={mine}
+        onLongPress={() => setReporting(item)}
+        delayLongPress={350}
+        accessibilityHint={mine ? undefined : 'Press and hold to report'}
+        style={[styles.bubbleRow, mine ? styles.mine : styles.theirs]}>
         <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement }]}>
           <Text selectable style={[styles.body, { color: mine ? '#FFFFFF' : theme.text }]}>
             {item.body}
@@ -57,7 +64,7 @@ function Chat({ userId }: { userId: string }) {
             {messageTime(new Date(item.created_at))}
           </Text>
         </View>
-      </View>
+      </Pressable>
     );
   }
 
@@ -106,6 +113,7 @@ function Chat({ userId }: { userId: string }) {
           <Button title="Send" onPress={onSend} loading={send.isPending} disabled={!text.trim()} style={styles.send} />
         </View>
       </KeyboardAvoidingView>
+      {reporting ? <ReportSheet visible onClose={() => setReporting(null)} type="private_message" targetId={reporting.id} /> : null}
     </SafeAreaView>
   );
 }

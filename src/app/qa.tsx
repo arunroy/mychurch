@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { ReportButton } from '@/components/report-sheet';
 import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Loading, Screen, TextField, ToggleRow } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useActiveChurch, usePermissions } from '@/lib/church';
@@ -189,6 +190,8 @@ function QuestionCard({ question }: { question: Question }) {
           {question.answer && !editing ? <Button title="Edit the answer" variant="secondary" onPress={() => setEditing(true)} /> : null}
         </>
       ) : null}
+
+      {!question.is_mine && !isPastor ? <ReportButton type="question" targetId={question.id} /> : null}
 
       {canRemove ? (
         <Button

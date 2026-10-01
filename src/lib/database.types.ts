@@ -106,6 +106,35 @@ export type Message = {
   created_at: string;
 };
 
+export type ReportTargetType =
+  | 'chat_message'
+  | 'private_message'
+  | 'elders_message'
+  | 'prayer_request'
+  | 'question'
+  | 'poll'
+  | 'sermon'
+  | 'event'
+  | 'member';
+
+export type ReportReason = 'inappropriate' | 'harassment' | 'spam' | 'other';
+
+/** A report as a reviewer sees it. `excerpt` is a short copy of the reported text. */
+export type ReportItem = {
+  id: string;
+  target_type: ReportTargetType;
+  target_id: string;
+  reason: ReportReason;
+  details: string;
+  excerpt: string;
+  reporter_name: string | null;
+  author_name: string | null;
+  status: 'open' | 'resolved' | 'dismissed';
+  resolution_note: string | null;
+  created_at: string;
+  church_name: string;
+};
+
 export type SermonSource = 'pastor' | 'member' | 'external';
 export type SermonStatus = 'pending' | 'approved' | 'declined';
 
@@ -447,6 +476,13 @@ export type Database = {
       is_platform_admin: { Args: Record<string, never>; Returns: boolean };
       start_conversation: { Args: { p_church: string; p_other: string }; Returns: string };
       mark_conversation_read: { Args: { p_conversation: string }; Returns: undefined };
+      report_content: {
+        Args: { p_church: string; p_type: ReportTargetType; p_target: string; p_reason: ReportReason; p_details?: string };
+        Returns: undefined;
+      };
+      report_queue: { Args: { p_church: string }; Returns: ReportItem[] };
+      platform_report_queue: { Args: Record<string, never>; Returns: ReportItem[] };
+      resolve_report: { Args: { p_report: string; p_dismiss: boolean; p_note?: string | null }; Returns: undefined };
       submit_sermon: {
         Args: {
           p_church: string;

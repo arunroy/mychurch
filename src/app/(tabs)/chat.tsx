@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ReportSheet } from '@/components/report-sheet';
 import { Avatar, Button, ErrorText, Title, useAccent, useAccentText } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -34,6 +35,7 @@ function ChurchChat({ userId }: { userId: string }) {
   const markRead = useMarkChatRead(church_id);
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [reporting, setReporting] = useState<ChatPost | null>(null);
   const tabBarHeight = useTabBarHeight();
 
   // Looking at the chat counts as reading it: when the tab opens, and for each new message while it's open.
@@ -76,9 +78,9 @@ function ChurchChat({ userId }: { userId: string }) {
     const startsRun = previous?.sender_id !== item.sender_id;
     return (
       <Pressable
-        onLongPress={() => onRemove(item)}
+        onLongPress={() => (mine ? onRemove(item) : setReporting(item))}
         delayLongPress={350}
-        accessibilityHint={mine || isLeader ? 'Press and hold to remove' : undefined}
+        accessibilityHint={mine ? 'Press and hold to remove' : 'Press and hold to report'}
         style={[styles.bubbleRow, mine ? styles.mine : styles.theirs, { marginTop: startsRun ? Spacing.two : 0 }]}>
         {!mine ? (
           <View style={styles.avatarSlot}>
@@ -145,6 +147,15 @@ function ChurchChat({ userId }: { userId: string }) {
           <Button title="Send" onPress={onSend} loading={post.isPending} disabled={!text.trim()} style={styles.send} />
         </View>
       </KeyboardAvoidingView>
+      {reporting ? (
+        <ReportSheet
+          visible
+          onClose={() => setReporting(null)}
+          type="chat_message"
+          targetId={reporting.id}
+          onRemove={isLeader ? () => onRemove(reporting) : undefined}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

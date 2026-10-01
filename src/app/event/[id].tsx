@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
 import { EventExtras } from '@/components/event-extras';
+import { ReportButton } from '@/components/report-sheet';
 import { Body, Button, Card, ErrorText, Heading, Loading, Screen, Title } from '@/components/ui';
 import { useUserId } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
@@ -63,6 +64,8 @@ export default function EventScreen() {
       <EventExtras event={item} />
 
       <Body muted>{item.creator?.full_name ? `Added by ${item.creator.full_name}` : 'Added by a church member'}</Body>
+
+      {item.created_by !== userId ? <ReportButton type="event" targetId={item.id} /> : null}
 
       {canManage ? (
         <>

@@ -97,6 +97,9 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
+      <Stack.Screen name="privacy" options={{ title: 'Privacy policy' }} />
+      <Stack.Screen name="terms" options={{ title: 'Terms of use' }} />
+
       <Stack.Protected guard={!isConfigured}>
         <Stack.Screen name="setup-needed" options={{ headerShown: false }} />
       </Stack.Protected>
@@ -129,6 +132,7 @@ function RootNavigator() {
         <Stack.Screen name="anonymous" options={{ title: 'Write anonymously' }} />
         <Stack.Screen name="anonymous-inbox" options={{ title: 'Anonymous inbox' }} />
         <Stack.Screen name="qa" options={{ title: 'Questions & answers' }} />
+        <Stack.Screen name="reports" options={{ title: 'Reports' }} />
         <Stack.Screen name="sermons" options={{ title: 'Sermons' }} />
         <Stack.Screen name="sermon/[id]" options={{ title: 'Sermon' }} />
         <Stack.Screen name="sermon-write" options={{ title: 'Write an article' }} />
@@ -147,6 +151,7 @@ function RootNavigator() {
       </Stack.Protected>
 
       <Stack.Protected guard={onboarded}>
+        <Stack.Screen name="delete-account" options={{ title: 'Delete account' }} />
         <Stack.Screen name="join" options={{ title: 'Join a church' }} />
         <Stack.Screen name="register" options={{ title: 'Register a church' }} />
         <Stack.Screen name="switch-church" options={{ title: 'Your churches', presentation: 'modal' }} />

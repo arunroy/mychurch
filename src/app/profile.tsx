@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { router } from 'expo-router';
 import { Avatar, Body, Button, Card, ErrorText, Screen, TextField, ToggleRow } from '@/components/ui';
 import { useProfile, useUserId } from '@/lib/auth';
 import { useActiveChurch, useChurch } from '@/lib/church';
@@ -93,6 +94,8 @@ export default function ProfileScreen() {
 
       <ErrorText>{error}</ErrorText>
       <Body muted>Your email is never shown to other members.</Body>
+
+      <Button title="Delete my account" variant="danger" onPress={() => router.push('/delete-account')} />
     </Screen>
   );
 }

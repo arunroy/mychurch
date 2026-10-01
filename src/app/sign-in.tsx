@@ -1,11 +1,14 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
 
 import { Body, Button, ErrorText, Screen, TextField, Title } from '@/components/ui';
+import { useTheme } from '@/hooks/use-theme';
 import { sendSignInCode, verifySignInCode } from '@/lib/auth';
 import { friendlyError } from '@/lib/supabase';
 
 export default function SignInScreen() {
+  const theme = useTheme();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
@@ -90,9 +93,25 @@ export default function SignInScreen() {
             />
           </>
         )}
+
+        <Text style={[styles.legal, { color: theme.textSecondary }]}>
+          {'By continuing you agree to the '}
+          <Text style={[styles.link, { color: theme.text }]} accessibilityRole="link" onPress={() => router.push('/terms')}>
+            Terms of use
+          </Text>
+          {' and the '}
+          <Text style={[styles.link, { color: theme.text }]} accessibilityRole="link" onPress={() => router.push('/privacy')}>
+            Privacy policy
+          </Text>
+          .
+        </Text>
       </Screen>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({ flex: { flex: 1 } });
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  legal: { fontSize: 14, lineHeight: 20 },
+  link: { textDecorationLine: 'underline', fontWeight: 600 },
+});

@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { Linking } from 'react-native';
 
 import { ThemeSettingsCard } from '@/components/theme-settings-card';
 import { InviteCard } from '@/components/invite-card';
@@ -6,6 +7,7 @@ import { Avatar, Card, Row, Screen, Title } from '@/components/ui';
 import { signOut, useIsPlatformAdmin, useProfile } from '@/lib/auth';
 import { ROLE_LABELS, useActiveChurch, useChurch } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
+import { SUPPORT_EMAIL } from '@/lib/legal';
 import { publicUrl } from '@/lib/supabase';
 
 // Your profile, theme settings and account. Church features (members, prayer, polls and so on) live on Home.
@@ -43,6 +45,13 @@ export default function MoreScreen() {
       </Card>
 
       <Card>
+        <Row title="Privacy policy" onPress={() => router.push('/privacy')} />
+        <Row title="Terms of use" onPress={() => router.push('/terms')} />
+        {SUPPORT_EMAIL ? <Row title="Contact us" subtitle={SUPPORT_EMAIL} onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)} /> : null}
+      </Card>
+
+      <Card>
+        <Row title="Delete my account" subtitle="Permanently remove your account and data" onPress={() => router.push('/delete-account')} />
         <Row title="Sign out" onPress={() => confirm('Sign out?', 'You can sign back in with your email any time.', 'Sign out', signOut)} />
       </Card>
     </Screen>

@@ -73,6 +73,12 @@ Push notifications don't work in Expo Go on Android, or anywhere until the app h
 
 A church always keeps at least one Pastor.
 
+## Store release
+
+- **Privacy policy and terms** live in `src/lib/legal.json`. The app shows them, and `npm run build:legal` turns the same text into web pages in `docs/` (publish that folder, for example with GitHub Pages, and give the store listings the address of `docs/privacy.html`). Set `supportEmail` in that file before publishing. The text is a starting point; have it reviewed.
+- **Reporting** uses the `content_reports` table and functions (migration `20261010000000_content_reports.sql`). Church leaders review reports about members in the Reports tile on Home; reports about leaders go to platform admins.
+- **Account deletion** is the `delete-account` edge function. Deploy it with `npx supabase functions deploy delete-account --project-ref <ref>`.
+
 ## Checks
 
 ```bash
