@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
+import { DateField } from '@/components/date-time-fields';
 import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, TextField } from '@/components/ui';
 import { PassagePreview, toPassage, usePassagePreview, VersePicker, type PassageDraft } from '@/components/verse-picker';
 import { findBook, findTranslation } from '@/lib/bible-books';
@@ -110,17 +111,7 @@ function VerseForm({
 
       <Card>
         <Heading>Day</Heading>
-        <TextField
-          label="Date"
-          value={dateText}
-          onChangeText={changeDate}
-          placeholder="YYYY-MM-DD"
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
-          hint={dateOk ? formatDay(dateText) : 'Use the form 2026-09-30.'}
-        />
+        <DateField label="Date" value={dateText} onChange={changeDate} hint={dateOk ? formatDay(dateText) : 'Choose the date.'} />
         {existing ? <Body muted>This day already has a verse. Saving replaces it.</Body> : null}
       </Card>
 

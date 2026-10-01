@@ -10,7 +10,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth, useProfile } from '@/lib/auth';
 import { ChurchProvider, useChurch } from '@/lib/church';
 import { useRememberInviteLinks } from '@/lib/invite';
-import { registerForPushNotifications } from '@/lib/push';
+import { registerForPushNotifications, useOpenNotificationTarget } from '@/lib/push';
 import { isConfigured } from '@/lib/supabase';
 import { ThemePreferenceProvider, useThemePreference } from '@/lib/theme-preference';
 
@@ -89,6 +89,8 @@ function RootNavigator() {
     if (session?.user.id) registerForPushNotifications(session.user.id).catch(() => {});
   }, [session?.user.id]);
 
+  useOpenNotificationTarget(onboarded && state === 'ready');
+
   // Keep the splash screen up until we know where the person belongs. Rendering the
   // navigator earlier would send an opened link (like an invite) to the wrong screen.
   if (loading) return null;
@@ -122,6 +124,11 @@ function RootNavigator() {
         <Stack.Screen name="member/[id]" options={{ title: 'Member' }} />
         <Stack.Screen name="polls" options={{ title: 'Polls' }} />
         <Stack.Screen name="poll-new" options={{ title: 'New poll' }} />
+        <Stack.Screen name="elders/index" options={{ title: 'The elders' }} />
+        <Stack.Screen name="elders/[id]" options={{ title: 'Elders' }} />
+        <Stack.Screen name="anonymous" options={{ title: 'Write anonymously' }} />
+        <Stack.Screen name="anonymous-inbox" options={{ title: 'Anonymous inbox' }} />
+        <Stack.Screen name="qa" options={{ title: 'Questions & answers' }} />
         <Stack.Screen name="sermons" options={{ title: 'Sermons' }} />
         <Stack.Screen name="sermon/[id]" options={{ title: 'Sermon' }} />
         <Stack.Screen name="sermon-edit" options={{ title: 'Sermon' }} />

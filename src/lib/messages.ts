@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tansta
 import { useEffect } from 'react';
 
 import type { ConversationSummary, Message, Messageable } from './database.types';
+import { callFunction } from './functions';
 import { supabase } from './supabase';
 
 /** Newest first, so an inverted list shows the latest message at the bottom. */
@@ -127,7 +128,11 @@ export function useSendMessage(conversationId: string, userId: string) {
       if (error) throw error;
       return data;
     },
-    onSuccess: (message) => addMessage(queryClient, conversationId, message),
+    onSuccess: (message) => {
+      addMessage(queryClient, conversationId, message);
+      // Tell the other person's phone. A failed push never affects the message itself.
+      callFunction('notify-message', { kind: 'direct', message_id: message.id }).catch(() => {});
+    },
   });
 }
 

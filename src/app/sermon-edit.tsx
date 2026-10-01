@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { DateField } from '@/components/date-time-fields';
 import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, TextField, ToggleRow } from '@/components/ui';
 import { VersePicker, type PassageDraft } from '@/components/verse-picker';
 import { Spacing } from '@/constants/theme';
@@ -110,17 +111,7 @@ function SermonForm({ existing }: { existing: Sermon | null }) {
         <Heading>Sermon</Heading>
         <TextField label="Title" value={title} onChangeText={setTitle} maxLength={150} />
         <TextField label="Speaker (optional)" value={speaker} onChangeText={setSpeaker} maxLength={100} autoCapitalize="words" />
-        <TextField
-          label="Date"
-          value={dateText}
-          onChangeText={setDateText}
-          placeholder="YYYY-MM-DD"
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
-          hint={dateOk ? formatDay(dateText) : 'Use the form 2026-10-04.'}
-        />
+        <DateField label="Date" value={dateText} onChange={setDateText} hint={dateOk ? formatDay(dateText) : 'Choose the date.'} />
       </Card>
 
       <Card>

@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { DateField, TimeField } from '@/components/date-time-fields';
 import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, TextField } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useUserId } from '@/lib/auth';
@@ -10,7 +11,6 @@ import {
   addDays,
   combineDateTime,
   dateKey,
-  formatDay,
   isValidDateKey,
   isValidTime,
   thisSunday,
@@ -114,17 +114,7 @@ function EventForm({ existing }: { existing: EventWithCreator | null }) {
 
       <Card>
         <Heading>When</Heading>
-        <TextField
-          label="Date"
-          value={date}
-          onChangeText={setDate}
-          placeholder="YYYY-MM-DD"
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
-          hint={dateOk ? formatDay(date) : 'Use the form 2026-09-30.'}
-        />
+        <DateField label="Date" value={date} onChange={setDate} />
         <View style={styles.shortcuts}>
           {shortcuts.map((shortcut) => (
             <Button
@@ -138,36 +128,20 @@ function EventForm({ existing }: { existing: EventWithCreator | null }) {
         </View>
         <View style={styles.times}>
           <View style={styles.time}>
-            <TextField
-              label="Starts"
-              value={startTime}
-              onChangeText={setStartTime}
-              placeholder="18:30"
-              autoCorrect={false}
-              keyboardType="numbers-and-punctuation"
-              maxLength={5}
-            />
+            <TimeField label="Starts" value={startTime} onChange={setStartTime} />
           </View>
           <View style={styles.time}>
-            <TextField
-              label="Ends (optional)"
-              value={endTime}
-              onChangeText={setEndTime}
-              placeholder="20:00"
-              autoCorrect={false}
-              keyboardType="numbers-and-punctuation"
-              maxLength={5}
-            />
+            <TimeField label="Ends" value={endTime} onChange={setEndTime} optional />
           </View>
         </View>
         <Body muted>
-          {!startOk && startTime
-            ? 'Type the time on a 24-hour clock, like 18:30.'
-            : !endOk
-              ? 'Type the end time like 20:00, or leave it blank.'
+          {!dateOk
+            ? 'Choose the date.'
+            : !startOk
+              ? 'Choose when it starts. The end time is optional.'
               : !endAfterStart
                 ? 'The end has to be after the start.'
-                : 'Times are on a 24-hour clock, like 18:30.'}
+                : 'The end time is optional.'}
         </Body>
       </Card>
 

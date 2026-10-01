@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
+import { EventExtras } from '@/components/event-extras';
 import { Body, Button, Card, ErrorText, Heading, Loading, Screen, Title } from '@/components/ui';
 import { useUserId } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
@@ -58,6 +59,8 @@ export default function EventScreen() {
           <Body>{item.description}</Body>
         </Card>
       ) : null}
+
+      <EventExtras event={item} />
 
       <Body muted>{item.creator?.full_name ? `Added by ${item.creator.full_name}` : 'Added by a church member'}</Body>
 

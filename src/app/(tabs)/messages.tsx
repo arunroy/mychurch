@@ -4,8 +4,10 @@ import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { Avatar, Body, Button, Card, ErrorText, Row, Screen, Title } from '@/components/ui';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserId } from '@/lib/auth';
-import { useActiveChurch } from '@/lib/church';
+import { useAnonymousBadge } from '@/lib/anonymous';
+import { useActiveChurch, usePermissions } from '@/lib/church';
 import { messageTime } from '@/lib/dates';
+import { useEldersBadge } from '@/lib/elders';
 import { useConversations } from '@/lib/messages';
 import { friendlyError, publicUrl } from '@/lib/supabase';
 
@@ -15,10 +17,40 @@ export default function MessagesScreen() {
   const userId = useUserId();
   const theme = useTheme();
   const conversations = useConversations(church_id);
+  const { isLeader, isPastor } = usePermissions();
+  const anonymousBadge = useAnonymousBadge(church_id, isPastor);
+  const eldersBadge = useEldersBadge(church_id, isLeader);
 
   return (
     <Screen edges={['top']}>
       <Title>Messages</Title>
+
+      <Card>
+        <Row
+          title={isLeader ? 'Elders inbox' : 'Message the elders'}
+          subtitle={
+            isLeader
+              ? eldersBadge > 0
+                ? `${eldersBadge} waiting for a reply`
+                : 'What members have written to the elders'
+              : eldersBadge > 0
+                ? 'You have a new reply'
+                : 'Every church leader can read and reply'
+          }
+          right={eldersBadge > 0 ? <Text accessibilityLabel="New" style={styles.dot}>●</Text> : undefined}
+          onPress={() => router.push('/elders')}
+        />
+        {isPastor ? (
+          <Row
+            title="Anonymous inbox"
+            subtitle={anonymousBadge > 0 ? `${anonymousBadge} unread` : 'Messages nobody can trace to a person'}
+            right={anonymousBadge > 0 ? <Text accessibilityLabel="Unread" style={styles.dot}>●</Text> : undefined}
+            onPress={() => router.push('/anonymous-inbox')}
+          />
+        ) : (
+          <Row title="Message the Pastor anonymously" subtitle="Your name is not saved" onPress={() => router.push('/anonymous')} />
+        )}
+      </Card>
 
       <Button title="New message" onPress={() => router.push('/new-message')} />
 

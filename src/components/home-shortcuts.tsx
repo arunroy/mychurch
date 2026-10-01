@@ -7,11 +7,12 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useMembers } from '@/lib/members';
+import { useUnansweredCount } from '@/lib/qa';
 
 type Shortcut = {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
-  path: '/members' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
+  path: '/members' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
   badge?: number;
   show: boolean;
 };
@@ -22,10 +23,12 @@ export function HomeShortcuts() {
   const { isLeader, isPastor, canEditChurch } = usePermissions();
   const members = useMembers(church_id);
   const pending = isLeader ? (members.data?.filter((m) => m.status === 'pending').length ?? 0) : 0;
+  const unanswered = useUnansweredCount(church_id, isPastor);
 
   const shortcuts: Shortcut[] = [
     { label: 'Members', icon: 'people', path: '/members', badge: pending, show: true },
     { label: 'Sermons', icon: 'mic', path: '/sermons', show: true },
+    { label: 'Questions & answers', icon: 'help-circle', path: '/qa', badge: unanswered, show: true },
     { label: 'Prayer requests', icon: 'heart', path: '/prayer', show: true },
     { label: 'Polls', icon: 'stats-chart', path: '/polls', show: true },
     { label: 'Daily verse', icon: 'book', path: '/daily-verse', show: isPastor },

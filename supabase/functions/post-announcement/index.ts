@@ -5,6 +5,8 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
+import { sendPush, type PushMessage } from '../_shared/expo-push.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -15,51 +17,6 @@ function reply(status: number, body: Record<string, unknown>) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
-}
-
-const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
-const BATCH = 100; // Expo accepts up to 100 messages per request.
-
-type PushMessage = {
-  to: string;
-  title: string;
-  body: string;
-  sound: 'default';
-  channelId: 'default';
-  data: Record<string, unknown>;
-};
-
-/** Sends the messages and returns how many were accepted, plus tokens Expo says no longer exist. */
-async function sendPush(messages: PushMessage[]) {
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  };
-  const accessToken = Deno.env.get('EXPO_ACCESS_TOKEN');
-  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
-
-  let accepted = 0;
-  const dead: string[] = [];
-  for (let i = 0; i < messages.length; i += BATCH) {
-    const batch = messages.slice(i, i + BATCH);
-    try {
-      const response = await fetch(EXPO_PUSH_URL, { method: 'POST', headers, body: JSON.stringify(batch) });
-      if (!response.ok) {
-        console.error('expo push failed', response.status, await response.text());
-        continue;
-      }
-      const { data } = (await response.json()) as {
-        data?: { status: string; details?: { error?: string } }[];
-      };
-      data?.forEach((ticket, index) => {
-        if (ticket.status === 'ok') accepted += 1;
-        else if (ticket.details?.error === 'DeviceNotRegistered') dead.push(batch[index].to);
-      });
-    } catch (e) {
-      console.error('expo push error', e);
-    }
-  }
-  return { accepted, dead };
 }
 
 Deno.serve(async (request) => {

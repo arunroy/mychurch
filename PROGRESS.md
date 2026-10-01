@@ -42,21 +42,21 @@
 - [x] Daily verse: Pastor picks translation, book, chapter and verses (no typing or pasting; the save-daily-verse function fetches and stores the text); reflection; schedule ahead
 - [x] Sermons: leaders add a sermon with links to read it (for example on SermonCentral) and/or watch or listen; drafts, scripture, search. The app stores no sermon text, because SermonCentral has no API and its terms do not allow republishing
 - [x] Church calendar: a shared Calendar tab; any member adds events, only the creator or a leader edits or deletes
-- [ ] Calendar extras: RSVP, reminders, add to phone calendar, date and time pickers
+- [x] Calendar extras: Going / Maybe / Can't go with totals (names for the event's creator and leaders), a reminder on this phone, add to the phone's calendar, and date and time pickers on the event, verse and sermon forms
 
 ### Phase 2: Connection
 
 - [x] Private messages: any member can message any other member, including the Pastor; live while the chat is open; only the two people can read it
 - [x] Church chat: a public room in its own Chat tab; every approved member reads and posts, authors and leaders remove messages; Members moved into More; unread badge on the Chat tab
-- [ ] Message notifications (push when a message arrives while the app is closed)
-- [ ] Message the elders (group inbox, or one elder)
-- [ ] Anonymous messages to the Pastor (no sender stored, day-only timestamps, unlinkable rate limit, optional reply code)
+- [x] Message notifications: a push when a private message arrives, and when the elders write or reply; tapping opens the conversation (needs an EAS project and a real phone)
+- [x] Message the elders: a shared inbox; a member writes once, every leader can read and reply under their own name
+- [x] Anonymous messages to the Pastor: no sender stored, day-only dates, a daily limit kept apart from the messages, and an optional reply code
 - [x] Prayer requests: share with the church, leaders or the Pastor only; "I prayed" counts; authors mark them answered
 
 ### Phase 3: Engagement
 
 - [x] Polls: any member starts one (single or multiple choice, optional closing time); votes are private; results show after you vote or when it closes
-- [ ] Q&A (named or anonymous questions, public answers)
+- [x] Q&A: members ask (anonymous questions store nothing about the asker); a question is private to the Pastor until they answer it and choose who sees it: only them, the church leaders, or the whole church
 - [ ] Church photo album with elder approval
 
 ### Phase 4: Store release

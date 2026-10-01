@@ -40,7 +40,14 @@
           "cameraPermission": false
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "MyChurch can add church events to your calendar when you ask it to."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

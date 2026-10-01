@@ -129,6 +129,83 @@ export type Sermon = {
   updated_at: string;
 };
 
+export type QuestionVisibility = 'pastor' | 'leaders' | 'church';
+
+export type Question = {
+  id: string;
+  body: string;
+  /** Null for an anonymous question. */
+  asker_name: string | null;
+  /** The viewer asked this (named) question, so they can take it down. */
+  is_mine: boolean;
+  /** Rounded to the day for anonymous questions. */
+  asked_at: string;
+  answer: string | null;
+  answered_by_name: string | null;
+  answered_at: string | null;
+  /** Who can see it: only the Pastor (and the asker of a named question), the church leaders, or everyone. */
+  visibility: QuestionVisibility;
+};
+
+export type AnonymousInboxItem = {
+  id: string;
+  body: string;
+  /** A date only, never a time. */
+  sent_on: string;
+  /** The sender asked for a reply, so they hold a code. */
+  can_reply: boolean;
+  is_read: boolean;
+  reply: string | null;
+  replied_on: string | null;
+};
+
+export type AnonymousReplyCheck = {
+  found: boolean;
+  body: string | null;
+  reply: string | null;
+  replied_on: string | null;
+};
+
+export type MyElderThread = {
+  thread_id: string;
+  last_message_at: string | null;
+  /** The elders have replied since the member last opened the thread. */
+  unread: boolean;
+};
+
+export type ElderInboxItem = {
+  thread_id: string;
+  member_id: string;
+  member_name: string;
+  member_avatar_path: string | null;
+  last_message_at: string;
+  last_message_preview: string;
+  last_sender_id: string | null;
+  /** The member wrote last and no leader has answered yet. */
+  needs_reply: boolean;
+};
+
+export type ElderMessage = {
+  id: string;
+  sender_id: string;
+  sender_name: string;
+  body: string;
+  created_at: string;
+  from_member: boolean;
+};
+
+export type RsvpStatus = 'going' | 'maybe' | 'no';
+
+export type RsvpSummary = {
+  going: number;
+  maybe: number;
+  declined: number;
+  /** The caller's own answer, or null if they haven't answered. */
+  my_status: RsvpStatus | null;
+  /** Who answered what. Only the event's creator and church leaders get this; everyone else gets null. */
+  people: { name: string; status: RsvpStatus }[] | null;
+};
+
 export type Announcement = {
   id: string;
   church_id: string;
@@ -319,6 +396,25 @@ export type Database = {
       is_platform_admin: { Args: Record<string, never>; Returns: boolean };
       start_conversation: { Args: { p_church: string; p_other: string }; Returns: string };
       mark_conversation_read: { Args: { p_conversation: string }; Returns: undefined };
+      ask_question: { Args: { p_church: string; p_body: string; p_anonymous?: boolean }; Returns: undefined };
+      qa_feed: { Args: { p_church: string }; Returns: Question[] };
+      set_question_visibility: { Args: { p_question: string; p_visibility: QuestionVisibility }; Returns: undefined };
+      answer_question: { Args: { p_question: string; p_answer: string }; Returns: undefined };
+      delete_question: { Args: { p_question: string }; Returns: undefined };
+      send_anonymous_message: { Args: { p_church: string; p_body: string; p_want_reply?: boolean }; Returns: string | null };
+      check_anonymous_reply: { Args: { p_code: string }; Returns: AnonymousReplyCheck[] };
+      anonymous_inbox: { Args: { p_church: string }; Returns: AnonymousInboxItem[] };
+      mark_anonymous_read: { Args: { p_message: string }; Returns: undefined };
+      reply_to_anonymous: { Args: { p_message: string; p_reply: string }; Returns: undefined };
+      delete_anonymous_message: { Args: { p_message: string }; Returns: undefined };
+      send_to_elders: { Args: { p_church: string; p_body: string }; Returns: { thread_id: string; message_id: string }[] };
+      reply_as_elder: { Args: { p_thread: string; p_body: string }; Returns: string };
+      my_elder_thread: { Args: { p_church: string }; Returns: MyElderThread[] };
+      elder_inbox: { Args: { p_church: string }; Returns: ElderInboxItem[] };
+      elder_thread_messages: { Args: { p_thread: string }; Returns: ElderMessage[] };
+      mark_elder_thread_read: { Args: { p_thread: string }; Returns: undefined };
+      set_rsvp: { Args: { p_event: string; p_status: RsvpStatus | null }; Returns: undefined };
+      event_rsvp_summary: { Args: { p_event: string }; Returns: RsvpSummary[] };
       create_prayer_request: {
         Args: { p_church: string; p_body: string; p_visibility?: PrayerVisibility };
         Returns: string;
