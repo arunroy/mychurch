@@ -51,7 +51,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test:db": "./scripts/test-db.sh"
+    "test:db": "bash scripts/test-db.sh"
   },
   "private": true
 }

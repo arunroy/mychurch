@@ -96,7 +96,7 @@ reset role;
 
 -- Other members, people waiting, and other churches see nothing.
 select pg_temp.act_as(:member_a2);
-select pg_temp.fails(format('select * from public.elder_thread_messages(%L)', :'thread_a'), 'another member cannot read the thread');
+select pg_temp.check((select count(*) = 0 from public.elder_thread_messages(:'thread_a')), 'another member gets no messages from the thread');
 select pg_temp.fails(format('select public.reply_as_elder(%L, ''hi'')', :'thread_a'), 'or reply in it');
 select pg_temp.check((select count(*) = 0 from public.my_elder_thread(:'church_a')), 'and has no thread of their own yet');
 reset role;
@@ -106,7 +106,7 @@ select pg_temp.fails(format('select * from public.send_to_elders(%L, ''let me in
 reset role;
 
 select pg_temp.act_as(:pastor_b);
-select pg_temp.fails(format('select * from public.elder_thread_messages(%L)', :'thread_a'), 'another church''s Pastor cannot read the thread');
+select pg_temp.check((select count(*) = 0 from public.elder_thread_messages(:'thread_a')), 'another church''s Pastor gets no messages from the thread');
 select pg_temp.fails(format('select public.reply_as_elder(%L, ''hi'')', :'thread_a'), 'or reply in it');
 select pg_temp.check((select count(*) = 0 from public.elder_inbox(:'church_a')), 'and sees nothing in this church''s inbox');
 reset role;

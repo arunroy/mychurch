@@ -105,6 +105,8 @@ npx expo lint          # lint
 npm run test:db        # database rules (needs Postgres 15+ installed locally)
 ```
 
+**Running the database tests on Windows:** install Postgres 15 or newer (for example `winget install PostgreSQL.PostgreSQL.16`; you only need the programs, not a running server) and run `npm run test:db` from **Git Bash**. The script finds Postgres under `C:\Program Files\PostgreSQL\<version>\bin`; if yours is elsewhere, point it there: `TEST_DB_PGBIN='/c/path/to/bin' npm run test:db`. It starts its own temporary server on port 54329 and removes it afterwards. On Linux and macOS it works the same way, and `.gitattributes` keeps the script's Unix line endings.
+
 ## Roadmap
 
 The full plan is in [PROGRESS.md](PROGRESS.md). In short: announcements, a daily verse chosen by the Pastor, sermon videos and the church calendar come next; then messaging (including anonymous messages to the Pastor) and prayer requests; then polls, Q&A and the photo album; then the store release.
