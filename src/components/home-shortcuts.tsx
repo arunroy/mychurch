@@ -15,7 +15,7 @@ import { usePendingSermonCount } from '@/lib/sermons';
 type Shortcut = {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
-  path: '/bible' | '/special-days' | '/members' | '/reports' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
+  path: '/bible' | '/bible-study' | '/special-days' | '/members' | '/reports' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
   badge?: number;
   show: boolean;
 };
@@ -33,6 +33,7 @@ export function HomeShortcuts() {
 
   const shortcuts: Shortcut[] = [
     { label: 'Bible', icon: 'book-outline', path: '/bible', show: true },
+    { label: 'Bible study', icon: 'school', path: '/bible-study', show: true },
     { label: 'Members', icon: 'people', path: '/members', badge: pending, show: true },
     { label: 'Sermons', icon: 'mic', path: '/sermons', badge: sermonsToReview, show: true },
     { label: 'Questions & answers', icon: 'help-circle', path: '/qa', badge: unanswered, show: true },

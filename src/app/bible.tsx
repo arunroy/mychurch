@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -12,7 +13,10 @@ import { BIBLE_BOOKS, displayBook, TRANSLATIONS, type TranslationCode } from '@/
 export default function BibleScreen() {
   const theme = useTheme();
   const [translation, setTranslation] = useState<TranslationCode>('web');
-  const [bookIndex, setBookIndex] = useState(42); // John
+  // Study screens can open the reader at a book; otherwise it starts at John 1.
+  const params = useLocalSearchParams<{ book?: string; chapter?: string }>();
+  const startBook = BIBLE_BOOKS.findIndex((b) => b.name === params.book);
+  const [bookIndex, setBookIndex] = useState(startBook >= 0 ? startBook : 42);
   const [chapter, setChapter] = useState(1);
   const [picking, setPicking] = useState<'book' | 'chapter' | null>(null);
   const [filter, setFilter] = useState('');
