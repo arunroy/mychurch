@@ -66,6 +66,13 @@ select pg_temp.act_as(:member_a2);
 select public.ask_question(:'church_a', 'Is it wrong to doubt?', true);
 reset role;
 
+-- The Pastor answers questions; they do not ask them.
+select pg_temp.act_as(:pastor_a);
+select pg_temp.fails(format('select public.ask_question(%L, ''A question from the Pastor'', false)', :'church_a'), 'the Pastor cannot ask a question');
+select pg_temp.fails(format('select public.ask_question(%L, ''An anonymous one from the Pastor'', true)', :'church_a'), 'or ask one anonymously');
+reset role;
+select pg_temp.check((select count(*) = 2 from public.questions), 'and nothing was added');
+
 -- What an anonymous question keeps.
 select pg_temp.check((select count(*) = 1 from public.questions where asker_id is null), 'an anonymous question has no asker stored');
 select pg_temp.check((select asked_at = date_trunc('day', asked_at) from public.questions where asker_id is null), 'and its time is rounded to the day');

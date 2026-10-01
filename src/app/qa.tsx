@@ -10,7 +10,7 @@ import { shortDate } from '@/lib/durations';
 import { useAnswer, useAsk, useQuestions, useRemoveQuestion, useSetVisibility, VISIBILITY_CHOICES } from '@/lib/qa';
 import { friendlyError } from '@/lib/supabase';
 
-// Ask the Pastor a question. Only the Pastor sees it at first. The Pastor answers it, and decides whether it stays
+// Members ask the Pastor a question. Only the Pastor sees it at first. The Pastor does not ask; they read, answer and control it. The Pastor answers it, and decides whether it stays
 // private, is shared with the church leaders, or is shared with the whole church.
 export default function QaScreen() {
   const { church_id } = useActiveChurch();
@@ -45,30 +45,32 @@ export default function QaScreen() {
 
   return (
     <Screen edges={['bottom']}>
-      <Card>
-        <Heading>Ask a question</Heading>
-        <Body muted>
-          Your question goes to the Pastor first. The Pastor may answer it, and can choose to share it and its answer with the church
-          leaders or the whole church.
-        </Body>
-        <TextField
-          label="Your question"
-          value={text}
-          onChangeText={setText}
-          multiline
-          maxLength={500}
-          style={{ minHeight: 90, paddingTop: 12, textAlignVertical: 'top' }}
-        />
-        <ToggleRow
-          title="Don’t show my name"
-          subtitle="Nothing is kept that says who asked, so you can’t take it back, and you will only see the answer if the Pastor shares it with the church. Limited to 5 a day."
-          value={anonymous}
-          onValueChange={setAnonymous}
-        />
-        <ErrorText>{error}</ErrorText>
-        {asked ? <Body>Thank you. Your question has gone to the Pastor.</Body> : null}
-        <Button title="Ask" onPress={onAsk} loading={ask.isPending} disabled={!text.trim()} />
-      </Card>
+      {isPastor ? null : (
+        <Card>
+          <Heading>Ask a question</Heading>
+          <Body muted>
+            Your question goes to the Pastor first. The Pastor may answer it, and can choose to share it and its answer with the church
+            leaders or the whole church.
+          </Body>
+          <TextField
+            label="Your question"
+            value={text}
+            onChangeText={setText}
+            multiline
+            maxLength={500}
+            style={{ minHeight: 90, paddingTop: 12, textAlignVertical: 'top' }}
+          />
+          <ToggleRow
+            title="Don’t show my name"
+            subtitle="Nothing is kept that says who asked, so you can’t take it back, and you will only see the answer if the Pastor shares it with the church. Limited to 5 a day."
+            value={anonymous}
+            onValueChange={setAnonymous}
+          />
+          <ErrorText>{error}</ErrorText>
+          {asked ? <Body>Thank you. Your question has gone to the Pastor.</Body> : null}
+          <Button title="Ask" onPress={onAsk} loading={ask.isPending} disabled={!text.trim()} />
+        </Card>
+      )}
 
       <ErrorText>{questions.error ? friendlyError(questions.error) : null}</ErrorText>
       {questions.isPending ? <Loading /> : null}
@@ -80,7 +82,7 @@ export default function QaScreen() {
       <Group title="Shared with the whole church" items={church} />
 
       {!questions.isPending && all.length === 0 ? (
-        <Body muted>{isPastor ? 'No questions yet.' : 'Nothing has been shared yet. Ask a question above.'}</Body>
+        <Body muted>{isPastor ? 'No questions yet. When a member asks one, it appears here for you to answer.' : 'Nothing has been shared yet. Ask a question above.'}</Body>
       ) : null}
       <Gap />
     </Screen>
