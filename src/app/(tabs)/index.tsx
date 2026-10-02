@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AnnouncementCards } from '@/components/announcement-cards';
 import { ChurchHeader } from '@/components/church-header';
+import { FeaturesPrompt } from '@/components/features-card';
 import { HomeShortcuts } from '@/components/home-shortcuts';
 import { InviteCard } from '@/components/invite-card';
 import { SosBanner } from '@/components/sos-banner';
@@ -12,6 +13,7 @@ import { WorshipCard } from '@/components/worship-card';
 import { Button, Card, Heading, Screen } from '@/components/ui';
 import { useProfile } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
+import { useEnabledFeatures } from '@/lib/features';
 import { useMembers } from '@/lib/members';
 
 export default function HomeScreen() {
@@ -22,6 +24,7 @@ export default function HomeScreen() {
   const members = useMembers(active.church_id);
   const pending = members.data?.filter((m) => m.status === 'pending') ?? [];
   const approvedCount = members.data?.filter((m) => m.status === 'approved').length ?? 0;
+  const featureOn = useEnabledFeatures();
   const firstName = profile.data?.full_name.split(' ')[0];
 
   return (
@@ -34,13 +37,15 @@ export default function HomeScreen() {
         <Heading>{t('home.welcome', { name: firstName })}</Heading>
       </Card>
 
-      <AnnouncementCards />
+      <FeaturesPrompt />
 
-      <VerseCard />
+      {featureOn('announcements') ? <AnnouncementCards /> : null}
 
-      <WorshipCard />
+      {featureOn('daily_verse') ? <VerseCard /> : null}
 
-      <SpecialDaysCard />
+      {featureOn('worship') ? <WorshipCard /> : null}
+
+      {featureOn('special_days') ? <SpecialDaysCard /> : null}
 
       <HomeShortcuts />
 

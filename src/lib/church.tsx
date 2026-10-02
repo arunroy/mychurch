@@ -82,7 +82,8 @@ export function ChurchProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!userId) return [];
-    return queryClient.fetchQuery({ queryKey: ['memberships', userId], queryFn: () => fetchMemberships(userId) });
+    // staleTime 0: the app treats data as fresh for 30 seconds, so without it this would return what it already had.
+    return queryClient.fetchQuery({ queryKey: ['memberships', userId], queryFn: () => fetchMemberships(userId), staleTime: 0 });
   }, [queryClient, userId]);
 
   return (

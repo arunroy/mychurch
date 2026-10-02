@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAccentText } from '@/components/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useEnabledFeatures } from '@/lib/features';
 import { TAB_BAR_CONTENT_HEIGHT } from '@/lib/tab-bar';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -28,6 +29,8 @@ export default function AppTabs({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  // Calendar, Chat and Messages appear only when the Pastor has turned them on.
+  const featureOn = useEnabledFeatures();
 
   return (
     <Tabs>
@@ -45,15 +48,21 @@ export default function AppTabs({
         <TabTrigger name="index" href="/" asChild>
           <TabButton label={t('tabs.home')} icon="home-outline" activeIcon="home" badge={pendingCount} />
         </TabTrigger>
-        <TabTrigger name="calendar" href="/calendar" asChild>
-          <TabButton label={t('tabs.calendar')} icon="calendar-outline" activeIcon="calendar" />
-        </TabTrigger>
-        <TabTrigger name="chat" href="/chat" asChild>
-          <TabButton label={t('tabs.chat')} icon="people-outline" activeIcon="people" badge={chatUnread} />
-        </TabTrigger>
-        <TabTrigger name="messages" href="/messages" asChild>
-          <TabButton label={t('tabs.messages')} icon="mail-outline" activeIcon="mail" badge={unreadCount} />
-        </TabTrigger>
+        {featureOn('calendar') ? (
+          <TabTrigger name="calendar" href="/calendar" asChild>
+            <TabButton label={t('tabs.calendar')} icon="calendar-outline" activeIcon="calendar" />
+          </TabTrigger>
+        ) : null}
+        {featureOn('chat') ? (
+          <TabTrigger name="chat" href="/chat" asChild>
+            <TabButton label={t('tabs.chat')} icon="people-outline" activeIcon="people" badge={chatUnread} />
+          </TabTrigger>
+        ) : null}
+        {featureOn('messages') ? (
+          <TabTrigger name="messages" href="/messages" asChild>
+            <TabButton label={t('tabs.messages')} icon="mail-outline" activeIcon="mail" badge={unreadCount} />
+          </TabTrigger>
+        ) : null}
         <TabTrigger name="more" href="/more" asChild>
           <TabButton label={t('tabs.more')} icon="ellipsis-horizontal-circle-outline" activeIcon="ellipsis-horizontal-circle" />
         </TabTrigger>

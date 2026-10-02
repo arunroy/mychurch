@@ -1213,5 +1213,15 @@
     "timesSung_other": "{{count}} times",
     "notSungYet": "Not sung yet",
     "plannedNext": "Planned again"
+  },
+  "features": {
+    "title": "Features",
+    "intro": "You decide what your church uses. Everything is off until you turn it on. Turning something off only hides it: nothing is deleted, and turning it back on brings everything back.",
+    "allOn": "Turn all on",
+    "allOff": "Turn all off",
+    "alwaysOn": "Members, church settings, SOS and the More tab are always available.",
+    "promptTitle": "Choose what your church uses",
+    "promptBody": "Nothing is switched on yet, so members see a bare Home. Turn on the features you want, like the Bible, prayer requests or chat.",
+    "promptButton": "Choose features"
   }
 }

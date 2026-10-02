@@ -9,6 +9,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useIsPlatformAdmin } from '@/lib/auth';
 import { useMembers } from '@/lib/members';
+import { useEnabledFeatures, type FeatureKey } from '@/lib/features';
 import { useFundraisers } from '@/lib/fundraisers';
 import { useIsWorshipTime, useWorshipPlans } from '@/lib/worship';
 import { useUnseenVideoCount } from '@/lib/video-seen';
@@ -22,6 +23,8 @@ type Shortcut = {
   icon: keyof typeof Ionicons.glyphMap | { material: keyof typeof MaterialCommunityIcons.glyphMap };
   path: '/bible' | '/worship' | '/worship-planner' | '/fundraisers' | '/funds' | '/videos' | '/bible-study' | '/special-days' | '/members' | '/reports' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
   badge?: number;
+  /** The switch the Pastor must turn on for this tile. Without one, the tile is always available. */
+  feature?: FeatureKey;
   show: boolean;
 };
 
@@ -38,6 +41,7 @@ export function HomeShortcuts() {
   const reportsToReview = useOpenReportCount(church_id, isLeader, isPlatformAdmin);
 
   const { church } = useActiveChurch();
+  const featureOn = useEnabledFeatures();
   const fundraisers = useFundraisers(church.id);
   const worshipPlans = useWorshipPlans(church.id);
   const worshipTime = useIsWorshipTime();
@@ -45,25 +49,25 @@ export function HomeShortcuts() {
   const hasFundraisers = (fundraisers.data?.length ?? 0) > 0;
   const newVideos = useUnseenVideoCount(church.id, church.youtube_channel_id);
   const shortcuts: Shortcut[] = [
-    { label: t('shortcuts.bible'), icon: 'book-outline', path: '/bible', show: true },
+    { label: t('shortcuts.bible'), icon: 'book-outline', path: '/bible', feature: 'bible', show: true },
     // Everyone sees Videos once the church has a channel; the people who can add one see it to be reminded to.
-    { label: t('shortcuts.videos'), icon: 'logo-youtube', path: '/videos', badge: newVideos, show: !!church.youtube_channel_id || canEditChurch },
+    { label: t('shortcuts.videos'), icon: 'logo-youtube', path: '/videos', badge: newVideos, feature: 'videos', show: !!church.youtube_channel_id || canEditChurch },
     // Everyone sees Worship on Sunday until 6 PM, once something is planned.
-    { label: t('shortcuts.worship'), icon: 'musical-notes', path: '/worship', show: hasWorship },
-    { label: t('shortcuts.bibleStudy'), icon: 'school', path: '/bible-study', show: true },
+    { label: t('shortcuts.worship'), icon: 'musical-notes', path: '/worship', feature: 'worship', show: hasWorship },
+    { label: t('shortcuts.bibleStudy'), icon: 'school', path: '/bible-study', feature: 'bible_study', show: true },
     { label: t('shortcuts.members'), icon: 'people', path: '/members', badge: pending, show: true },
-    { label: t('shortcuts.sermons'), icon: 'document-text', path: '/sermons', badge: sermonsToReview, show: true },
-    { label: t('shortcuts.qa'), icon: 'help-circle', path: '/qa', badge: unanswered, show: true },
-    { label: t('shortcuts.prayer'), icon: { material: 'hands-pray' }, path: '/prayer', show: true },
-    { label: t('shortcuts.polls'), icon: 'stats-chart', path: '/polls', show: true },
-    { label: t('shortcuts.dailyVerse'), icon: 'book', path: '/daily-verse', show: isPastor },
-    { label: t('shortcuts.reports'), icon: 'flag', path: '/reports', badge: reportsToReview, show: isLeader || isPlatformAdmin },
-    { label: t('shortcuts.specialDays'), icon: 'gift', path: '/special-days', show: isLeader },
-    { label: t('shortcuts.funds'), icon: 'cash', path: '/funds', show: canSeeFunds },
+    { label: t('shortcuts.sermons'), icon: 'document-text', path: '/sermons', badge: sermonsToReview, feature: 'sermons', show: true },
+    { label: t('shortcuts.qa'), icon: 'help-circle', path: '/qa', badge: unanswered, feature: 'qa', show: true },
+    { label: t('shortcuts.prayer'), icon: { material: 'hands-pray' }, path: '/prayer', feature: 'prayer', show: true },
+    { label: t('shortcuts.polls'), icon: 'stats-chart', path: '/polls', feature: 'polls', show: true },
+    { label: t('shortcuts.dailyVerse'), icon: 'book', path: '/daily-verse', feature: 'daily_verse', show: isPastor },
+    { label: t('shortcuts.reports'), icon: 'flag', path: '/reports', badge: reportsToReview, feature: 'reports', show: isLeader || isPlatformAdmin },
+    { label: t('shortcuts.specialDays'), icon: 'gift', path: '/special-days', feature: 'special_days', show: isLeader },
+    { label: t('shortcuts.funds'), icon: 'cash', path: '/funds', feature: 'funds', show: canSeeFunds },
     // Everyone sees Fundraisers once one exists; the Pastor and elders always, to open the first.
-    { label: t('shortcuts.fundraisers'), icon: 'heart', path: '/fundraisers', show: hasFundraisers || canRunFundraisers },
-    { label: t('shortcuts.worshipPlanner'), icon: 'calendar', path: '/worship-planner', show: canPlanWorship },
-    { label: t('shortcuts.announcements'), icon: 'megaphone', path: '/announcements', show: isLeader },
+    { label: t('shortcuts.fundraisers'), icon: 'heart', path: '/fundraisers', feature: 'fundraisers', show: hasFundraisers || canRunFundraisers },
+    { label: t('shortcuts.worshipPlanner'), icon: 'calendar', path: '/worship-planner', feature: 'worship', show: canPlanWorship },
+    { label: t('shortcuts.announcements'), icon: 'megaphone', path: '/announcements', feature: 'announcements', show: isLeader },
     { label: t('shortcuts.churchSettings'), icon: 'settings', path: '/church-settings', show: canEditChurch },
   ];
 
@@ -72,7 +76,7 @@ export function HomeShortcuts() {
       <Heading>{t('home.churchSection')}</Heading>
       <View style={styles.grid}>
         {shortcuts
-          .filter((s) => s.show)
+          .filter((s) => s.show && (!s.feature || featureOn(s.feature)))
           .map((s) => (
             <Tile key={s.path} shortcut={s} />
           ))}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ColorPicker } from '@/components/color-picker';
+import { FeaturesCard } from '@/components/features-card';
 import { YoutubeChannelCard } from '@/components/youtube-channel-card';
 import { Avatar, Body, Button, Card, ErrorText, Heading, Screen, TextField, ToggleRow } from '@/components/ui';
 import type { Church } from '@/lib/database.types';
@@ -81,6 +82,8 @@ export default function ChurchSettingsScreen() {
         <Body muted>{t('settings.colourHint')}</Body>
         <ColorPicker value={church.accent_color} onChange={(color) => save({ accent_color: color }, 'color')} />
       </Card>
+
+      <FeaturesCard />
 
       <YoutubeChannelCard />
 

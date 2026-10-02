@@ -242,6 +242,8 @@ export type Church = {
   status: ChurchStatus;
   requires_approval: boolean;
   directory_enabled: boolean;
+  /** The features the Pastor has turned on. Everything is off until then. Set only through set_church_features. */
+  enabled_features: string[];
   /** What the Pastor pasted, and the channel it was resolved to. Set only by the set-youtube-channel function. */
   youtube_url: string | null;
   youtube_channel_id: string | null;
@@ -885,6 +887,7 @@ export type Database = {
       fundraiser_summaries: { Args: { p_church: string }; Returns: FundraiserSummary[] };
       set_my_pledge: { Args: { p_fundraiser: string; p_amount: number | null }; Returns: undefined };
       song_library: { Args: { p_church: string }; Returns: SongLibraryEntry[] };
+      set_church_features: { Args: { p_church: string; p_features: string[] }; Returns: undefined };
       set_worship_leader: { Args: { p_church: string; p_user: string; p_value: boolean }; Returns: undefined };
       can_plan_worship: { Args: { p_church: string }; Returns: boolean };
       save_worship_plan: {
