@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useState, type ReactNode } from 'react';
+import { Children, Fragment, isValidElement, useState, type ReactElement, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ACCENT, CardShadow, lighten, MaxContentWidth, Radius, Spacing, withAlpha } from '@/constants/theme';
+import { ACCENT, IconColors, lighten, MaxContentWidth, Radius, Spacing, withAlpha } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useThemePreference } from '@/lib/theme-preference';
 
@@ -38,13 +38,10 @@ export function useAccentSoft() {
   return withAlpha(accent, scheme === 'dark' ? 0.22 : 0.12);
 }
 
-/** Cards lift with a soft shadow in light mode and sit on a hairline outline in dark mode. */
+/** Cards are flat, white sections on the grey page, as in the phone's Settings. */
 export function useCardSurface(): ViewStyle {
   const theme = useTheme();
-  const { scheme } = useThemePreference();
-  return scheme === 'dark'
-    ? { backgroundColor: theme.backgroundElement, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.border }
-    : { backgroundColor: theme.backgroundElement, ...CardShadow };
+  return { backgroundColor: theme.backgroundElement };
 }
 
 export function Screen({
@@ -151,7 +148,7 @@ export function TextField({ label, hint, ...props }: TextInputProps & { label: s
   const [focused, setFocused] = useState(false);
   return (
     <View style={styles.field}>
-      <Text style={[styles.fieldLabel, { color: theme.text }]}>{label}</Text>
+      <Text style={[styles.fieldLabel, { color: theme.textSecondary }]}>{label}</Text>
       <TextInput
         placeholderTextColor={theme.textSecondary}
         {...props}
@@ -167,23 +164,95 @@ export function TextField({ label, hint, ...props }: TextInputProps & { label: s
           styles.input,
           {
             color: theme.text,
-            backgroundColor: theme.background,
-            borderColor: focused ? accent : theme.border,
-            borderWidth: focused ? 2 : 1,
-            // Keeps the text still when the border thickens on focus.
-            paddingHorizontal: focused ? Spacing.three - 1 : Spacing.three,
+            backgroundColor: theme.backgroundElement,
+            borderColor: focused ? accent : 'transparent',
+            borderWidth: 1.5,
+            paddingHorizontal: Spacing.three - 1.5,
           },
           props.style,
         ]}
       />
-      {hint ? <Text style={[styles.hint, { color: theme.textSecondary }]}>{hint}</Text> : null}
+      {hint ? <Text style={[styles.fieldHint, { color: theme.textSecondary }]}>{hint}</Text> : null}
     </View>
   );
 }
 
+function isListRow(child: unknown): child is ReactElement<{ left?: ReactNode }> {
+  return isValidElement(child) && (child.type === Row || child.type === ToggleRow);
+}
+
+/**
+ * A white rounded section. When it holds only rows (optionally after a Heading), it becomes a grouped list: the
+ * heading moves above the section as a small caption, and thin lines separate the rows, as in the phone's Settings.
+ */
 export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
+  const theme = useTheme();
   const surface = useCardSurface();
+  const items = Children.toArray(children);
+  const first = items[0];
+  const heading = isValidElement<{ children?: ReactNode }>(first) && first.type === Heading ? first : null;
+  const rows = heading ? items.slice(1) : items;
+
+  if (rows.length > 0 && rows.every(isListRow)) {
+    return (
+      <View style={styles.section}>
+        {heading ? <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>{heading.props.children}</Text> : null}
+        <View style={[styles.sectionBody, { backgroundColor: theme.backgroundElement }, style]}>
+          {rows.map((row, i) => (
+            <Fragment key={row.key ?? i}>
+              {i > 0 ? (
+                <View style={[styles.separator, { backgroundColor: theme.hairline, marginLeft: row.props.left ? 54 : 0 }]} />
+              ) : null}
+              {row}
+            </Fragment>
+          ))}
+        </View>
+      </View>
+    );
+  }
   return <View style={[styles.card, surface, style]}>{children}</View>;
+}
+
+/** The phone-style switch between a few views or filters, such as Month, Week and Events. */
+export function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (next: T) => void;
+}) {
+  const theme = useTheme();
+  const { scheme } = useThemePreference();
+  return (
+    <View accessibilityRole="tablist" style={[styles.segmented, { backgroundColor: theme.backgroundSelected }]}>
+      {options.map((option) => {
+        const selected = option.value === value;
+        return (
+          <Pressable
+            key={option.value}
+            accessibilityRole="tab"
+            accessibilityState={{ selected }}
+            onPress={() => onChange(option.value)}
+            style={[
+              styles.segment,
+              selected ? [styles.segmentSelected, { backgroundColor: scheme === 'dark' ? '#636366' : '#FFFFFF' }] : null,
+            ]}>
+            <Text style={{ color: theme.text, fontSize: 14, fontWeight: selected ? 600 : 500 }} numberOfLines={1}>
+              {option.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/** A tick at the end of the chosen row in a list of choices. */
+export function Checkmark({ visible = true }: { visible?: boolean }) {
+  const accent = useAccentText();
+  return <Ionicons name="checkmark" size={22} color={visible ? accent : 'transparent'} />;
 }
 
 export function Row({
@@ -192,12 +261,15 @@ export function Row({
   left,
   right,
   onPress,
+  chevron = true,
 }: {
   title: string;
   subtitle?: string;
   left?: ReactNode;
   right?: ReactNode;
   onPress?: () => void;
+  /** Off for rows that pick a choice rather than open something. */
+  chevron?: boolean;
 }) {
   const theme = useTheme();
   return (
@@ -211,8 +283,62 @@ export function Row({
         <Text style={[styles.rowTitle, { color: theme.text }]}>{title}</Text>
         {subtitle ? <Text style={[styles.hint, { color: theme.textSecondary }]}>{subtitle}</Text> : null}
       </View>
-      {right ?? (onPress ? <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} /> : null)}
+      {right}
+      {onPress && chevron ? <Ionicons name="chevron-forward" size={17} color={theme.textSecondary} style={{ opacity: 0.6 }} /> : null}
     </Pressable>
+  );
+}
+
+/**
+ * A grouped list: an optional small heading, then the rows in one white section with thin lines between them.
+ * `inset` moves the lines past an icon column, so they start under the text (44 for rows with an IconSquare).
+ */
+export function ListSection({
+  title,
+  footer,
+  inset = 0,
+  children,
+}: {
+  title?: string;
+  footer?: string;
+  inset?: number;
+  children: ReactNode;
+}) {
+  const theme = useTheme();
+  const rows = Children.toArray(children).filter(Boolean);
+  if (rows.length === 0) return null;
+  return (
+    <View style={styles.section}>
+      {title ? <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>{title}</Text> : null}
+      <View style={[styles.sectionBody, { backgroundColor: theme.backgroundElement }]}>
+        {rows.map((row, i) => (
+          <Fragment key={i}>
+            {i > 0 ? <View style={[styles.separator, { backgroundColor: theme.hairline, marginLeft: inset }]} /> : null}
+            {row}
+          </Fragment>
+        ))}
+      </View>
+      {footer ? <Text style={[styles.sectionFooter, { color: theme.textSecondary }]}>{footer}</Text> : null}
+    </View>
+  );
+}
+
+/** The small coloured square with a white symbol at the start of a list row. */
+export function IconSquare({ icon, color }: { icon: keyof typeof Ionicons.glyphMap; color: keyof typeof IconColors }) {
+  return (
+    <View style={[styles.iconSquare, { backgroundColor: IconColors[color] }]}>
+      <Ionicons name={icon} size={18} color="#FFFFFF" />
+    </View>
+  );
+}
+
+/** A red count in a pill, for unread or waiting items at the end of a row. */
+export function CountBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <View style={styles.countBadge}>
+      <Text style={styles.countBadgeText}>{count > 99 ? '99+' : count}</Text>
+    </View>
   );
 }
 
@@ -345,28 +471,29 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 28, lineHeight: 34, fontWeight: 700, letterSpacing: -0.4 },
-  heading: { fontSize: 18, lineHeight: 24, fontWeight: 700, letterSpacing: -0.2 },
-  label: { fontSize: 12, lineHeight: 16, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase' },
-  body: { fontSize: 16, lineHeight: 23 },
+  title: { fontSize: 34, lineHeight: 41, fontWeight: 700, letterSpacing: -0.4 },
+  heading: { fontSize: 17, lineHeight: 22, fontWeight: 600 },
+  label: { fontSize: 13, lineHeight: 18, fontWeight: 400, letterSpacing: 0.2, textTransform: 'uppercase' },
+  body: { fontSize: 17, lineHeight: 22 },
   error: { fontSize: 15, lineHeight: 20, fontWeight: 500 },
   button: {
-    minHeight: 52,
+    minHeight: 50,
     borderRadius: Radius.field,
     borderWidth: 1,
     paddingHorizontal: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonText: { fontSize: 16, fontWeight: 600 },
+  buttonText: { fontSize: 17, fontWeight: 600 },
   field: { gap: 6 },
-  fieldLabel: { fontSize: 14, fontWeight: 600 },
-  input: { minHeight: 52, borderRadius: Radius.field, fontSize: 16 },
+  fieldLabel: { fontSize: 13, lineHeight: 18, letterSpacing: 0.2, textTransform: 'uppercase', paddingHorizontal: 16 },
+  fieldHint: { fontSize: 13, lineHeight: 18, paddingHorizontal: 16 },
+  input: { minHeight: 48, borderRadius: Radius.field, fontSize: 17 },
   hint: { fontSize: 14, lineHeight: 19 },
-  card: { borderRadius: Radius.card, padding: 20, gap: 12 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 10, minHeight: 52 },
+  card: { borderRadius: Radius.card, padding: 16, gap: 10 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 10, minHeight: 46 },
   rowText: { flex: 1, gap: 2 },
-  rowTitle: { fontSize: 16, lineHeight: 22, fontWeight: 500 },
+  rowTitle: { fontSize: 17, lineHeight: 22 },
   avatar: { alignItems: 'center', justifyContent: 'center' },
   chip: {
     minWidth: 44,
@@ -378,4 +505,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipWide: { minWidth: 64 },
+  section: { gap: 6 },
+  sectionTitle: { fontSize: 13, lineHeight: 18, letterSpacing: 0.2, textTransform: 'uppercase', paddingHorizontal: 16 },
+  sectionBody: { borderRadius: Radius.card, paddingHorizontal: 16, overflow: 'hidden' },
+  sectionFooter: { fontSize: 13, lineHeight: 18, paddingHorizontal: 16 },
+  separator: { height: StyleSheet.hairlineWidth },
+  iconSquare: { width: 30, height: 30, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
+  countBadge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    paddingHorizontal: 6,
+    backgroundColor: '#FF3B30',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countBadgeText: { color: '#FFFFFF', fontSize: 13, fontWeight: 700 },
+  segmented: { flexDirection: 'row', borderRadius: 9, padding: 2 },
+  segment: { flex: 1, minHeight: 32, borderRadius: 7, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
+  segmentSelected: { shadowColor: '#000000', shadowOpacity: 0.12, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
 });

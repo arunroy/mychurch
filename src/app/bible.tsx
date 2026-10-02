@@ -8,6 +8,7 @@ import { Body, Button, Card, Chip, ErrorText, Heading, Loading, Screen, TextFiel
 import { VerseNoteSheet } from '@/components/verse-note-sheet';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useThemePreference } from '@/lib/theme-preference';
 import { useLanguage } from '@/i18n/language-preference';
 import { lookUpChapter } from '@/lib/bible';
 import { bookLabel } from '@/lib/bible-book-label';
@@ -20,6 +21,7 @@ import { creditFor, defaultVersionFor, isIndianVersion, languageOf, versionsFor,
 export default function BibleScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const { scheme } = useThemePreference();
   const accent = useAccentText();
   const { bibleLanguage } = useLanguage();
   // The version the person picked here, remembered with the Bible language it was picked under, so
@@ -159,7 +161,7 @@ export default function BibleScreen() {
                     <Text style={[styles.number, { color: hasNote ? accent : theme.textSecondary }]}>
                       {hasNote ? `${v.number}✎ ` : `${v.number} `}
                     </Text>
-                    <Text style={hasNote ? { backgroundColor: theme.backgroundSelected } : undefined}>{v.text}</Text>{' '}
+                    <Text style={hasNote ? { backgroundColor: scheme === 'dark' ? '#3D3510' : '#FFF4C2' } : undefined}>{v.text}</Text>{' '}
                   </Text>
                 );
               })}
@@ -195,6 +197,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   gap: { gap: Spacing.two },
   // Taller than English needs, so the marks above and below Indian letters are not clipped.
-  passage: { fontSize: 18, lineHeight: 32 },
-  number: { fontSize: 12, fontWeight: 600 },
+  passage: { fontSize: 19, lineHeight: 31 },
+  number: { fontSize: 12, fontWeight: 700 },
 });

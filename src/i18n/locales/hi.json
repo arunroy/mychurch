@@ -42,7 +42,8 @@
     "reviewRequests": "अनुरोध देखें",
     "goodMorning": "सुप्रभात, {{name}}",
     "goodAfternoon": "नमस्ते, {{name}}",
-    "goodEvening": "शुभ संध्या, {{name}}"
+    "goodEvening": "शुभ संध्या, {{name}}",
+    "leadersSection": "अगुवों के लिए"
   },
   "shortcuts": {
     "bible": "बाइबल",
@@ -726,7 +727,10 @@
     "membersTitle": "{{name}} के सदस्य",
     "newInChat": "{{name}}, नए संदेश",
     "groupEmpty": "{{name}} में अभी कोई संदेश नहीं। अपने समूह को नमस्ते कहें।",
-    "groupPlaceholder": "{{name}} को संदेश लिखें"
+    "groupPlaceholder": "{{name}} को संदेश लिखें",
+    "groupsSection": "आपके समूह",
+    "groupsFooter": "समूह को केवल उसके सदस्य पढ़ सकते हैं। समूह पास्टर और एल्डर बनाते हैं।",
+    "noGroups": "आप अभी किसी समूह में नहीं हैं।"
   },
   "messagesTab": {
     "title": "संदेश",

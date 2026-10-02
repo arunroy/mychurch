@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 
-import { Avatar, Body, Button, Card, ErrorText, Row, Screen, Title, useAccentText } from '@/components/ui';
+import { Avatar, Body, Button, Card, ErrorText, Row, Screen, Title, useAccentText, ListSection } from '@/components/ui';
 import { useTheme } from '@/hooks/use-theme';
 import { useUserId } from '@/lib/auth';
 import { useAnonymousBadge } from '@/lib/anonymous';
@@ -28,7 +28,7 @@ export default function MessagesScreen() {
     <Screen edges={['top']}>
       <Title>{t('messagesTab.title')}</Title>
 
-      <Card>
+      <ListSection>
         <Row
           title={isLeader ? t('messagesTab.eldersInbox') : t('messagesTab.messageElders')}
           subtitle={
@@ -53,7 +53,7 @@ export default function MessagesScreen() {
         ) : (
           <Row title={t('messagesTab.anonWrite')} subtitle={t('messagesTab.nameNotSaved')} onPress={() => router.push('/anonymous')} />
         )}
-      </Card>
+      </ListSection>
 
       <Button title={t('messagesTab.newMessage')} onPress={() => router.push('/new-message')} />
 
@@ -67,7 +67,7 @@ export default function MessagesScreen() {
       ) : null}
 
       {conversations.data && conversations.data.length > 0 ? (
-        <Card>
+        <ListSection inset={54}>
           {conversations.data.map((chat) => (
             <Row
               key={chat.id}
@@ -85,7 +85,7 @@ export default function MessagesScreen() {
               }
             />
           ))}
-        </Card>
+        </ListSection>
       ) : null}
     </Screen>
   );

@@ -9,7 +9,10 @@ import { useTheme } from '@/hooks/use-theme';
 import { useActiveChurch, useChurch } from '@/lib/church';
 import { publicUrl } from '@/lib/supabase';
 
-/** The church's logo and name. Tapping it switches church when the person belongs to more than one. */
+/**
+ * The church's name as the screen's large title, with its logo beside it. Tapping it switches church when the person
+ * belongs to more than one.
+ */
 export function ChurchHeader() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -32,6 +35,12 @@ export function ChurchHeader() {
       accessibilityRole={canSwitch ? 'button' : 'header'}
       accessibilityHint={canSwitch ? t('churchHeader.hint') : undefined}
       style={({ pressed }) => [styles.row, { opacity: pressed ? 0.7 : 1 }]}>
+      <View style={styles.titleRow}>
+        <Text style={[styles.name, { color: theme.text }]} numberOfLines={2}>
+          {church.name}
+        </Text>
+        {canSwitch ? <Ionicons name="chevron-down" size={22} color={theme.textSecondary} /> : null}
+      </View>
       {logo ? (
         <Image source={{ uri: logo }} style={styles.logo} contentFit="cover" accessibilityIgnoresInvertColors />
       ) : (
@@ -39,27 +48,15 @@ export function ChurchHeader() {
           <Text style={styles.initialsText}>{initials}</Text>
         </View>
       )}
-      <View style={styles.text}>
-        <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
-          {church.name}
-        </Text>
-        {church.city ? (
-          <Text style={[styles.city, { color: theme.textSecondary }]} numberOfLines={1}>
-            {church.city}
-          </Text>
-        ) : null}
-      </View>
-      {canSwitch ? <Ionicons name="chevron-down" size={20} color={theme.textSecondary} /> : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 },
-  logo: { width: 44, height: 44, borderRadius: 14 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  titleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  name: { flexShrink: 1, fontSize: 34, lineHeight: 41, fontWeight: 700, letterSpacing: -0.4 },
+  logo: { width: 40, height: 40, borderRadius: 20 },
   initials: { alignItems: 'center', justifyContent: 'center' },
-  initialsText: { color: '#FFFFFF', fontSize: 16, fontWeight: 700 },
-  text: { flex: 1, gap: 1 },
-  name: { fontSize: 16, fontWeight: 700 },
-  city: { fontSize: 13 },
+  initialsText: { color: '#FFFFFF', fontSize: 15, fontWeight: 700 },
 });

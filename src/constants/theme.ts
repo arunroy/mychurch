@@ -9,57 +9,64 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#15171C',
+    text: '#111111',
     /** Solid surfaces: inputs, sheets. */
     background: '#FFFFFF',
     /** Behind a whole screen. */
-    page: '#F5F6F8',
+    page: '#F2F2F7',
     /** Cards and grouped lists. */
     backgroundElement: '#FFFFFF',
     /** Quiet fills: unselected chips, secondary buttons, tracks. */
-    backgroundSelected: '#EEF0F3',
+    backgroundSelected: '#E5E5EA',
     /** Outlines of fields, chips and secondary buttons. */
-    border: '#E2E5EA',
-    /** Dividers inside a card. */
-    hairline: '#EEF0F3',
-    textSecondary: '#5B6270',
-    danger: '#B42318',
-    dangerBackground: '#FEECEB',
+    border: '#D1D1D6',
+    /** Dividers between rows of a grouped list. */
+    hairline: '#E0E0E5',
+    textSecondary: '#6E6E73',
+    danger: '#C4251B',
+    dangerBackground: '#FDECEB',
   },
   dark: {
-    text: '#F2F3F5',
-    background: '#171A1F',
-    page: '#0D0F12',
-    backgroundElement: '#171A1F',
-    backgroundSelected: '#23272E',
-    border: '#2E333B',
-    hairline: '#23272E',
-    textSecondary: '#A3A9B4',
-    danger: '#FDA29B',
+    text: '#FFFFFF',
+    background: '#1C1C1E',
+    page: '#000000',
+    backgroundElement: '#1C1C1E',
+    backgroundSelected: '#2C2C2E',
+    border: '#3A3A3C',
+    hairline: '#38383A',
+    textSecondary: '#98989F',
+    danger: '#FF6961',
     dangerBackground: '#3A1714',
   },
 } as const;
 
 /** The app's one accent colour, the same for every church. White text on it passes 4.5:1. */
-export const ACCENT = '#3B5BDB';
+export const ACCENT = '#0A66D8';
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 /** Corner radii, so every surface rounds the same way. */
 export const Radius = {
-  field: 14,
-  card: 20,
-  tile: 18,
+  field: 12,
+  card: 14,
+  tile: 8,
   pill: 999,
 } as const;
 
-/** The soft lift under cards in light mode. Dark mode uses a hairline outline instead. */
-export const CardShadow = {
-  shadowColor: '#101828',
-  shadowOpacity: 0.06,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 2 },
-  elevation: 1,
+/** Background colours for the small icon squares beside list rows, one per kind of thing, as in the phone's Settings. */
+export const IconColors = {
+  blue: '#0A84FF',
+  indigo: '#5856D6',
+  purple: '#AF52DE',
+  pink: '#FF2D55',
+  red: '#FF3B30',
+  orange: '#FF9500',
+  amber: '#E0A100',
+  green: '#34C759',
+  teal: '#30B0C7',
+  cyan: '#32ADE6',
+  brown: '#A2845E',
+  gray: '#8E8E93',
 } as const;
 
 /** A colour at some opacity, from a #RRGGBB hex: for soft tints of the church colour. */

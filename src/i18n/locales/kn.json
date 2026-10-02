@@ -42,7 +42,8 @@
     "reviewRequests": "ವಿನಂತಿಗಳನ್ನು ನೋಡಿ",
     "goodMorning": "ಶುಭೋದಯ, {{name}}",
     "goodAfternoon": "ನಮಸ್ಕಾರ, {{name}}",
-    "goodEvening": "ಶುಭ ಸಂಜೆ, {{name}}"
+    "goodEvening": "ಶುಭ ಸಂಜೆ, {{name}}",
+    "leadersSection": "ನಾಯಕರಿಗಾಗಿ"
   },
   "shortcuts": {
     "bible": "ಬೈಬಲ್",
@@ -726,7 +727,10 @@
     "membersTitle": "{{name}} ನ ಸದಸ್ಯರು",
     "newInChat": "{{name}}, ಹೊಸ ಸಂದೇಶಗಳು",
     "groupEmpty": "{{name}} ನಲ್ಲಿ ಇನ್ನೂ ಸಂದೇಶಗಳಿಲ್ಲ. ನಿಮ್ಮ ಗುಂಪಿಗೆ ನಮಸ್ಕಾರ ಹೇಳಿ.",
-    "groupPlaceholder": "{{name}} ಗೆ ಸಂದೇಶ ಬರೆಯಿರಿ"
+    "groupPlaceholder": "{{name}} ಗೆ ಸಂದೇಶ ಬರೆಯಿರಿ",
+    "groupsSection": "ನಿಮ್ಮ ಗುಂಪುಗಳು",
+    "groupsFooter": "ಗುಂಪನ್ನು ಅದರ ಸದಸ್ಯರು ಮಾತ್ರ ಓದಬಹುದು. ಗುಂಪುಗಳನ್ನು ಪಾಸ್ಟರ್ ಮತ್ತು ಹಿರಿಯರು ರಚಿಸುತ್ತಾರೆ.",
+    "noGroups": "ನೀವು ಇನ್ನೂ ಯಾವುದೇ ಗುಂಪಿನಲ್ಲಿ ಇಲ್ಲ."
   },
   "messagesTab": {
     "title": "ಸಂದೇಶಗಳು",

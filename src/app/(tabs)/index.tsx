@@ -10,9 +10,10 @@ import { SosBanner } from '@/components/sos-banner';
 import { SpecialDaysCard } from '@/components/special-days-card';
 import { VerseCard } from '@/components/verse-card';
 import { WorshipCard } from '@/components/worship-card';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { Button, Card, Heading, Label, Screen, Title } from '@/components/ui';
+import { Button, Card, Heading, Screen } from '@/components/ui';
+import { useTheme } from '@/hooks/use-theme';
 import { useProfile } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useEnabledFeatures } from '@/lib/features';
@@ -21,6 +22,7 @@ import { useMembers } from '@/lib/members';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
   const profile = useProfile();
   const active = useActiveChurch();
   const { isLeader } = usePermissions();
@@ -32,14 +34,14 @@ export default function HomeScreen() {
 
   return (
     <Screen edges={['top']}>
-      <ChurchHeader />
+      <View style={styles.header}>
+        <Text style={[styles.greeting, { color: theme.textSecondary }]}>
+          {t(greetingKey(), { name: firstName })} · {formatDay(dateKey())}
+        </Text>
+        <ChurchHeader />
+      </View>
 
       <SosBanner />
-
-      <View style={styles.greeting}>
-        <Label>{formatDay(dateKey())}</Label>
-        <Title>{t(greetingKey(), { name: firstName })}</Title>
-      </View>
 
       <FeaturesPrompt />
 
@@ -72,5 +74,6 @@ function greetingKey() {
 }
 
 const styles = StyleSheet.create({
-  greeting: { gap: 4, marginTop: 4 },
+  header: { gap: 2, marginTop: 4 },
+  greeting: { fontSize: 15, fontWeight: 500 },
 });

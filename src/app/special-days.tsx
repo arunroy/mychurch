@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Loading, Row, Screen, TextField } from '@/components/ui';
+import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Loading, Row, Screen, TextField, Segmented } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useUserId } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
@@ -84,10 +84,14 @@ function Manager() {
 
       <Card>
         <Heading>{t('specialDays.addTitle')}</Heading>
-        <View style={styles.chips}>
-          <Chip label={t('specialDays.birthday')} selected={kind === 'birthday'} onPress={() => setKind('birthday')} />
-          <Chip label={t('specialDays.anniversary')} selected={kind === 'anniversary'} onPress={() => setKind('anniversary')} />
-        </View>
+        <Segmented
+          value={kind}
+          onChange={setKind}
+          options={[
+            { value: 'birthday', label: t('specialDays.birthday') },
+            { value: 'anniversary', label: t('specialDays.anniversary') },
+          ]}
+        />
         <TextField
           label={kind === 'birthday' ? t('specialDays.whoseBirthday') : t('specialDays.whoseAnniversary')}
           value={name}

@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
 
 import { ReportButton } from '@/components/report-sheet';
-import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Loading, Screen, TextField, ToggleRow } from '@/components/ui';
-import { Spacing } from '@/constants/theme';
+import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, TextField, ToggleRow, Segmented } from '@/components/ui';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
 import type { Question, QuestionVisibility } from '@/lib/database.types';
@@ -183,11 +181,11 @@ function QuestionCard({ question }: { question: Question }) {
       {isPastor ? (
         <>
           <Body>{t('qa.whoCanSee')}</Body>
-          <View style={styles.chips}>
-            {VISIBILITY_CHOICES.map((choice) => (
-              <Chip key={choice.value} label={t(`qa.vis${choice.value[0].toUpperCase()}${choice.value.slice(1)}`)} selected={question.visibility === choice.value} onPress={() => choose(choice.value)} />
-            ))}
-          </View>
+          <Segmented
+            value={question.visibility}
+            onChange={choose}
+            options={VISIBILITY_CHOICES.map((choice) => ({ value: choice.value, label: t(`qa.vis${choice.value[0].toUpperCase()}${choice.value.slice(1)}`) }))}
+          />
           {!question.answer ? <Body muted>{t('qa.needAnswer')}</Body> : null}
           {question.answer && !editing ? <Button title={t('qa.editAnswer')} variant="secondary" onPress={() => setEditing(true)} /> : null}
         </>
@@ -211,6 +209,3 @@ function QuestionCard({ question }: { question: Question }) {
   );
 }
 
-const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-});

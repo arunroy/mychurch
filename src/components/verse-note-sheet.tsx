@@ -65,7 +65,7 @@ export function VerseNoteSheet({
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={t('common.close')} />
-        <View style={[styles.sheet, { backgroundColor: scheme === 'dark' ? '#171A1F' : '#FFFFFF' }]}>
+        <View style={[styles.sheet, { backgroundColor: scheme === 'dark' ? '#000000' : '#F2F2F7' }]}>
           <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
             <Heading>{reference}</Heading>
             <Text style={[styles.verse, { color: theme.textSecondary }]}>{verseText}</Text>

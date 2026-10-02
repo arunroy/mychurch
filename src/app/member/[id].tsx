@@ -1,9 +1,10 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
 
 import { ReportButton } from '@/components/report-sheet';
-import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, Title, ToggleRow } from '@/components/ui';
+import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, Title, ToggleRow, Checkmark } from '@/components/ui';
 import { startConversation } from '@/lib/messages';
 import type { MemberRole } from '@/lib/database.types';
 import { ROLE_LABELS, useActiveChurch, usePermissions } from '@/lib/church';
@@ -63,16 +64,18 @@ export default function MemberScreen() {
   return (
     <Screen edges={['bottom']}>
       <Stack.Screen options={{ title: name }} />
-      <Avatar name={name} uri={publicUrl('avatars', member.profile?.avatar_path)} size={72} />
-      <Title>{name}</Title>
-      <Body muted>
-        {member.status === 'pending'
-          ? t('member.waiting')
-          : t('member.roleJoined', {
-              role: t(`roles.${member.role}`),
-              date: new Date(member.approved_at ?? member.created_at).toLocaleDateString(getDateLocale()),
-            })}
-      </Body>
+      <View style={{ alignItems: 'center', gap: 6 }}>
+        <Avatar name={name} uri={publicUrl('avatars', member.profile?.avatar_path)} size={88} />
+        <Title>{name}</Title>
+        <Body muted>
+          {member.status === 'pending'
+            ? t('member.waiting')
+            : t('member.roleJoined', {
+                role: t(`roles.${member.role}`),
+                date: new Date(member.approved_at ?? member.created_at).toLocaleDateString(getDateLocale()),
+              })}
+        </Body>
+      </View>
 
       <ErrorText>{error}</ErrorText>
 
@@ -87,7 +90,8 @@ export default function MemberScreen() {
               key={role}
               title={t(`roles.${role}`)}
               subtitle={t(`roleDescriptions.${role}`)}
-              right={member.role === role ? <Body>✓</Body> : undefined}
+              right={<Checkmark visible={member.role === role} />}
+              chevron={false}
               onPress={member.role === role || setRole.isPending ? undefined : () => changeRole(role)}
             />
           ))}

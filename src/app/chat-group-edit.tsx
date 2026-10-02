@@ -1,9 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text } from 'react-native';
 
-import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Row, Screen, TextField, useAccentText } from '@/components/ui';
+import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Row, Screen, TextField, Checkmark } from '@/components/ui';
 import { useUserId } from '@/lib/auth';
 import { useChatGroupMembers, useCreateChatGroup, useDeleteChatGroup, useManageableChatGroups, useUpdateChatGroup } from '@/lib/chat-groups';
 import { useActiveChurch, usePermissions } from '@/lib/church';
@@ -46,7 +45,6 @@ export default function ChatGroupEditScreen() {
 
 function GroupForm({ existing, currentMembers }: { existing: ManageableChatGroup | null; currentMembers: string[] | null }) {
   const { t } = useTranslation();
-  const accent = useAccentText();
   const { church_id } = useActiveChurch();
   const userId = useUserId()!;
   const members = useMembers(church_id);
@@ -123,7 +121,7 @@ function GroupForm({ existing, currentMembers }: { existing: ManageableChatGroup
             <Row
               key={m.user_id}
               title={m.profile!.full_name}
-              right={<Text style={{ color: accent, fontSize: 20, fontWeight: 700 }}>{on ? '✓' : ''}</Text>}
+              right={<Checkmark visible={on} />}
               onPress={() => toggle(m.user_id)}
             />
           );

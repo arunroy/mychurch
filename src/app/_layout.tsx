@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { ACCENT, Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LanguageProvider } from '@/i18n/language-preference';
 import { useTheme } from '@/hooks/use-theme';
@@ -134,7 +134,8 @@ function RootNavigator() {
       {onboarded && state === 'ready' ? <ShakeToSos /> : null}
       <Stack
       screenOptions={{
-        headerBackButtonDisplayMode: 'minimal',
+        headerBackButtonDisplayMode: 'generic',
+        headerTintColor: ACCENT,
         headerShadowVisible: false,
         headerTitleStyle: { fontSize: 17, fontWeight: '700' },
       }}>
@@ -202,6 +203,7 @@ function RootNavigator() {
           <Stack.Screen name="event/[id]" options={{ title: t('titles.event') }} />
           <Stack.Screen name="event-edit" options={{ title: t('titles.event') }} />
           <Stack.Screen name="new-message" options={{ title: t('messagesTab.newMessage') }} />
+          <Stack.Screen name="chat-room" options={{ title: t('chatTab.title') }} />
           <Stack.Screen name="chat/[id]" options={{ title: t('chatTab.title') }} />
           <Stack.Screen name="worship" options={{ title: t('shortcuts.worship') }} />
           <Stack.Screen name="worship-planner" options={{ title: t('shortcuts.worshipPlanner') }} />
