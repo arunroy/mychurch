@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Body, Button, ErrorText, Heading, TextField } from '@/components/ui';
+import { Body, Button, ErrorText, Heading, TextField, ToggleRow } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useDeleteNote, useSaveNote } from '@/lib/bible-notes';
+import { useActiveChurch, usePermissions } from '@/lib/church';
 import type { BibleNote } from '@/lib/database.types';
+import { useAsk } from '@/lib/qa';
 import { friendlyError } from '@/lib/supabase';
 import { useThemePreference } from '@/lib/theme-preference';
 
@@ -30,6 +32,7 @@ export function VerseNoteSheet({
 }) {
   const theme = useTheme();
   const { scheme } = useThemePreference();
+  const { isPastor } = usePermissions();
   const save = useSaveNote();
   const remove = useDeleteNote();
   const [body, setBody] = useState(existing?.body ?? '');
@@ -78,6 +81,7 @@ export function VerseNoteSheet({
             <ErrorText>{error}</ErrorText>
             <Button title={existing ? 'Save changes' : 'Save note'} onPress={onSave} loading={save.isPending} disabled={!body.trim() || body.trim() === existing?.body} />
             {existing ? <Button title="Delete note" variant="danger" onPress={onDelete} loading={remove.isPending} /> : null}
+            {isPastor ? null : <AskPastor reference={reference} />}
             <Pressable onPress={onClose} accessibilityRole="button" style={styles.cancel}>
               <Body muted>Cancel</Body>
             </Pressable>
@@ -88,7 +92,64 @@ export function VerseNoteSheet({
   );
 }
 
+/**
+ * Sends a question about this verse to the Pastor through the church's Questions and answers, so it is
+ * answered and shared the same way as any other question. The person's private note is never sent: only
+ * the question they type here, headed with the verse reference.
+ */
+function AskPastor({ reference }: { reference: string }) {
+  const { church_id } = useActiveChurch();
+  const ask = useAsk(church_id);
+  const [question, setQuestion] = useState('');
+  const [anonymous, setAnonymous] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+
+  // The Questions screen holds up to 500 characters in all, and the heading takes some of them.
+  const heading = `About ${reference}: `;
+
+  async function onSend() {
+    setError(null);
+    setSent(false);
+    try {
+      await ask.mutateAsync({ body: heading + question.trim(), anonymous });
+      setQuestion('');
+      setSent(true);
+    } catch (e) {
+      setError(friendlyError(e));
+    }
+  }
+
+  return (
+    <View style={styles.ask}>
+      <Heading>Ask the Pastor about this verse</Heading>
+      <Body muted>Your question goes to the Pastor, who may answer it and share it with the church. Your note stays private.</Body>
+      <TextField
+        label="Your question"
+        value={question}
+        onChangeText={(text) => {
+          setQuestion(text);
+          setSent(false);
+        }}
+        multiline
+        maxLength={500 - heading.length}
+        style={{ minHeight: 80, paddingTop: 12, textAlignVertical: 'top' }}
+      />
+      <ToggleRow
+        title="Don’t show my name"
+        subtitle="You can’t take it back, and you will only see the answer if the Pastor shares it with the church. Limited to 5 a day, with other anonymous questions."
+        value={anonymous}
+        onValueChange={setAnonymous}
+      />
+      <ErrorText>{error}</ErrorText>
+      {sent ? <Body>Thank you. Your question has gone to the Pastor.</Body> : null}
+      <Button title="Send to the Pastor" variant="secondary" onPress={onSend} loading={ask.isPending} disabled={!question.trim()} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  ask: { gap: Spacing.three, marginTop: Spacing.three },
   fill: { flex: 1, justifyContent: 'flex-end' },
   backdrop: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '85%' },
