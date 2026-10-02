@@ -3,8 +3,8 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Heading, useAccent } from '@/components/ui';
-import { Spacing } from '@/constants/theme';
+import { useAccentText, useCardSurface } from '@/components/ui';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useIsPlatformAdmin } from '@/lib/auth';
@@ -31,6 +31,7 @@ type Shortcut = {
 /** Big tappable tiles for the things people do most, each shown only to the people who can use it. */
 export function HomeShortcuts() {
   const { t } = useTranslation();
+  const theme = useTheme();
   const { church_id } = useActiveChurch();
   const { isLeader, isPastor, canEditChurch, canSeeFunds, canRunFundraisers, canPlanWorship } = usePermissions();
   const members = useMembers(church_id);
@@ -51,29 +52,31 @@ export function HomeShortcuts() {
   const shortcuts: Shortcut[] = [
     { label: t('shortcuts.bible'), icon: 'book-outline', path: '/bible', feature: 'bible', show: true },
     // Everyone sees Videos once the church has a channel; the people who can add one see it to be reminded to.
-    { label: t('shortcuts.videos'), icon: 'logo-youtube', path: '/videos', badge: newVideos, feature: 'videos', show: !!church.youtube_channel_id || canEditChurch },
+    { label: t('shortcuts.videos'), icon: 'play-circle-outline', path: '/videos', badge: newVideos, feature: 'videos', show: !!church.youtube_channel_id || canEditChurch },
     // Everyone sees Worship on Sunday until 6 PM, once something is planned.
-    { label: t('shortcuts.worship'), icon: 'musical-notes', path: '/worship', feature: 'worship', show: hasWorship },
-    { label: t('shortcuts.bibleStudy'), icon: 'school', path: '/bible-study', feature: 'bible_study', show: true },
-    { label: t('shortcuts.members'), icon: 'people', path: '/members', badge: pending, show: true },
-    { label: t('shortcuts.sermons'), icon: 'document-text', path: '/sermons', badge: sermonsToReview, feature: 'sermons', show: true },
-    { label: t('shortcuts.qa'), icon: 'help-circle', path: '/qa', badge: unanswered, feature: 'qa', show: true },
+    { label: t('shortcuts.worship'), icon: 'musical-notes-outline', path: '/worship', feature: 'worship', show: hasWorship },
+    { label: t('shortcuts.bibleStudy'), icon: 'school-outline', path: '/bible-study', feature: 'bible_study', show: true },
+    { label: t('shortcuts.members'), icon: 'people-outline', path: '/members', badge: pending, show: true },
+    { label: t('shortcuts.sermons'), icon: 'document-text-outline', path: '/sermons', badge: sermonsToReview, feature: 'sermons', show: true },
+    { label: t('shortcuts.qa'), icon: 'help-circle-outline', path: '/qa', badge: unanswered, feature: 'qa', show: true },
     { label: t('shortcuts.prayer'), icon: { material: 'hands-pray' }, path: '/prayer', feature: 'prayer', show: true },
-    { label: t('shortcuts.polls'), icon: 'stats-chart', path: '/polls', feature: 'polls', show: true },
-    { label: t('shortcuts.dailyVerse'), icon: 'book', path: '/daily-verse', feature: 'daily_verse', show: isPastor },
-    { label: t('shortcuts.reports'), icon: 'flag', path: '/reports', badge: reportsToReview, feature: 'reports', show: isLeader || isPlatformAdmin },
-    { label: t('shortcuts.specialDays'), icon: 'gift', path: '/special-days', feature: 'special_days', show: isLeader },
-    { label: t('shortcuts.funds'), icon: 'cash', path: '/funds', feature: 'funds', show: canSeeFunds },
+    { label: t('shortcuts.polls'), icon: 'stats-chart-outline', path: '/polls', feature: 'polls', show: true },
+    { label: t('shortcuts.dailyVerse'), icon: 'reader-outline', path: '/daily-verse', feature: 'daily_verse', show: isPastor },
+    { label: t('shortcuts.reports'), icon: 'flag-outline', path: '/reports', badge: reportsToReview, feature: 'reports', show: isLeader || isPlatformAdmin },
+    { label: t('shortcuts.specialDays'), icon: 'gift-outline', path: '/special-days', feature: 'special_days', show: isLeader },
+    { label: t('shortcuts.funds'), icon: 'cash-outline', path: '/funds', feature: 'funds', show: canSeeFunds },
     // Everyone sees Fundraisers once one exists; the Pastor and elders always, to open the first.
-    { label: t('shortcuts.fundraisers'), icon: 'heart', path: '/fundraisers', feature: 'fundraisers', show: hasFundraisers || canRunFundraisers },
-    { label: t('shortcuts.worshipPlanner'), icon: 'calendar', path: '/worship-planner', feature: 'worship', show: canPlanWorship },
-    { label: t('shortcuts.announcements'), icon: 'megaphone', path: '/announcements', feature: 'announcements', show: isLeader },
-    { label: t('shortcuts.churchSettings'), icon: 'settings', path: '/church-settings', show: canEditChurch },
+    { label: t('shortcuts.fundraisers'), icon: 'heart-outline', path: '/fundraisers', feature: 'fundraisers', show: hasFundraisers || canRunFundraisers },
+    { label: t('shortcuts.worshipPlanner'), icon: 'calendar-outline', path: '/worship-planner', feature: 'worship', show: canPlanWorship },
+    { label: t('shortcuts.announcements'), icon: 'megaphone-outline', path: '/announcements', feature: 'announcements', show: isLeader },
+    { label: t('shortcuts.churchSettings'), icon: 'settings-outline', path: '/church-settings', show: canEditChurch },
   ];
 
   return (
     <View style={styles.section}>
-      <Heading>{t('home.churchSection')}</Heading>
+      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: theme.text }]}>
+        {t('home.churchSection')}
+      </Text>
       <View style={styles.grid}>
         {shortcuts
           .filter((s) => s.show && (!s.feature || featureOn(s.feature)))
@@ -88,18 +91,19 @@ export function HomeShortcuts() {
 function Tile({ shortcut }: { shortcut: Shortcut }) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const accent = useAccent();
+  const accentText = useAccentText();
+  const surface = useCardSurface();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={shortcut.badge ? t('shortcuts.waiting', { label: shortcut.label, count: shortcut.badge }) : shortcut.label}
       onPress={() => router.push(shortcut.path)}
-      style={({ pressed }) => [styles.tile, { backgroundColor: theme.backgroundElement, opacity: pressed ? 0.7 : 1 }]}>
-      <View style={[styles.iconCircle, { backgroundColor: accent }]}>
+      style={({ pressed }) => [styles.tile, { opacity: pressed ? 0.6 : 1 }]}>
+      <View style={[styles.iconBox, surface]}>
         {typeof shortcut.icon === 'string' ? (
-          <Ionicons name={shortcut.icon} size={26} color="#FFFFFF" />
+          <Ionicons name={shortcut.icon} size={25} color={accentText} />
         ) : (
-          <MaterialCommunityIcons name={shortcut.icon.material} size={28} color="#FFFFFF" />
+          <MaterialCommunityIcons name={shortcut.icon.material} size={27} color={accentText} />
         )}
         {shortcut.badge ? (
           <View style={styles.badge}>
@@ -107,7 +111,7 @@ function Tile({ shortcut }: { shortcut: Shortcut }) {
           </View>
         ) : null}
       </View>
-      <Text style={[styles.label, { color: theme.text }]} numberOfLines={2}>
+      <Text style={[styles.label, { color: theme.text }]} numberOfLines={2} maxFontSizeMultiplier={1.4}>
         {shortcut.label}
       </Text>
     </Pressable>
@@ -115,19 +119,13 @@ function Tile({ shortcut }: { shortcut: Shortcut }) {
 }
 
 const styles = StyleSheet.create({
-  section: { gap: Spacing.two },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.three },
-  tile: {
-    flexGrow: 1,
-    flexBasis: '42%',
-    minHeight: 112,
-    borderRadius: 20,
-    padding: Spacing.three,
-    justifyContent: 'space-between',
-    gap: Spacing.two,
-  },
-  iconCircle: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
-  label: { fontSize: 17, fontWeight: 600 },
+  section: { gap: Spacing.three },
+  sectionTitle: { fontSize: 18, fontWeight: 700, letterSpacing: -0.2 },
+  // Four across, like the apps on a phone's home screen.
+  grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 18 },
+  tile: { width: '25%', alignItems: 'center', gap: 8, paddingHorizontal: 2 },
+  iconBox: { width: 60, height: 60, borderRadius: Radius.tile, alignItems: 'center', justifyContent: 'center' },
+  label: { fontSize: 13, lineHeight: 17, fontWeight: 500, textAlign: 'center' },
   badge: {
     position: 'absolute',
     top: -6,

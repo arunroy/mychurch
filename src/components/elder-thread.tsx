@@ -77,7 +77,7 @@ export function ElderThread({
         delayLongPress={350}
         accessibilityHint={mine ? undefined : t('chatTab.holdReport')}
         style={[styles.bubbleRow, mine ? styles.mine : styles.theirs]}>
-        <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement }]}>
+        <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement, borderColor: theme.border, borderWidth: mine ? 0 : StyleSheet.hairlineWidth }]}>
           {!mine ? <Text style={[styles.sender, { color: theme.textSecondary }]}>{item.sender_name || t('newMessage.churchMember')}</Text> : null}
           <Text selectable style={[styles.body, { color: mine ? '#FFFFFF' : theme.text }]}>
             {item.body}
@@ -118,7 +118,7 @@ export function ElderThread({
 
         <ErrorText>{error ?? (messages.error ? friendlyError(messages.error) : null)}</ErrorText>
 
-        <View style={[styles.composer, { borderTopColor: theme.backgroundSelected }]}>
+        <View style={[styles.composer, { borderTopColor: theme.border, backgroundColor: theme.backgroundElement }]}>
           <TextInput
             value={text}
             onChangeText={setText}
@@ -126,7 +126,7 @@ export function ElderThread({
             placeholderTextColor={theme.textSecondary}
             multiline
             maxLength={2000}
-            style={[styles.input, { color: theme.text, backgroundColor: theme.backgroundElement }]}
+            style={[styles.input, { color: theme.text, backgroundColor: theme.page, borderColor: theme.border }]}
           />
           <Button title={t('common.send')} onPress={onSend} loading={busy} disabled={!text.trim()} style={styles.send} />
         </View>
@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     maxHeight: 120,
     borderRadius: 22,
+    borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 12,

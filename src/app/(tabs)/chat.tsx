@@ -171,7 +171,7 @@ function Thread({ userId, group }: { userId: string; group: ChatGroup | null }) 
             {startsRun ? <Avatar name={item.sender_name} uri={publicUrl('avatars', item.sender_avatar_path)} size={32} /> : null}
           </View>
         ) : null}
-        <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement }]}>
+        <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement, borderColor: theme.border, borderWidth: mine ? 0 : StyleSheet.hairlineWidth }]}>
           <Text style={[styles.sender, { color: mine ? 'rgba(255,255,255,0.92)' : accentText }]}>
             {mine ? t('prayer.you') : item.sender_name || t('newMessage.churchMember')}
           </Text>
@@ -214,7 +214,7 @@ function Thread({ userId, group }: { userId: string; group: ChatGroup | null }) 
 
         <ErrorText>{error ?? (posts.error ? friendlyError(posts.error) : null)}</ErrorText>
 
-        <View style={[styles.composer, { borderTopColor: theme.backgroundSelected }]}>
+        <View style={[styles.composer, { borderTopColor: theme.border, backgroundColor: theme.backgroundElement }]}>
           <TextInput
             value={text}
             onChangeText={setText}
@@ -222,7 +222,7 @@ function Thread({ userId, group }: { userId: string; group: ChatGroup | null }) 
             placeholderTextColor={theme.textSecondary}
             multiline
             maxLength={2000}
-            style={[styles.input, { color: theme.text, backgroundColor: theme.backgroundElement }]}
+            style={[styles.input, { color: theme.text, backgroundColor: theme.page, borderColor: theme.border }]}
           />
           <Button title={t('common.send')} onPress={onSend} loading={post.isPending} disabled={!text.trim()} style={styles.send} />
         </View>
@@ -271,6 +271,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     maxHeight: 120,
     borderRadius: 22,
+    borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 12,

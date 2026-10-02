@@ -10,10 +10,13 @@ import { SosBanner } from '@/components/sos-banner';
 import { SpecialDaysCard } from '@/components/special-days-card';
 import { VerseCard } from '@/components/verse-card';
 import { WorshipCard } from '@/components/worship-card';
-import { Button, Card, Heading, Screen } from '@/components/ui';
+import { StyleSheet, View } from 'react-native';
+
+import { Button, Card, Heading, Label, Screen, Title } from '@/components/ui';
 import { useProfile } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useEnabledFeatures } from '@/lib/features';
+import { dateKey, formatDay } from '@/lib/dates';
 import { useMembers } from '@/lib/members';
 
 export default function HomeScreen() {
@@ -33,9 +36,10 @@ export default function HomeScreen() {
 
       <SosBanner />
 
-      <Card>
-        <Heading>{t('home.welcome', { name: firstName })}</Heading>
-      </Card>
+      <View style={styles.greeting}>
+        <Label>{formatDay(dateKey())}</Label>
+        <Title>{t(greetingKey(), { name: firstName })}</Title>
+      </View>
 
       <FeaturesPrompt />
 
@@ -60,3 +64,13 @@ export default function HomeScreen() {
     </Screen>
   );
 }
+
+/** Good morning until noon, good afternoon until 5 PM, then good evening. */
+function greetingKey() {
+  const hour = new Date().getHours();
+  return hour < 12 ? 'home.goodMorning' : hour < 17 ? 'home.goodAfternoon' : 'home.goodEvening';
+}
+
+const styles = StyleSheet.create({
+  greeting: { gap: 4, marginTop: 4 },
+});

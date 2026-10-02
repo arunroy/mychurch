@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ColorPicker } from '@/components/color-picker';
 import { Body, Button, ErrorText, Screen, TextField } from '@/components/ui';
-import { DEFAULT_ACCENT } from '@/constants/theme';
+import { ACCENT } from '@/constants/theme';
 import { useChurch } from '@/lib/church';
 import { goToChurch } from '@/lib/navigation';
 import { friendlyError, supabase } from '@/lib/supabase';
@@ -14,7 +13,6 @@ export default function RegisterChurchScreen() {
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
   const [email, setEmail] = useState('');
-  const [color, setColor] = useState(DEFAULT_ACCENT);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +25,7 @@ export default function RegisterChurchScreen() {
       p_name: name.trim(),
       p_city: city.trim(),
       p_contact_email: email.trim(),
-      p_accent_color: color,
+      p_accent_color: ACCENT,
     });
     if (registerError || !churchId) {
       setError(friendlyError(registerError));
@@ -52,8 +50,6 @@ export default function RegisterChurchScreen() {
         placeholder="office@gracechapel.org"
         hint={t('register.emailHint')}
       />
-      <Body>{t('register.colour')}</Body>
-      <ColorPicker value={color} onChange={setColor} />
       <ErrorText>{error}</ErrorText>
       <Button title={t('register.submit')} onPress={register} loading={busy} disabled={!valid} />
       <Body muted>{t('register.after')}</Body>

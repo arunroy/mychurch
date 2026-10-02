@@ -36,11 +36,13 @@
     "newBadge": "{{label}}, {{count}} new"
   },
   "home": {
-    "welcome": "Welcome, {{name}}",
     "churchSection": "Church",
     "wantToJoin_one": "{{count}} person wants to join",
     "wantToJoin_other": "{{count}} people want to join",
-    "reviewRequests": "Review requests"
+    "reviewRequests": "Review requests",
+    "goodMorning": "Good morning, {{name}}",
+    "goodAfternoon": "Good afternoon, {{name}}",
+    "goodEvening": "Good evening, {{name}}"
   },
   "shortcuts": {
     "bible": "Bible",
@@ -272,7 +274,6 @@
     "cityPlaceholder": "Springfield",
     "email": "Church contact email",
     "emailHint": "We use this to confirm the church is real.",
-    "colour": "Church colour",
     "submit": "Register church",
     "after": "You can add your logo and invite members once your church is verified."
   },
@@ -297,8 +298,6 @@
     "details": "Details",
     "contactEmail": "Contact email",
     "saveDetails": "Save details",
-    "colour": "Colour",
-    "colourHint": "Used for buttons and highlights throughout the app.",
     "joining": "Joining",
     "approveTitle": "Approve new members",
     "approveOn": "A leader approves everyone who joins.",
@@ -383,15 +382,10 @@
   },
   "themeSettings": {
     "title": "Theme settings",
-    "mode": "Mode",
     "system": "System",
     "light": "Light",
     "dark": "Dark",
-    "systemHint": "System follows your phone's light or dark setting.",
-    "theme": "Theme",
-    "plain": "Plain",
-    "plainHint": "Plain uses your church's own colour. Every other theme brings its own matching colours.",
-    "swatch": "{{name}} theme"
+    "systemHint": "System follows your phone's light or dark setting."
   },
   "churchHeader": {
     "switch": "Switch ▾",

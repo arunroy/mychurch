@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text } from 'react-native';
 
-import { Body, Button, Card, Heading } from '@/components/ui';
+import { Body, Button, Card, Heading, Label } from '@/components/ui';
+import { useTheme } from '@/hooks/use-theme';
 import { useLanguage } from '@/i18n/language-preference';
 import { lookUpPassage } from '@/lib/bible';
 import { creditFor, indianVersionFor } from '@/lib/bible-versions';
@@ -60,6 +62,7 @@ export function VerseCard() {
 
 function VerseBody({ verse, isPastor }: { verse: DailyVerse; isPastor: boolean }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const translated = useVerseInBibleLanguage(verse);
   const { bibleLanguage } = useLanguage();
   const version = indianVersionFor(bibleLanguage);
@@ -72,10 +75,12 @@ function VerseBody({ verse, isPastor }: { verse: DailyVerse; isPastor: boolean }
 
   return (
     <Card>
-      <Body muted>{t('verse.ofTheDay', { date: formatDay(verse_date) })}</Body>
-      <Heading>{reference}</Heading>
-      <Body>{`“${text}”`}</Body>
-      {credit ? <Body muted>{credit}</Body> : null}
+      <Label accent>{t('verse.ofTheDay', { date: formatDay(verse_date) })}</Label>
+      <Text style={[styles.verse, { color: theme.text }]}>{`“${text}”`}</Text>
+      <Text style={[styles.reference, { color: theme.textSecondary }]}>
+        {reference}
+        {credit ? ` · ${credit}` : ''}
+      </Text>
       {reflection ? (
         <>
           <Heading>{t('verse.reflection')}</Heading>
@@ -88,3 +93,8 @@ function VerseBody({ verse, isPastor }: { verse: DailyVerse; isPastor: boolean }
     </Card>
   );
 }
+
+const styles = StyleSheet.create({
+  verse: { fontSize: 19, lineHeight: 28, fontWeight: 500, letterSpacing: -0.1 },
+  reference: { fontSize: 14, lineHeight: 20, fontWeight: 500 },
+});

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useAccentText } from '@/components/ui';
+import { useAccentSoft, useAccentText } from '@/components/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useEnabledFeatures } from '@/lib/features';
@@ -40,31 +40,31 @@ export default function AppTabs({
           styles.list,
           {
             backgroundColor: theme.backgroundElement,
-            borderTopColor: theme.backgroundSelected,
+            borderTopColor: theme.border,
             height: TAB_BAR_CONTENT_HEIGHT + insets.bottom,
             paddingBottom: insets.bottom,
           },
         ]}>
         <TabTrigger name="index" href="/" asChild>
-          <TabButton label={t('tabs.home')} icon="home-outline" activeIcon="home" badge={pendingCount} />
+          <TabButton label={t('tabs.home')} icon="home-outline" activeIcon="home-outline" badge={pendingCount} />
         </TabTrigger>
         {featureOn('calendar') ? (
           <TabTrigger name="calendar" href="/calendar" asChild>
-            <TabButton label={t('tabs.calendar')} icon="calendar-outline" activeIcon="calendar" />
+            <TabButton label={t('tabs.calendar')} icon="calendar-outline" activeIcon="calendar-outline" />
           </TabTrigger>
         ) : null}
         {featureOn('chat') ? (
           <TabTrigger name="chat" href="/chat" asChild>
-            <TabButton label={t('tabs.chat')} icon="people-outline" activeIcon="people" badge={chatUnread} />
+            <TabButton label={t('tabs.chat')} icon="chatbubbles-outline" activeIcon="chatbubbles-outline" badge={chatUnread} />
           </TabTrigger>
         ) : null}
         {featureOn('messages') ? (
           <TabTrigger name="messages" href="/messages" asChild>
-            <TabButton label={t('tabs.messages')} icon="mail-outline" activeIcon="mail" badge={unreadCount} />
+            <TabButton label={t('tabs.messages')} icon="mail-outline" activeIcon="mail-outline" badge={unreadCount} />
           </TabTrigger>
         ) : null}
         <TabTrigger name="more" href="/more" asChild>
-          <TabButton label={t('tabs.more')} icon="ellipsis-horizontal-circle-outline" activeIcon="ellipsis-horizontal-circle" />
+          <TabButton label={t('tabs.more')} icon="ellipsis-horizontal" activeIcon="ellipsis-horizontal" />
         </TabTrigger>
       </TabList>
     </Tabs>
@@ -82,6 +82,7 @@ function TabButton({
   const theme = useTheme();
   const { t } = useTranslation();
   const accentText = useAccentText();
+  const accentSoft = useAccentSoft();
   const color = isFocused ? accentText : theme.textSecondary;
 
   return (
@@ -91,15 +92,15 @@ function TabButton({
       accessibilityState={{ selected: !!isFocused }}
       accessibilityLabel={badge > 0 ? t('tabs.newBadge', { label, count: badge }) : label}
       style={styles.button}>
-      <View style={[styles.pill, isFocused ? { backgroundColor: theme.backgroundSelected } : null]}>
-        <Ionicons name={isFocused ? activeIcon : icon} size={30} color={color} />
+      <View style={[styles.pill, isFocused ? { backgroundColor: accentSoft } : null]}>
+        <Ionicons name={isFocused ? activeIcon : icon} size={24} color={color} />
         {badge > 0 ? (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{badge > 99 ? '99+' : badge}</Text>
           </View>
         ) : null}
       </View>
-      <Text style={[styles.label, { color, fontWeight: isFocused ? 700 : 500 }]} numberOfLines={1}>
+      <Text style={[styles.label, { color, fontWeight: isFocused ? 700 : 500 }]} numberOfLines={1} maxFontSizeMultiplier={1.3}>
         {label}
       </Text>
     </Pressable>
@@ -116,20 +117,20 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingTop: Spacing.two,
   },
-  button: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  pill: { width: 64, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  label: { fontSize: 13 },
+  button: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4 },
+  pill: { width: 56, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  label: { fontSize: 12 },
   badge: {
     position: 'absolute',
-    top: -2,
-    right: 4,
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
+    top: -4,
+    right: 6,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     paddingHorizontal: 5,
     backgroundColor: '#D92D20',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  badgeText: { color: '#FFFFFF', fontSize: 12, fontWeight: 700 },
+  badgeText: { color: '#FFFFFF', fontSize: 11, fontWeight: 700 },
 });

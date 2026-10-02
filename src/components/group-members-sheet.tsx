@@ -17,7 +17,7 @@ export function GroupMembersSheet({ groupId, name, onClose }: { groupId: string;
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={t('common.close')} />
-        <View style={[styles.sheet, { backgroundColor: scheme === 'dark' ? '#1C1C1E' : '#FFFFFF' }]}>
+        <View style={[styles.sheet, { backgroundColor: scheme === 'dark' ? '#171A1F' : '#FFFFFF' }]}>
           <ScrollView contentContainerStyle={styles.content}>
             <Heading>{t('chatTab.membersTitle', { name })}</Heading>
             {members.isPending ? <Loading /> : null}

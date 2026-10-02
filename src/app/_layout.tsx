@@ -1,13 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, type Href } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { Colors, findTheme, Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LanguageProvider } from '@/i18n/language-preference';
 import { useTheme } from '@/hooks/use-theme';
@@ -17,7 +16,7 @@ import { ShakeToSos } from '@/components/shake-to-sos';
 import { useRememberInviteLinks } from '@/lib/invite';
 import { registerForPushNotifications, useOpenNotificationTarget } from '@/lib/push';
 import { isConfigured } from '@/lib/supabase';
-import { ThemePreferenceProvider, useThemePreference } from '@/lib/theme-preference';
+import { ThemePreferenceProvider } from '@/lib/theme-preference';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -42,33 +41,17 @@ export default function RootLayout() {
 
 function ThemedApp() {
   const colorScheme = useColorScheme();
-  const { themeId } = useThemePreference();
-  const colors = findTheme(themeId)?.[colorScheme].gradient;
+  const palette = Colors[colorScheme];
 
-  // With a theme chosen, the navigator's own backgrounds go clear so the gradient shows through every screen.
+  // The navigator draws screen and header backgrounds in the page colour, so every screen sits on the same calm ground.
   const base = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
-  const navigationTheme = colors
-    ? {
-        ...base,
-        colors: {
-          ...base.colors,
-          background: 'transparent',
-          card: 'transparent',
-        },
-      }
-    : base;
+  const navigationTheme = {
+    ...base,
+    colors: { ...base.colors, background: palette.page, card: palette.page, text: palette.text, border: palette.hairline },
+  };
 
   return (
-    <View style={[styles.root, { backgroundColor: Colors[colorScheme].background }]}>
-      {colors ? (
-        <LinearGradient
-          colors={[...colors]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
-        />
-      ) : null}
+    <View style={[styles.root, { backgroundColor: palette.page }]}>
       <ThemeProvider value={navigationTheme}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
@@ -149,7 +132,12 @@ function RootNavigator() {
   return (
     <>
       {onboarded && state === 'ready' ? <ShakeToSos /> : null}
-      <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
+      <Stack
+      screenOptions={{
+        headerBackButtonDisplayMode: 'minimal',
+        headerShadowVisible: false,
+        headerTitleStyle: { fontSize: 17, fontWeight: '700' },
+      }}>
         <Stack.Screen name="privacy" options={{ title: t('titles.privacy'), headerLeft: closeLegal }} />
         <Stack.Screen name="terms" options={{ title: t('titles.terms'), headerLeft: closeLegal }} />
 
