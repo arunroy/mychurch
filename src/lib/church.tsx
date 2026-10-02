@@ -117,6 +117,8 @@ export function usePermissions() {
     canEditChurch: role === 'pastor' || role === 'admin',
     // The church's money: the Pastor and elders only, not church admins.
     canSeeFunds: role === 'pastor' || role === 'elder',
+    /** Opens fundraisers, records money received and sees who gave. */
+    canRunFundraisers: role === 'pastor' || role === 'elder',
     // Creates and manages the chat groups for committees and fellowships.
     canManageChatGroups: role === 'pastor' || role === 'elder',
     canChangeRoles: role === 'pastor',

@@ -9,6 +9,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useIsPlatformAdmin } from '@/lib/auth';
 import { useMembers } from '@/lib/members';
+import { useFundraisers } from '@/lib/fundraisers';
 import { useUnseenVideoCount } from '@/lib/video-seen';
 import { useOpenReportCount } from '@/lib/reports';
 import { useUnansweredCount } from '@/lib/qa';
@@ -18,7 +19,7 @@ type Shortcut = {
   label: string;
   /** An Ionicons name, or a Material Community icon for the few things Ionicons has no picture of (praying hands). */
   icon: keyof typeof Ionicons.glyphMap | { material: keyof typeof MaterialCommunityIcons.glyphMap };
-  path: '/bible' | '/funds' | '/videos' | '/bible-study' | '/special-days' | '/members' | '/reports' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
+  path: '/bible' | '/fundraisers' | '/funds' | '/videos' | '/bible-study' | '/special-days' | '/members' | '/reports' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
   badge?: number;
   show: boolean;
 };
@@ -27,7 +28,7 @@ type Shortcut = {
 export function HomeShortcuts() {
   const { t } = useTranslation();
   const { church_id } = useActiveChurch();
-  const { isLeader, isPastor, canEditChurch, canSeeFunds } = usePermissions();
+  const { isLeader, isPastor, canEditChurch, canSeeFunds, canRunFundraisers } = usePermissions();
   const members = useMembers(church_id);
   const pending = isLeader ? (members.data?.filter((m) => m.status === 'pending').length ?? 0) : 0;
   const unanswered = useUnansweredCount(church_id, isPastor);
@@ -36,6 +37,8 @@ export function HomeShortcuts() {
   const reportsToReview = useOpenReportCount(church_id, isLeader, isPlatformAdmin);
 
   const { church } = useActiveChurch();
+  const fundraisers = useFundraisers(church.id);
+  const hasFundraisers = (fundraisers.data?.length ?? 0) > 0;
   const newVideos = useUnseenVideoCount(church.id, church.youtube_channel_id);
   const shortcuts: Shortcut[] = [
     { label: t('shortcuts.bible'), icon: 'book-outline', path: '/bible', show: true },
@@ -51,6 +54,8 @@ export function HomeShortcuts() {
     { label: t('shortcuts.reports'), icon: 'flag', path: '/reports', badge: reportsToReview, show: isLeader || isPlatformAdmin },
     { label: t('shortcuts.specialDays'), icon: 'gift', path: '/special-days', show: isLeader },
     { label: t('shortcuts.funds'), icon: 'cash', path: '/funds', show: canSeeFunds },
+    // Everyone sees Fundraisers once one exists; the Pastor and elders always, to open the first.
+    { label: t('shortcuts.fundraisers'), icon: 'heart', path: '/fundraisers', show: hasFundraisers || canRunFundraisers },
     { label: t('shortcuts.announcements'), icon: 'megaphone', path: '/announcements', show: isLeader },
     { label: t('shortcuts.churchSettings'), icon: 'settings', path: '/church-settings', show: canEditChurch },
   ];

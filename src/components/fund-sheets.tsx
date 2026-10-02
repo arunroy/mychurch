@@ -26,7 +26,7 @@ import { useThemePreference } from '@/lib/theme-preference';
 import { useUserId } from '@/lib/auth';
 
 /** A bottom sheet with room for the keyboard. */
-function Sheet({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+export function Sheet({ onClose, children }: { onClose: () => void; children: ReactNode }) {
   const { t } = useTranslation();
   const { scheme } = useThemePreference();
   return (
@@ -46,7 +46,7 @@ function Sheet({ onClose, children }: { onClose: () => void; children: ReactNode
   );
 }
 
-type Party = { name: string; userId: string | null };
+export type Party = { name: string; userId: string | null };
 
 const MAX_SUGGESTIONS = 8;
 
@@ -54,7 +54,7 @@ const MAX_SUGGESTIONS = 8;
  * Who the money came from (or was paid to): a church member picked from the list, a name used on an earlier entry,
  * or a new name typed in. Optional.
  */
-function PartyField({ kind, value, onChange }: { kind: 'in' | 'out'; value: Party; onChange: (next: Party) => void }) {
+export function PartyField({ kind, value, onChange }: { kind: 'in' | 'out'; value: Party; onChange: (next: Party) => void }) {
   const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const members = useMembers(church_id);

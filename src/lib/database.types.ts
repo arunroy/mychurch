@@ -118,6 +118,45 @@ export type FundsSummary = {
   latest_on: string | null;
 };
 
+/** A cause the church is raising money for. */
+export type Fundraiser = {
+  id: string;
+  church_id: string;
+  title: string;
+  description: string;
+  /** Null when there is no target, so no bar is drawn. */
+  target_amount: number | null;
+  currency: string;
+  status: 'active' | 'closed';
+  created_by: string | null;
+  created_at: string;
+};
+
+/** Money received (entered by a leader) or a pledge (entered by the member). Only the Pastor and elders can read these. */
+export type FundraiserEntry = {
+  id: string;
+  fundraiser_id: string;
+  church_id: string;
+  kind: 'received' | 'pledge';
+  amount: number;
+  party_name: string;
+  party_user_id: string | null;
+  occurred_on: string;
+  note: string;
+  created_by: string | null;
+  created_at: string;
+};
+
+/** What every member sees of a fundraiser: totals, and their own pledge. Never a name. */
+export type FundraiserSummary = Pick<
+  Fundraiser,
+  'id' | 'title' | 'description' | 'target_amount' | 'currency' | 'status' | 'created_at'
+> & {
+  received_total: number;
+  pledged_total: number;
+  my_pledge: number | null;
+};
+
 export type QuizLevel = 'little' | 'kids' | 'youth';
 
 /** A multiple-choice question a leader wrote. */
@@ -565,6 +604,23 @@ export type Database = {
           Relationship<'fund_transactions_updated_by_fkey', 'updated_by', 'profiles'>,
         ]
       >;
+      fundraisers: Table<
+        Fundraiser,
+        Pick<Fundraiser, 'church_id' | 'title' | 'created_by'> &
+          Partial<Pick<Fundraiser, 'description' | 'target_amount' | 'currency'>>,
+        Partial<Pick<Fundraiser, 'title' | 'description' | 'target_amount' | 'currency' | 'status'>>,
+        [
+          Relationship<'fundraisers_church_id_fkey', 'church_id', 'churches'>,
+          Relationship<'fundraisers_created_by_fkey', 'created_by', 'profiles'>,
+        ]
+      >;
+      fundraiser_entries: Table<
+        FundraiserEntry,
+        Pick<FundraiserEntry, 'fundraiser_id' | 'church_id' | 'kind' | 'amount' | 'created_by'> &
+          Partial<Pick<FundraiserEntry, 'party_name' | 'party_user_id' | 'occurred_on' | 'note'>>,
+        Partial<Pick<FundraiserEntry, 'amount' | 'party_name' | 'party_user_id' | 'occurred_on' | 'note'>>,
+        [Relationship<'fundraiser_entries_created_by_fkey', 'created_by', 'profiles'>]
+      >;
       bible_notes: Table<
         BibleNote,
         Pick<BibleNote, 'user_id' | 'book' | 'chapter' | 'verse' | 'body'>,
@@ -761,6 +817,8 @@ export type Database = {
         Returns: undefined;
       };
       end_sos_alert: { Args: { p_alert: string; p_reason: 'safe' | 'false_alarm' | 'ended_by_leader' }; Returns: undefined };
+      fundraiser_summaries: { Args: { p_church: string }; Returns: FundraiserSummary[] };
+      set_my_pledge: { Args: { p_fundraiser: string; p_amount: number | null }; Returns: undefined };
       church_funds_summary: { Args: { p_church: string }; Returns: FundsSummary[] };
       church_special_days: { Args: { p_church: string }; Returns: SpecialDayEntry[] };
       church_polls: { Args: { p_church: string }; Returns: PollSummary[] };
