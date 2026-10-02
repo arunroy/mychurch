@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ReportButton } from '@/components/report-sheet';
-import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, Title } from '@/components/ui';
+import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, Title, ToggleRow } from '@/components/ui';
 import { startConversation } from '@/lib/messages';
 import type { MemberRole } from '@/lib/database.types';
 import { ROLE_LABELS, useActiveChurch, usePermissions } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
 import { getDateLocale } from '@/lib/dates';
-import { memberName, useMembers, useRemoveMember, useSetRole } from '@/lib/members';
+import { memberName, useMembers, useRemoveMember, useSetRole, useSetWorshipLeader } from '@/lib/members';
 import { friendlyError, publicUrl } from '@/lib/supabase';
 
 // Leaders manage one member here. Only a Pastor can change roles.
@@ -20,6 +20,7 @@ export default function MemberScreen() {
   const { canChangeRoles, isPastor, isLeader } = usePermissions();
   const members = useMembers(church.id);
   const setRole = useSetRole(church.id);
+  const setWorshipLeader = useSetWorshipLeader(church.id);
   const remove = useRemoveMember(church.id);
   const [error, setError] = useState<string | null>(null);
   const [opening, setOpening] = useState(false);
@@ -90,6 +91,21 @@ export default function MemberScreen() {
               onPress={member.role === role || setRole.isPending ? undefined : () => changeRole(role)}
             />
           ))}
+        </Card>
+      ) : null}
+
+      {canChangeRoles && member.status === 'approved' ? (
+        <Card>
+          <ToggleRow
+            title={t('worship.leaderToggle')}
+            subtitle={t('worship.leaderToggleHint')}
+            value={member.is_worship_leader}
+            disabled={setWorshipLeader.isPending}
+            onValueChange={(value) => {
+              setError(null);
+              setWorshipLeader.mutate({ userId: member.user_id, value }, { onError: (e) => setError(friendlyError(e)) });
+            }}
+          />
         </Card>
       ) : null}
 

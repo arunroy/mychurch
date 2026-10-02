@@ -56,6 +56,12 @@ export function useSetRole(churchId: string) {
   );
 }
 
+export function useSetWorshipLeader(churchId: string) {
+  return useMemberAction(churchId, ({ userId, value }: { userId: string; value: boolean }) =>
+    supabase.rpc('set_worship_leader', { p_church: churchId, p_user: userId, p_value: value }),
+  );
+}
+
 export function useJoinCode(churchId: string, enabled: boolean) {
   return useQuery({
     queryKey: ['join-code', churchId],

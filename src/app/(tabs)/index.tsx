@@ -8,6 +8,7 @@ import { InviteCard } from '@/components/invite-card';
 import { SosBanner } from '@/components/sos-banner';
 import { SpecialDaysCard } from '@/components/special-days-card';
 import { VerseCard } from '@/components/verse-card';
+import { WorshipCard } from '@/components/worship-card';
 import { Button, Card, Heading, Screen } from '@/components/ui';
 import { useProfile } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
@@ -36,6 +37,8 @@ export default function HomeScreen() {
       <AnnouncementCards />
 
       <VerseCard />
+
+      <WorshipCard />
 
       <SpecialDaysCard />
 

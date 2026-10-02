@@ -215,6 +215,9 @@ function RootNavigator() {
           <Stack.Screen name="event-edit" options={{ title: t('titles.event') }} />
           <Stack.Screen name="new-message" options={{ title: t('messagesTab.newMessage') }} />
           <Stack.Screen name="chat/[id]" options={{ title: t('chatTab.title') }} />
+          <Stack.Screen name="worship" options={{ title: t('shortcuts.worship') }} />
+          <Stack.Screen name="worship-planner" options={{ title: t('shortcuts.worshipPlanner') }} />
+          <Stack.Screen name="songs" options={{ title: t('songs.title') }} />
           <Stack.Screen name="fundraisers" options={{ title: t('shortcuts.fundraisers') }} />
           <Stack.Screen name="fundraiser" options={{ title: t('shortcuts.fundraisers') }} />
           <Stack.Screen name="profile" options={{ title: t('titles.profile') }} />

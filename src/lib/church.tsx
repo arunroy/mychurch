@@ -122,6 +122,8 @@ export function usePermissions() {
     // Creates and manages the chat groups for committees and fellowships.
     canManageChatGroups: role === 'pastor' || role === 'elder',
     canChangeRoles: role === 'pastor',
+    // Plans the Sunday Psalm and songs: the Pastor, elders and anyone the Pastor marked as a worship leader.
+    canPlanWorship: role === 'pastor' || role === 'elder' || (role !== null && !!active?.is_worship_leader),
   };
 }
 

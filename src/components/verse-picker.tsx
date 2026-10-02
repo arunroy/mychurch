@@ -65,10 +65,13 @@ export function VersePicker({
   value,
   onChange,
   showTranslation = true,
+  lockedBook = false,
 }: {
   value: PassageDraft;
   onChange: (next: PassageDraft) => void;
   showTranslation?: boolean;
+  /** The book is already chosen in `value` and cannot be changed, such as a Psalm for worship. */
+  lockedBook?: boolean;
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -102,8 +105,10 @@ export function VersePicker({
         </View>
       ) : null}
 
-      <Selector label={t('picker.book')} value={value.book ?? t('picker.chooseBook')} open={panel === 'book'} onPress={() => toggle('book')} />
-      {panel === 'book' ? (
+      {lockedBook ? null : (
+        <Selector label={t('picker.book')} value={value.book ?? t('picker.chooseBook')} open={panel === 'book'} onPress={() => toggle('book')} />
+      )}
+      {panel === 'book' && !lockedBook ? (
         <View style={styles.panel}>
           <TextField
             label={t('bible.findBook')}

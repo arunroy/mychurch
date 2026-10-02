@@ -157,6 +157,61 @@ export type FundraiserSummary = Pick<
   my_pledge: number | null;
 };
 
+/** The Psalm and songs for one Sunday. The Psalm is optional; its book is always Psalms. */
+export type WorshipPlan = {
+  id: string;
+  church_id: string;
+  /** The Sunday, as YYYY-MM-DD. */
+  service_date: string;
+  psalm_chapter: number | null;
+  psalm_verse_start: number | null;
+  psalm_verse_end: number | null;
+  /** Like "Psalm 23:1-6", or empty. */
+  psalm_reference: string;
+  note: string;
+  created_by: string | null;
+  updated_by: string | null;
+  updated_at: string;
+};
+
+export type WorshipSong = {
+  id: string;
+  plan_id: string;
+  church_id: string;
+  position: number;
+  title: string;
+  artist: string;
+  /** A web link to listen to, or empty. */
+  link: string;
+  /** The library entry this song came from. Empty if that was deleted. */
+  song_id: string | null;
+};
+
+export type SongLanguage = 'en' | 'hi' | 'ta' | 'ml' | 'kn' | 'other';
+
+/** A song in the church's own library. Only the people who can plan worship can read these. */
+export type ChurchSong = {
+  id: string;
+  church_id: string;
+  title: string;
+  artist: string;
+  link: string;
+  language: SongLanguage;
+  /** Up to five lower-case tags. */
+  tags: string[];
+  created_by: string | null;
+  created_at: string;
+};
+
+/** A library song with how often and when it was sung, worked out from the plans. */
+export type SongLibraryEntry = Pick<ChurchSong, 'id' | 'title' | 'artist' | 'link' | 'language' | 'tags'> & {
+  times_sung: number;
+  /** The most recent Sunday it was planned for, up to today. */
+  last_sung: string | null;
+  /** The next Sunday it is planned for, after today. */
+  next_planned: string | null;
+};
+
 export type QuizLevel = 'little' | 'kids' | 'youth';
 
 /** A multiple-choice question a leader wrote. */
@@ -204,6 +259,8 @@ export type Membership = {
   role: MemberRole;
   status: MembershipStatus;
   directory_visible: boolean;
+  /** Can plan Sunday worship, besides the Pastor and elders. Set by the Pastor. */
+  is_worship_leader: boolean;
   created_at: string;
   approved_by: string | null;
   approved_at: string | null;
@@ -621,6 +678,14 @@ export type Database = {
         Partial<Pick<FundraiserEntry, 'amount' | 'party_name' | 'party_user_id' | 'occurred_on' | 'note'>>,
         [Relationship<'fundraiser_entries_created_by_fkey', 'created_by', 'profiles'>]
       >;
+      worship_plans: Table<WorshipPlan, never, never, [Relationship<'worship_plans_church_id_fkey', 'church_id', 'churches'>]>;
+      worship_songs: Table<WorshipSong, never, never, [Relationship<'worship_songs_church_id_fkey', 'church_id', 'churches'>]>;
+      church_songs: Table<
+        ChurchSong,
+        Pick<ChurchSong, 'church_id' | 'title' | 'created_by'> & Partial<Pick<ChurchSong, 'artist' | 'link' | 'language' | 'tags'>>,
+        Partial<Pick<ChurchSong, 'title' | 'artist' | 'link' | 'language' | 'tags'>>,
+        [Relationship<'church_songs_church_id_fkey', 'church_id', 'churches'>]
+      >;
       bible_notes: Table<
         BibleNote,
         Pick<BibleNote, 'user_id' | 'book' | 'chapter' | 'verse' | 'body'>,
@@ -819,6 +884,21 @@ export type Database = {
       end_sos_alert: { Args: { p_alert: string; p_reason: 'safe' | 'false_alarm' | 'ended_by_leader' }; Returns: undefined };
       fundraiser_summaries: { Args: { p_church: string }; Returns: FundraiserSummary[] };
       set_my_pledge: { Args: { p_fundraiser: string; p_amount: number | null }; Returns: undefined };
+      song_library: { Args: { p_church: string }; Returns: SongLibraryEntry[] };
+      set_worship_leader: { Args: { p_church: string; p_user: string; p_value: boolean }; Returns: undefined };
+      can_plan_worship: { Args: { p_church: string }; Returns: boolean };
+      save_worship_plan: {
+        Args: {
+          p_church: string;
+          p_date: string;
+          p_chapter: number | null;
+          p_verse_start: number | null;
+          p_verse_end: number | null;
+          p_note: string;
+          p_songs: { title: string; artist: string; link: string; language?: SongLanguage; tags?: string[] }[];
+        };
+        Returns: string;
+      };
       church_funds_summary: { Args: { p_church: string }; Returns: FundsSummary[] };
       church_special_days: { Args: { p_church: string }; Returns: SpecialDayEntry[] };
       church_polls: { Args: { p_church: string }; Returns: PollSummary[] };
