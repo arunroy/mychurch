@@ -32,18 +32,28 @@ export function timeText(date: Date) {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
+// Dates and times are written in the app's language, which the language provider sets here.
+let locale: string | undefined;
+export function setDateLocale(next: string | undefined) {
+  locale = next;
+}
+
+export function getDateLocale() {
+  return locale;
+}
+
 export function formatDay(key: string) {
-  return parseDateKey(key).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  return parseDateKey(key).toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
 export function formatTime(date: Date) {
-  return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  return date.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
 }
 
 /** Time for today's messages, and the day for older ones. */
 export function messageTime(date: Date) {
   if (dateKey(date) === dateKey()) return formatTime(date);
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 }
 
 export function addDays(key: string, days: number) {

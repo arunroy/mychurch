@@ -1,22 +1,33 @@
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Body, Button, Card, Chip, ErrorText, Heading, Loading, Screen, TextField, useAccentText } from '@/components/ui';
 import { VerseNoteSheet } from '@/components/verse-note-sheet';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useLanguage } from '@/i18n/language-preference';
 import { lookUpChapter } from '@/lib/bible';
+import { bookLabel } from '@/lib/bible-book-label';
 import { useChapterNotes } from '@/lib/bible-notes';
-import { BIBLE_BOOKS, displayBook, formatReference, TRANSLATIONS, type TranslationCode } from '@/lib/bible-books';
+import { BIBLE_BOOKS, formatReference } from '@/lib/bible-books';
+import { creditFor, defaultVersionFor, isIndianVersion, languageOf, versionsFor, type BibleVersionCode } from '@/lib/bible-versions';
 
-// A simple reader open to everyone: pick a translation, a book and a chapter, then read.
+// A simple reader open to everyone: pick a version, a book and a chapter, then read.
 // Tap a verse to keep a private note on it.
 export default function BibleScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const accent = useAccentText();
-  const [translation, setTranslation] = useState<TranslationCode>('web');
+  const { bibleLanguage } = useLanguage();
+  // The version the person picked here, remembered with the Bible language it was picked under, so
+  // changing the Bible language in the settings goes back to that language's own version.
+  const [picked, setPicked] = useState<{ language: string; code: BibleVersionCode } | null>(null);
+  const version = picked?.language === bibleLanguage ? picked.code : defaultVersionFor(bibleLanguage);
+  const setVersion = (code: BibleVersionCode) => setPicked({ language: bibleLanguage, code });
+
   // Study screens and the notes list can open the reader at a book and chapter; otherwise it starts at John 1.
   const params = useLocalSearchParams<{ book?: string; chapter?: string }>();
   const startBook = BIBLE_BOOKS.findIndex((b) => b.name === params.book);
@@ -32,16 +43,21 @@ export default function BibleScreen() {
   const [filter, setFilter] = useState('');
 
   const book = BIBLE_BOOKS[bookIndex];
+  // Book names follow the language of the version being read.
+  const readingLanguage = languageOf(version);
+  const label = (name: string) => bookLabel(name, readingLanguage);
+
   const text = useQuery({
-    queryKey: ['bible-chapter', translation, book.name, chapter],
+    queryKey: ['bible-chapter', version, book.name, chapter],
     staleTime: Infinity,
     retry: false,
-    queryFn: ({ signal }) => lookUpChapter(translation, book.name, chapter, signal),
+    queryFn: ({ signal }) => lookUpChapter(version, book.name, chapter, signal),
   });
 
   const notes = useChapterNotes(book.name, chapter);
   const noted = notes.data;
   const openVerse = noteVerse === null ? undefined : text.data?.verses.find((v) => v.number === noteVerse);
+  const credit = creditFor(version);
 
   const hasPrevious = chapter > 1 || bookIndex > 0;
   const hasNext = chapter < book.verses.length || bookIndex < BIBLE_BOOKS.length - 1;
@@ -61,38 +77,44 @@ export default function BibleScreen() {
     else go(bookIndex + 1, 1);
   }
 
-  const books = BIBLE_BOOKS.map((b, index) => ({ b, index })).filter(({ b }) =>
-    b.name.toLowerCase().includes(filter.trim().toLowerCase()),
+  // People can type a book's name in the language they read, or in English.
+  const query = filter.trim().toLowerCase();
+  const books = BIBLE_BOOKS.map((b, index) => ({ b, index })).filter(
+    ({ b }) => !query || b.name.toLowerCase().includes(query) || label(b.name).toLowerCase().includes(query),
   );
 
   return (
     <Screen edges={['bottom']}>
       <View style={styles.row}>
-        {TRANSLATIONS.map((t) => (
-          <Chip key={t.code} label={t.short} wide selected={t.code === translation} onPress={() => setTranslation(t.code)} />
+        {versionsFor(bibleLanguage).map((v) => (
+          <Chip key={v.code} label={v.short} wide selected={v.code === version} onPress={() => setVersion(v.code)} />
         ))}
       </View>
 
       <View style={styles.row}>
-        <Chip label={displayBook(book.name)} selected={picking === 'book'} onPress={() => setPicking(picking === 'book' ? null : 'book')} />
-        <Chip label={`Chapter ${chapter}`} selected={picking === 'chapter'} onPress={() => setPicking(picking === 'chapter' ? null : 'chapter')} />
+        <Chip label={label(book.name)} selected={picking === 'book'} onPress={() => setPicking(picking === 'book' ? null : 'book')} />
+        <Chip
+          label={t('bible.chapter', { number: chapter })}
+          selected={picking === 'chapter'}
+          onPress={() => setPicking(picking === 'chapter' ? null : 'chapter')}
+        />
       </View>
 
       {picking === 'book' ? (
         <View style={styles.gap}>
           <TextField
-            label="Find a book"
+            label={t('bible.findBook')}
             value={filter}
             onChangeText={setFilter}
             autoCapitalize="none"
             autoCorrect={false}
-            placeholder="Start typing, like Rom"
+            placeholder={t('bible.findBookPlaceholder')}
           />
           <View style={styles.row}>
             {books.map(({ b, index }) => (
               <Chip
                 key={b.name}
-                label={b.name}
+                label={label(b.name)}
                 selected={index === bookIndex}
                 onPress={() => {
                   setFilter('');
@@ -100,7 +122,7 @@ export default function BibleScreen() {
                 }}
               />
             ))}
-            {books.length === 0 ? <Body muted>No book matches that.</Body> : null}
+            {books.length === 0 ? <Body muted>{t('bible.noBook')}</Body> : null}
           </View>
         </View>
       ) : null}
@@ -114,12 +136,17 @@ export default function BibleScreen() {
       ) : null}
 
       <Card>
-        <Heading>{`${displayBook(book.name)} ${chapter}`}</Heading>
+        <Heading>{`${label(book.name)} ${chapter}`}</Heading>
         {text.isPending ? <Loading /> : null}
-        {text.isError ? <ErrorText>{text.error.message}</ErrorText> : null}
+        {text.isError ? (
+          <>
+            <ErrorText>{text.error.message}</ErrorText>
+            {isIndianVersion(version) ? <Button title={t('bible.tryEnglish')} variant="secondary" onPress={() => setVersion('web')} /> : null}
+          </>
+        ) : null}
         {text.data ? (
           <>
-            <Body muted>Tap a verse to add a note. Verses with a note are marked ✎.</Body>
+            <Body muted>{t('bible.tapVerse')}</Body>
             <Text style={[styles.passage, { color: theme.text }]}>
               {text.data.verses.map((v) => {
                 const hasNote = !!noted?.has(v.number);
@@ -128,7 +155,7 @@ export default function BibleScreen() {
                     key={v.number}
                     onPress={() => setNoteVerse(v.number)}
                     accessibilityRole="button"
-                    accessibilityLabel={`${hasNote ? 'Edit note on' : 'Add a note to'} verse ${v.number}`}>
+                    accessibilityLabel={t(hasNote ? 'bible.editNoteOn' : 'bible.addNoteTo', { number: v.number })}>
                     <Text style={[styles.number, { color: hasNote ? accent : theme.textSecondary }]}>
                       {hasNote ? `${v.number}✎ ` : `${v.number} `}
                     </Text>
@@ -137,6 +164,7 @@ export default function BibleScreen() {
                 );
               })}
             </Text>
+            {credit ? <Body muted>{credit}</Body> : null}
           </>
         ) : null}
       </Card>
@@ -144,7 +172,7 @@ export default function BibleScreen() {
       {openVerse ? (
         <VerseNoteSheet
           key={openVerse.number}
-          reference={formatReference(displayBook(book.name), chapter, openVerse.number, openVerse.number)}
+          reference={formatReference(label(book.name), chapter, openVerse.number, openVerse.number)}
           verseText={openVerse.text}
           book={book.name}
           chapter={chapter}
@@ -155,10 +183,10 @@ export default function BibleScreen() {
       ) : null}
 
       <View style={styles.row}>
-        {hasPrevious ? <Button title="Previous" variant="secondary" onPress={previous} /> : null}
-        {hasNext ? <Button title="Next" onPress={next} /> : null}
+        {hasPrevious ? <Button title={t('bible.previous')} variant="secondary" onPress={previous} /> : null}
+        {hasNext ? <Button title={t('bible.next')} onPress={next} /> : null}
       </View>
-      <Button title="My notes" variant="secondary" onPress={() => router.push('/bible-notes')} />
+      <Button title={t('bible.myNotes')} variant="secondary" onPress={() => router.push('/bible-notes')} />
     </Screen>
   );
 }
@@ -166,6 +194,7 @@ export default function BibleScreen() {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   gap: { gap: Spacing.two },
-  passage: { fontSize: 18, lineHeight: 28 },
+  // Taller than English needs, so the marks above and below Indian letters are not clipped.
+  passage: { fontSize: 18, lineHeight: 32 },
   number: { fontSize: 12, fontWeight: 600 },
 });

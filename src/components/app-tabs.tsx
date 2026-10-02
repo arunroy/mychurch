@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { TabList, TabSlot, TabTrigger, Tabs, type TabTriggerSlotProps } from 'expo-router/ui';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -26,6 +27,7 @@ export default function AppTabs({
 }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
     <Tabs>
@@ -41,19 +43,19 @@ export default function AppTabs({
           },
         ]}>
         <TabTrigger name="index" href="/" asChild>
-          <TabButton label="Home" icon="home-outline" activeIcon="home" badge={pendingCount} />
+          <TabButton label={t('tabs.home')} icon="home-outline" activeIcon="home" badge={pendingCount} />
         </TabTrigger>
         <TabTrigger name="calendar" href="/calendar" asChild>
-          <TabButton label="Calendar" icon="calendar-outline" activeIcon="calendar" />
+          <TabButton label={t('tabs.calendar')} icon="calendar-outline" activeIcon="calendar" />
         </TabTrigger>
         <TabTrigger name="chat" href="/chat" asChild>
-          <TabButton label="Chat" icon="people-outline" activeIcon="people" badge={chatUnread} />
+          <TabButton label={t('tabs.chat')} icon="people-outline" activeIcon="people" badge={chatUnread} />
         </TabTrigger>
         <TabTrigger name="messages" href="/messages" asChild>
-          <TabButton label="Messages" icon="mail-outline" activeIcon="mail" badge={unreadCount} />
+          <TabButton label={t('tabs.messages')} icon="mail-outline" activeIcon="mail" badge={unreadCount} />
         </TabTrigger>
         <TabTrigger name="more" href="/more" asChild>
-          <TabButton label="More" icon="ellipsis-horizontal-circle-outline" activeIcon="ellipsis-horizontal-circle" />
+          <TabButton label={t('tabs.more')} icon="ellipsis-horizontal-circle-outline" activeIcon="ellipsis-horizontal-circle" />
         </TabTrigger>
       </TabList>
     </Tabs>
@@ -69,6 +71,7 @@ function TabButton({
   ...props
 }: TabTriggerSlotProps & { label: string; icon: IconName; activeIcon: IconName; badge?: number }) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const accentText = useAccentText();
   const color = isFocused ? accentText : theme.textSecondary;
 
@@ -77,7 +80,7 @@ function TabButton({
       {...props}
       accessibilityRole="tab"
       accessibilityState={{ selected: !!isFocused }}
-      accessibilityLabel={badge > 0 ? `${label}, ${badge} new` : label}
+      accessibilityLabel={badge > 0 ? t('tabs.newBadge', { label, count: badge }) : label}
       style={styles.button}>
       <View style={[styles.pill, isFocused ? { backgroundColor: theme.backgroundSelected } : null]}>
         <Ionicons name={isFocused ? activeIcon : icon} size={30} color={color} />

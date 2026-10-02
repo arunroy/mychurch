@@ -1,30 +1,29 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { BookCard } from '@/components/book-card';
-import { TranslationChips } from '@/components/passage-sections';
+import { TranslationChips, useStartVersion } from '@/components/passage-sections';
 import { Body, Screen } from '@/components/ui';
-import type { TranslationCode } from '@/lib/bible-books';
 import { PAUL_LETTERS } from '@/lib/book-guide';
 
 // The thirteen letters that carry Paul's name, in Bible order.
 export default function PaulLettersScreen() {
-  const [translation, setTranslation] = useState<TranslationCode>('web');
+  const { t } = useTranslation();
+  const [translation, setTranslation] = useStartVersion();
   const [open, setOpen] = useState<string | null>(null);
 
   return (
     <Screen edges={['bottom']}>
-      <Body muted>
-        Thirteen letters from the apostle Paul. Dates are approximate. Tap a key verse to read it, or open the whole letter.
-      </Body>
+      <Body muted>{t('study.paulIntro')}</Body>
       <TranslationChips value={translation} onChange={setTranslation} />
       {PAUL_LETTERS.map((l) => (
         <BookCard
           key={l.book}
           book={l.book}
           facts={[
-            { label: 'Written to', value: l.to },
-            { label: 'Written from', value: l.writtenFrom },
-            { label: 'Date', value: l.date },
+            { label: t('study.writtenTo'), value: l.to },
+            { label: t('study.writtenFrom'), value: l.writtenFrom },
+            { label: t('study.date'), value: l.date },
           ]}
           theme={l.theme}
           keyVerse={l.keyVerse}

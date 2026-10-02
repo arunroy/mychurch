@@ -17,8 +17,8 @@ export type PassageDraft = {
   verseEnd: number;
 };
 
-/** The complete passage, once a book is chosen. */
-export function toPassage(draft: PassageDraft): Passage | null {
+/** The complete passage, once a book is chosen. The daily verse is always one of the English translations. */
+export function toPassage(draft: PassageDraft): (Passage & { translation: TranslationCode }) | null {
   return draft.book ? { ...draft, book: draft.book } : null;
 }
 

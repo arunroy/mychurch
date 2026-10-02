@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Body, Button, ErrorText, Heading, TextField, ToggleRow } from '@/components/ui';
@@ -30,6 +31,7 @@ export function VerseNoteSheet({
   existing: BibleNote | null;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { scheme } = useThemePreference();
   const { isPastor } = usePermissions();
@@ -68,22 +70,22 @@ export function VerseNoteSheet({
             <Heading>{reference}</Heading>
             <Text style={[styles.verse, { color: theme.textSecondary }]}>{verseText}</Text>
             <TextField
-              label="Your note"
-              hint="Only you can see your notes."
+              label={t('notes.yourNote')}
+              hint={t('notes.onlyYou')}
               value={body}
               onChangeText={setBody}
               multiline
               autoFocus
               maxLength={2000}
-              placeholder="What is God saying to you in this verse?"
+              placeholder={t('notes.placeholder')}
               style={{ minHeight: 120, paddingTop: 12, textAlignVertical: 'top' }}
             />
             <ErrorText>{error}</ErrorText>
-            <Button title={existing ? 'Save changes' : 'Save note'} onPress={onSave} loading={save.isPending} disabled={!body.trim() || body.trim() === existing?.body} />
-            {existing ? <Button title="Delete note" variant="danger" onPress={onDelete} loading={remove.isPending} /> : null}
+            <Button title={existing ? t('notes.saveChanges') : t('notes.saveNote')} onPress={onSave} loading={save.isPending} disabled={!body.trim() || body.trim() === existing?.body} />
+            {existing ? <Button title={t('notes.deleteNote')} variant="danger" onPress={onDelete} loading={remove.isPending} /> : null}
             {isPastor ? null : <AskPastor reference={reference} />}
             <Pressable onPress={onClose} accessibilityRole="button" style={styles.cancel}>
-              <Body muted>Cancel</Body>
+              <Body muted>{t('common.cancel')}</Body>
             </Pressable>
           </ScrollView>
         </View>
@@ -98,6 +100,7 @@ export function VerseNoteSheet({
  * the question they type here, headed with the verse reference.
  */
 function AskPastor({ reference }: { reference: string }) {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const ask = useAsk(church_id);
   const [question, setQuestion] = useState('');
@@ -106,7 +109,7 @@ function AskPastor({ reference }: { reference: string }) {
   const [sent, setSent] = useState(false);
 
   // The Questions screen holds up to 500 characters in all, and the heading takes some of them.
-  const heading = `About ${reference}: `;
+  const heading = t('notes.aboutHeading', { reference });
 
   async function onSend() {
     setError(null);
@@ -122,10 +125,10 @@ function AskPastor({ reference }: { reference: string }) {
 
   return (
     <View style={styles.ask}>
-      <Heading>Ask the Pastor about this verse</Heading>
-      <Body muted>Your question goes to the Pastor, who may answer it and share it with the church. Your note stays private.</Body>
+      <Heading>{t('notes.askTitle')}</Heading>
+      <Body muted>{t('notes.askIntro')}</Body>
       <TextField
-        label="Your question"
+        label={t('notes.yourQuestion')}
         value={question}
         onChangeText={(text) => {
           setQuestion(text);
@@ -136,14 +139,14 @@ function AskPastor({ reference }: { reference: string }) {
         style={{ minHeight: 80, paddingTop: 12, textAlignVertical: 'top' }}
       />
       <ToggleRow
-        title="Don’t show my name"
-        subtitle="You can’t take it back, and you will only see the answer if the Pastor shares it with the church. Limited to 5 a day, with other anonymous questions."
+        title={t('notes.anonymous')}
+        subtitle={t('notes.anonymousHint')}
         value={anonymous}
         onValueChange={setAnonymous}
       />
       <ErrorText>{error}</ErrorText>
-      {sent ? <Body>Thank you. Your question has gone to the Pastor.</Body> : null}
-      <Button title="Send to the Pastor" variant="secondary" onPress={onSend} loading={ask.isPending} disabled={!question.trim()} />
+      {sent ? <Body>{t('notes.thanks')}</Body> : null}
+      <Button title={t('notes.send')} variant="secondary" onPress={onSend} loading={ask.isPending} disabled={!question.trim()} />
     </View>
   );
 }

@@ -1,22 +1,23 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { BookCard } from '@/components/book-card';
-import { TranslationChips } from '@/components/passage-sections';
+import { TranslationChips, useStartVersion } from '@/components/passage-sections';
 import { Body, Chip, Screen } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
-import type { TranslationCode } from '@/lib/bible-books';
 import { BOOK_GROUPS, BOOK_GUIDE, type BookGroup } from '@/lib/book-guide';
 
 // All 66 books, one group at a time.
 export default function BooksOverviewScreen() {
   const [group, setGroup] = useState<BookGroup>('The Law');
-  const [translation, setTranslation] = useState<TranslationCode>('web');
+  const { t } = useTranslation();
+  const [translation, setTranslation] = useStartVersion();
   const [open, setOpen] = useState<string | null>(null);
 
   return (
     <Screen edges={['bottom']}>
-      <Body muted>Every book of the Bible in a few lines. Authors are the traditional ones.</Body>
+      <Body muted>{t('study.booksIntro')}</Body>
       <View style={styles.chips}>
         {BOOK_GROUPS.map((g) => (
           <Chip
@@ -35,7 +36,7 @@ export default function BooksOverviewScreen() {
         <BookCard
           key={b.book}
           book={b.book}
-          facts={[{ label: 'Author', value: b.author }]}
+          facts={[{ label: t('study.author'), value: b.author }]}
           theme={b.theme}
           keyVerse={b.keyVerse}
           translation={translation}

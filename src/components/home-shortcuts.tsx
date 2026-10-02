@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Heading, useAccent } from '@/components/ui';
@@ -22,6 +23,7 @@ type Shortcut = {
 
 /** Big tappable tiles for the things people do most, each shown only to the people who can use it. */
 export function HomeShortcuts() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isLeader, isPastor, canEditChurch } = usePermissions();
   const members = useMembers(church_id);
@@ -32,23 +34,23 @@ export function HomeShortcuts() {
   const reportsToReview = useOpenReportCount(church_id, isLeader, isPlatformAdmin);
 
   const shortcuts: Shortcut[] = [
-    { label: 'Bible', icon: 'book-outline', path: '/bible', show: true },
-    { label: 'Bible study', icon: 'school', path: '/bible-study', show: true },
-    { label: 'Members', icon: 'people', path: '/members', badge: pending, show: true },
-    { label: 'Sermons', icon: 'mic', path: '/sermons', badge: sermonsToReview, show: true },
-    { label: 'Questions & answers', icon: 'help-circle', path: '/qa', badge: unanswered, show: true },
-    { label: 'Prayer requests', icon: 'heart', path: '/prayer', show: true },
-    { label: 'Polls', icon: 'stats-chart', path: '/polls', show: true },
-    { label: 'Daily verse', icon: 'book', path: '/daily-verse', show: isPastor },
-    { label: 'Reports', icon: 'flag', path: '/reports', badge: reportsToReview, show: isLeader || isPlatformAdmin },
-    { label: 'Birthdays and anniversaries', icon: 'gift', path: '/special-days', show: isLeader },
-    { label: 'Announcements', icon: 'megaphone', path: '/announcements', show: isLeader },
-    { label: 'Church settings', icon: 'settings', path: '/church-settings', show: canEditChurch },
+    { label: t('shortcuts.bible'), icon: 'book-outline', path: '/bible', show: true },
+    { label: t('shortcuts.bibleStudy'), icon: 'school', path: '/bible-study', show: true },
+    { label: t('shortcuts.members'), icon: 'people', path: '/members', badge: pending, show: true },
+    { label: t('shortcuts.sermons'), icon: 'mic', path: '/sermons', badge: sermonsToReview, show: true },
+    { label: t('shortcuts.qa'), icon: 'help-circle', path: '/qa', badge: unanswered, show: true },
+    { label: t('shortcuts.prayer'), icon: 'heart', path: '/prayer', show: true },
+    { label: t('shortcuts.polls'), icon: 'stats-chart', path: '/polls', show: true },
+    { label: t('shortcuts.dailyVerse'), icon: 'book', path: '/daily-verse', show: isPastor },
+    { label: t('shortcuts.reports'), icon: 'flag', path: '/reports', badge: reportsToReview, show: isLeader || isPlatformAdmin },
+    { label: t('shortcuts.specialDays'), icon: 'gift', path: '/special-days', show: isLeader },
+    { label: t('shortcuts.announcements'), icon: 'megaphone', path: '/announcements', show: isLeader },
+    { label: t('shortcuts.churchSettings'), icon: 'settings', path: '/church-settings', show: canEditChurch },
   ];
 
   return (
     <View style={styles.section}>
-      <Heading>Church</Heading>
+      <Heading>{t('home.churchSection')}</Heading>
       <View style={styles.grid}>
         {shortcuts
           .filter((s) => s.show)
@@ -61,12 +63,13 @@ export function HomeShortcuts() {
 }
 
 function Tile({ shortcut }: { shortcut: Shortcut }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const accent = useAccent();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={shortcut.badge ? `${shortcut.label}, ${shortcut.badge} waiting` : shortcut.label}
+      accessibilityLabel={shortcut.badge ? t('shortcuts.waiting', { label: shortcut.label, count: shortcut.badge }) : shortcut.label}
       onPress={() => router.push(shortcut.path)}
       style={({ pressed }) => [styles.tile, { backgroundColor: theme.backgroundElement, opacity: pressed ? 0.7 : 1 }]}>
       <View style={[styles.iconCircle, { backgroundColor: accent }]}>

@@ -4,10 +4,12 @@ import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, type Href } from
 import { LinearGradient } from 'expo-linear-gradient';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppState, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { Colors, findTheme, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { LanguageProvider } from '@/i18n/language-preference';
 import { useTheme } from '@/hooks/use-theme';
 import { AuthProvider, useAuth, useProfile } from '@/lib/auth';
 import { ChurchProvider, useChurch } from '@/lib/church';
@@ -29,9 +31,11 @@ if (Platform.OS !== 'web') {
 
 export default function RootLayout() {
   return (
-    <ThemePreferenceProvider>
-      <ThemedApp />
-    </ThemePreferenceProvider>
+    <LanguageProvider>
+      <ThemePreferenceProvider>
+        <ThemedApp />
+      </ThemePreferenceProvider>
+    </LanguageProvider>
   );
 }
 
@@ -93,6 +97,7 @@ function CloseLegalScreen({ home }: { home: Href }) {
 }
 
 function RootNavigator() {
+  const { t } = useTranslation();
   const { session, loading: authLoading } = useAuth();
   const profile = useProfile();
   const { state } = useChurch();
@@ -132,8 +137,8 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
-      <Stack.Screen name="privacy" options={{ title: 'Privacy policy', headerLeft: closeLegal }} />
-      <Stack.Screen name="terms" options={{ title: 'Terms of use', headerLeft: closeLegal }} />
+      <Stack.Screen name="privacy" options={{ title: t('titles.privacy'), headerLeft: closeLegal }} />
+      <Stack.Screen name="terms" options={{ title: t('titles.terms'), headerLeft: closeLegal }} />
 
       <Stack.Protected guard={!isConfigured}>
         <Stack.Screen name="setup-needed" options={{ headerShown: false }} />
@@ -158,16 +163,16 @@ function RootNavigator() {
       <Stack.Protected guard={onboarded && state === 'ready'}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="church-settings" options={{ title: 'Church settings' }} />
-        <Stack.Screen name="bible" options={{ title: 'Bible' }} />
-        <Stack.Screen name="bible-notes" options={{ title: 'My notes' }} />
-        <Stack.Screen name="bible-study" options={{ title: 'Bible study' }} />
-        <Stack.Screen name="bible-study/christ" options={{ title: 'Jesus quick reference' }} />
-        <Stack.Screen name="bible-study/doctrines" options={{ title: 'New Testament doctrines' }} />
-        <Stack.Screen name="bible-study/paul" options={{ title: "Paul's letters" }} />
-        <Stack.Screen name="bible-study/books" options={{ title: 'Books of the Bible' }} />
-        <Stack.Screen name="bible-study/promises" options={{ title: 'Promises and help' }} />
-        <Stack.Screen name="bible-study/quiz" options={{ title: 'Bible quiz' }} />
-        <Stack.Screen name="bible-study/quiz-questions" options={{ title: 'Quiz questions' }} />
+        <Stack.Screen name="bible" options={{ title: t('titles.bible') }} />
+        <Stack.Screen name="bible-notes" options={{ title: t('titles.myNotes') }} />
+        <Stack.Screen name="bible-study" options={{ title: t('titles.bibleStudy') }} />
+        <Stack.Screen name="bible-study/christ" options={{ title: t('titles.christ') }} />
+        <Stack.Screen name="bible-study/doctrines" options={{ title: t('titles.doctrines') }} />
+        <Stack.Screen name="bible-study/paul" options={{ title: t('titles.paul') }} />
+        <Stack.Screen name="bible-study/books" options={{ title: t('titles.books') }} />
+        <Stack.Screen name="bible-study/promises" options={{ title: t('titles.promises') }} />
+        <Stack.Screen name="bible-study/quiz" options={{ title: t('titles.quiz') }} />
+        <Stack.Screen name="bible-study/quiz-questions" options={{ title: t('titles.quizQuestions') }} />
         <Stack.Screen name="special-days" options={{ title: 'Birthdays and anniversaries' }} />
         <Stack.Screen name="members" options={{ title: 'Members' }} />
         <Stack.Screen name="member/[id]" options={{ title: 'Member' }} />

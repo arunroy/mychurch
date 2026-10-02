@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { AnnouncementCards } from '@/components/announcement-cards';
 import { ChurchHeader } from '@/components/church-header';
@@ -12,6 +13,7 @@ import { useActiveChurch, usePermissions } from '@/lib/church';
 import { useMembers } from '@/lib/members';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const profile = useProfile();
   const active = useActiveChurch();
   const { isLeader } = usePermissions();
@@ -25,7 +27,7 @@ export default function HomeScreen() {
       <ChurchHeader />
 
       <Card>
-        <Heading>Welcome, {firstName}</Heading>
+        <Heading>{t('home.welcome', { name: firstName })}</Heading>
       </Card>
 
       <AnnouncementCards />
@@ -38,10 +40,8 @@ export default function HomeScreen() {
 
       {isLeader && pending.length > 0 ? (
         <Card>
-          <Heading>
-            {pending.length === 1 ? '1 person wants to join' : `${pending.length} people want to join`}
-          </Heading>
-          <Button title="Review requests" onPress={() => router.push('/members')} />
+          <Heading>{t('home.wantToJoin', { count: pending.length })}</Heading>
+          <Button title={t('home.reviewRequests')} onPress={() => router.push('/members')} />
         </Card>
       ) : null}
 

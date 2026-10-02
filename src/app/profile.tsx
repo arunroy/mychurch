@@ -1,17 +1,20 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { router } from 'expo-router';
 import { Avatar, Body, Button, Card, Chip, ErrorText, Heading, Screen, TextField, ToggleRow } from '@/components/ui';
+import { AppLanguagePicker, BibleLanguagePicker } from '@/components/language-pickers';
 import { Spacing } from '@/constants/theme';
 import { useProfile, useUserId } from '@/lib/auth';
 import { useActiveChurch, useChurch } from '@/lib/church';
 import { pickAndUploadImage } from '@/lib/images';
-import { daysInMonth, MONTHS } from '@/lib/special-days';
+import { daysInMonth } from '@/lib/special-days';
 import { friendlyError, publicUrl, supabase } from '@/lib/supabase';
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const userId = useUserId()!;
   const profile = useProfile();
   const active = useActiveChurch();
@@ -92,10 +95,10 @@ export default function ProfileScreen() {
   return (
     <Screen edges={['bottom']}>
       <Avatar name={profile.data?.full_name ?? ''} uri={publicUrl('avatars', profile.data?.avatar_path)} size={96} />
-      <Button title="Change photo" variant="secondary" onPress={changePhoto} loading={busy === 'photo'} />
+      <Button title={t('profile.changePhoto')} variant="secondary" onPress={changePhoto} loading={busy === 'photo'} />
 
       <TextField
-        label="Your name"
+        label={t('profile.yourName')}
         value={name}
         onChangeText={(text) => {
           setName(text);
@@ -105,36 +108,36 @@ export default function ProfileScreen() {
         maxLength={100}
       />
       <Button
-        title={saved ? 'Saved' : 'Save name'}
+        title={saved ? t('profile.saved') : t('profile.saveName')}
         onPress={saveName}
         loading={busy === 'name'}
         disabled={name.trim().length < 2 || name.trim() === profile.data?.full_name}
       />
 
       <Card>
-        <Heading>Your birthday</Heading>
-        <Body muted>Your church sees it on Home so they can wish and pray for you. The year is never saved.</Body>
+        <Heading>{t('profile.birthdayTitle')}</Heading>
+        <Body muted>{t('profile.birthdayHint')}</Body>
         <View style={styles.chips}>
-          {MONTHS.map((label, i) => (
-            <Chip key={label} label={label.slice(0, 3)} selected={birthMonth === i + 1} onPress={() => setBirthMonth(i + 1)} />
+          {(t('months.short', { returnObjects: true }) as string[]).map((label, i) => (
+            <Chip key={i} label={label} selected={birthMonth === i + 1} onPress={() => setBirthMonth(i + 1)} />
           ))}
         </View>
-        <TextField label="Day" value={birthDay} onChangeText={setBirthDay} keyboardType="number-pad" maxLength={2} placeholder="14" />
+        <TextField label={t('profile.day')} value={birthDay} onChangeText={setBirthDay} keyboardType="number-pad" maxLength={2} placeholder="14" />
         <Button
-          title="Save birthday"
+          title={t('profile.saveBirthday')}
           onPress={() => saveBirthday(false)}
           loading={busy === 'birthday'}
           disabled={!birthdayValid || !birthdayChanged}
         />
         {profile.data?.birth_month ? (
-          <Button title="Remove my birthday" variant="secondary" onPress={() => saveBirthday(true)} disabled={busy === 'birthday'} />
+          <Button title={t('profile.removeBirthday')} variant="secondary" onPress={() => saveBirthday(true)} disabled={busy === 'birthday'} />
         ) : null}
       </Card>
 
       <Card>
         <ToggleRow
-          title={`Show me in the ${active.church.name} directory`}
-          subtitle="Leaders can always see you. Your birthday is hidden from the church too if you turn this off."
+          title={t('profile.directory', { church: active.church.name })}
+          subtitle={t('profile.directoryHint')}
           value={active.directory_visible}
           onValueChange={setDirectoryVisible}
           disabled={busy === 'directory'}
@@ -142,9 +145,17 @@ export default function ProfileScreen() {
       </Card>
 
       <ErrorText>{error}</ErrorText>
-      <Body muted>Your email is never shown to other members.</Body>
+      <Card>
+        <AppLanguagePicker />
+      </Card>
 
-      <Button title="Delete my account" variant="danger" onPress={() => router.push('/delete-account')} />
+      <Card>
+        <BibleLanguagePicker />
+      </Card>
+
+      <Body muted>{t('profile.emailPrivate')}</Body>
+
+      <Button title={t('profile.deleteAccount')} variant="danger" onPress={() => router.push('/delete-account')} />
     </Screen>
   );
 }
