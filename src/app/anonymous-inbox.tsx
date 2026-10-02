@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Body, Button, Card, ErrorText, Gap, Loading, Screen, TextField } from '@/components/ui';
 import {
@@ -15,6 +16,7 @@ import { friendlyError } from '@/lib/supabase';
 
 // The Pastor's anonymous messages. Nobody, the Pastor included, can see who wrote them.
 export default function AnonymousInboxScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isPastor } = usePermissions();
   const inbox = useAnonymousInbox(church_id, isPastor);
@@ -22,17 +24,17 @@ export default function AnonymousInboxScreen() {
   if (!isPastor) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>Only the Pastor can read anonymous messages.</Body>
+        <Body muted>{t('anonymous.onlyPastor')}</Body>
       </Screen>
     );
   }
 
   return (
     <Screen edges={['bottom']}>
-      <Body muted>Nobody can see who wrote these. You can reply only where the sender asked for one.</Body>
+      <Body muted>{t('anonymous.inboxIntro')}</Body>
       <ErrorText>{inbox.error ? friendlyError(inbox.error) : null}</ErrorText>
       {inbox.isPending ? <Loading /> : null}
-      {inbox.data?.length === 0 ? <Body muted>No anonymous messages.</Body> : null}
+      {inbox.data?.length === 0 ? <Body muted>{t('anonymous.none')}</Body> : null}
       {inbox.data?.map((message) => <MessageCard key={message.id} message={message} />)}
       <Gap />
     </Screen>
@@ -40,6 +42,7 @@ export default function AnonymousInboxScreen() {
 }
 
 function MessageCard({ message }: { message: AnonymousInboxItem }) {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const markRead = useMarkAnonymousRead(church_id);
   const reply = useReplyToAnonymous(church_id);
@@ -58,28 +61,28 @@ function MessageCard({ message }: { message: AnonymousInboxItem }) {
 
   return (
     <Card>
-      <Body muted>{`${shortDate(`${message.sent_on}T12:00:00`)}${message.is_read ? '' : ' · New'}`}</Body>
+      <Body muted>{message.is_read ? shortDate(`${message.sent_on}T12:00:00`) : t('anonymous.newOn', { date: shortDate(`${message.sent_on}T12:00:00`) })}</Body>
       <Body>{message.body}</Body>
       <ErrorText>{error}</ErrorText>
 
       {message.reply ? (
         <>
-          <Body muted>{`Your reply${message.replied_on ? ` on ${shortDate(`${message.replied_on}T12:00:00`)}` : ''}:`}</Body>
+          <Body muted>{message.replied_on ? t('anonymous.yourReplyOn', { date: shortDate(`${message.replied_on}T12:00:00`) }) : t('anonymous.yourReply')}</Body>
           <Body>{message.reply}</Body>
         </>
       ) : message.can_reply ? (
         <>
           <TextField
-            label="Reply"
+            label={t('elders.reply')}
             value={text}
             onChangeText={setText}
             multiline
             maxLength={2000}
             style={{ minHeight: 90, paddingTop: 12, textAlignVertical: 'top' }}
-            hint="The sender sees this when they enter their code."
+            hint={t('anonymous.replyHint')}
           />
           <Button
-            title="Send reply"
+            title={t('anonymous.sendReply')}
             loading={reply.isPending}
             disabled={!text.trim()}
             onPress={() => run(async () => {
@@ -89,18 +92,18 @@ function MessageCard({ message }: { message: AnonymousInboxItem }) {
           />
         </>
       ) : (
-        <Body muted>The sender did not ask for a reply, so there is no way to answer.</Body>
+        <Body muted>{t('anonymous.noWay')}</Body>
       )}
 
       {!message.is_read ? (
-        <Button title="Mark as read" variant="secondary" loading={markRead.isPending} onPress={() => run(() => markRead.mutateAsync(message.id))} />
+        <Button title={t('anonymous.markRead')} variant="secondary" loading={markRead.isPending} onPress={() => run(() => markRead.mutateAsync(message.id))} />
       ) : null}
       <Button
-        title="Delete"
+        title={t('common.delete')}
         variant="danger"
         loading={remove.isPending}
         onPress={() =>
-          confirm('Delete this message?', 'It will be removed for good.', 'Delete', () => run(() => remove.mutateAsync(message.id)))
+          confirm(t('anonymous.deleteTitle'), t('anonymous.deleteMessage'), t('common.delete'), () => run(() => remove.mutateAsync(message.id)))
         }
       />
     </Card>

@@ -8,8 +8,14 @@ export type PushMessage = {
   title: string;
   body: string;
   sound: 'default';
-  channelId: 'default';
+  channelId: 'default' | 'alerts';
   data: Record<string, unknown>;
+  /** 'high' wakes a sleeping phone at once. */
+  priority?: 'default' | 'normal' | 'high';
+  /** iOS only. 'time-sensitive' breaks through Focus modes; 'critical' needs Apple's approval for the app. */
+  interruptionLevel?: 'active' | 'passive' | 'time-sensitive' | 'critical';
+  /** Seconds the push service keeps trying to deliver. */
+  ttl?: number;
 };
 
 /** Sends the messages and returns how many were accepted, plus tokens Expo says no longer exist. */

@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { DateField, TimeField } from '@/components/date-time-fields';
@@ -21,7 +22,8 @@ import { friendlyError } from '@/lib/supabase';
 
 // Adds an event, or with ?id= edits one. Anyone in the church can add; only the creator or a leader can edit.
 export default function EventEditScreen() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { t } = useTranslation();
+  const { id, date } = useLocalSearchParams<{ id?: string; date?: string }>();
   const { church_id } = useActiveChurch();
   const event = useEvent(church_id, id);
 
@@ -29,14 +31,15 @@ export default function EventEditScreen() {
   if (id && !event.data) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>This event is no longer on the calendar.</Body>
+        <Body muted>{t('event.gone')}</Body>
       </Screen>
     );
   }
-  return <EventForm existing={event.data ?? null} />;
+  return <EventForm existing={event.data ?? null} initialDate={date && isValidDateKey(date) ? date : ''} />;
 }
 
-function EventForm({ existing }: { existing: EventWithCreator | null }) {
+function EventForm({ existing, initialDate }: { existing: EventWithCreator | null; initialDate: string }) {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isLeader } = usePermissions();
   const userId = useUserId();
@@ -45,7 +48,7 @@ function EventForm({ existing }: { existing: EventWithCreator | null }) {
   const start = existing ? new Date(existing.starts_at) : null;
   const end = existing?.ends_at ? new Date(existing.ends_at) : null;
   const [title, setTitle] = useState(existing?.title ?? '');
-  const [date, setDate] = useState(start ? dateKey(start) : '');
+  const [date, setDate] = useState(start ? dateKey(start) : initialDate);
   const [startTime, setStartTime] = useState(start ? timeText(start) : '');
   const [endTime, setEndTime] = useState(end ? timeText(end) : '');
   const [location, setLocation] = useState(existing?.location ?? '');
@@ -55,7 +58,7 @@ function EventForm({ existing }: { existing: EventWithCreator | null }) {
   if (existing && !canManageEvent(existing, userId ?? undefined, isLeader)) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>Only the person who added this event, or a church leader, can change it.</Body>
+        <Body muted>{t('eventEdit.onlyOwner')}</Body>
       </Screen>
     );
   }
@@ -89,9 +92,9 @@ function EventForm({ existing }: { existing: EventWithCreator | null }) {
 
   const today = dateKey();
   const shortcuts = [
-    { label: 'Today', value: today },
-    { label: 'Tomorrow', value: addDays(today, 1) },
-    { label: 'Sunday', value: thisSunday() },
+    { label: t('eventEdit.today'), value: today },
+    { label: t('eventEdit.tomorrow'), value: addDays(today, 1) },
+    { label: t('eventEdit.sunday'), value: thisSunday() },
   ];
 
   return (
@@ -99,11 +102,11 @@ function EventForm({ existing }: { existing: EventWithCreator | null }) {
       <ErrorText>{error}</ErrorText>
 
       <Card>
-        <Heading>What</Heading>
-        <TextField label="Title" value={title} onChangeText={setTitle} maxLength={120} placeholder="Youth night" />
-        <TextField label="Where (optional)" value={location} onChangeText={setLocation} maxLength={200} />
+        <Heading>{t('eventEdit.what')}</Heading>
+        <TextField label={t('common.title')} value={title} onChangeText={setTitle} maxLength={120} placeholder={t('eventEdit.placeholder')} />
+        <TextField label={t('eventEdit.where')} value={location} onChangeText={setLocation} maxLength={200} />
         <TextField
-          label="Details (optional)"
+          label={t('announce.details')}
           value={description}
           onChangeText={setDescription}
           multiline
@@ -113,8 +116,8 @@ function EventForm({ existing }: { existing: EventWithCreator | null }) {
       </Card>
 
       <Card>
-        <Heading>When</Heading>
-        <DateField label="Date" value={date} onChange={setDate} />
+        <Heading>{t('eventEdit.when')}</Heading>
+        <DateField label={t('study.date')} value={date} onChange={setDate} />
         <View style={styles.shortcuts}>
           {shortcuts.map((shortcut) => (
             <Button
@@ -128,25 +131,25 @@ function EventForm({ existing }: { existing: EventWithCreator | null }) {
         </View>
         <View style={styles.times}>
           <View style={styles.time}>
-            <TimeField label="Starts" value={startTime} onChange={setStartTime} />
+            <TimeField label={t('eventEdit.starts')} value={startTime} onChange={setStartTime} />
           </View>
           <View style={styles.time}>
-            <TimeField label="Ends" value={endTime} onChange={setEndTime} optional />
+            <TimeField label={t('eventEdit.ends')} value={endTime} onChange={setEndTime} optional />
           </View>
         </View>
         <Body muted>
           {!dateOk
-            ? 'Choose the date.'
+            ? t('sermonEdit.chooseDate')
             : !startOk
-              ? 'Choose when it starts. The end time is optional.'
+              ? t('eventEdit.chooseStart')
               : !endAfterStart
-                ? 'The end has to be after the start.'
-                : 'The end time is optional.'}
+                ? t('eventEdit.endAfter')
+                : t('eventEdit.endOptional')}
         </Body>
       </Card>
 
       <Button
-        title={existing ? 'Save changes' : 'Add to the calendar'}
+        title={existing ? t('notes.saveChanges') : t('eventEdit.save')}
         onPress={onSave}
         loading={save.isPending}
         disabled={!canSave}

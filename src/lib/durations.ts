@@ -1,3 +1,5 @@
+import { getDateLocale } from './dates';
+
 /** "How long should this last" choices for announcements and polls. `days: null` means no end. */
 export type Duration = { label: string; days: number | null };
 
@@ -13,5 +15,5 @@ export function endsAfter(days: number | null): Date | null {
 }
 
 export function shortDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return new Date(iso).toLocaleDateString(getDateLocale(), { month: 'short', day: 'numeric' });
 }

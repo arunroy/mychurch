@@ -1,13 +1,16 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
 
+import { AppLanguagePicker } from '@/components/language-pickers';
 import { Body, Button, ErrorText, Screen, TextField, Title } from '@/components/ui';
 import { useTheme } from '@/hooks/use-theme';
 import { sendSignInCode, verifySignInCode } from '@/lib/auth';
 import { friendlyError } from '@/lib/supabase';
 
 export default function SignInScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -37,7 +40,7 @@ export default function SignInScreen() {
       // On success the session changes and the app moves on by itself.
       await verifySignInCode(email, code);
     } catch {
-      setError('That code didn’t work. Check it, or send a new one.');
+      setError(t('signIn.badCode'));
       setBusy(false);
     }
   }
@@ -45,31 +48,32 @@ export default function SignInScreen() {
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Screen>
-        <Title>Welcome to MyChurch</Title>
-        <Body muted>Stay connected with your church family. Sign in with your email, no password needed.</Body>
+        <AppLanguagePicker showHeading={false} />
+        <Title>{t('signIn.welcome')}</Title>
+        <Body muted>{t('signIn.intro')}</Body>
 
         {!codeSent ? (
           <>
             <TextField
-              label="Email"
+              label={t('common.email')}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
               textContentType="emailAddress"
-              placeholder="you@example.com"
+              placeholder={t('signIn.emailPlaceholder')}
               returnKeyType="send"
               onSubmitEditing={() => emailLooksValid && sendCode()}
             />
             <ErrorText>{error}</ErrorText>
-            <Button title="Send me a code" onPress={sendCode} loading={busy} disabled={!emailLooksValid} />
+            <Button title={t('signIn.sendCode')} onPress={sendCode} loading={busy} disabled={!emailLooksValid} />
           </>
         ) : (
           <>
-            <Body>We sent a code to {email.trim()}. Enter it below.</Body>
+            <Body>{t('signIn.sentTo', { email: email.trim() })}</Body>
             <TextField
-              label="Code"
+              label={t('signIn.code')}
               value={code}
               onChangeText={(text) => setCode(text.replace(/\D/g, ''))}
               keyboardType="number-pad"
@@ -80,10 +84,10 @@ export default function SignInScreen() {
               autoFocus
             />
             <ErrorText>{error}</ErrorText>
-            <Button title="Sign in" onPress={verify} loading={busy} disabled={code.length < 6} />
-            <Button title="Send a new code" variant="secondary" onPress={sendCode} disabled={busy} />
+            <Button title={t('signIn.signIn')} onPress={verify} loading={busy} disabled={code.length < 6} />
+            <Button title={t('signIn.sendNewCode')} variant="secondary" onPress={sendCode} disabled={busy} />
             <Button
-              title="Use a different email"
+              title={t('signIn.differentEmail')}
               variant="secondary"
               onPress={() => {
                 setCodeSent(false);
@@ -95,13 +99,13 @@ export default function SignInScreen() {
         )}
 
         <Text style={[styles.legal, { color: theme.textSecondary }]}>
-          {'By continuing you agree to the '}
+          {t('signIn.agree')}
           <Text style={[styles.link, { color: theme.text }]} accessibilityRole="link" onPress={() => router.push('/terms')}>
-            Terms of use
+            {t('signIn.terms')}
           </Text>
-          {' and the '}
+          {t('signIn.and')}
           <Text style={[styles.link, { color: theme.text }]} accessibilityRole="link" onPress={() => router.push('/privacy')}>
-            Privacy policy
+            {t('signIn.privacy')}
           </Text>
           .
         </Text>

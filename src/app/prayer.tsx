@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { ReportButton } from '@/components/report-sheet';
@@ -10,11 +11,12 @@ import { useActiveChurch, usePermissions } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
 import type { PrayerRequest } from '@/lib/database.types';
 import { shortDate } from '@/lib/durations';
-import { useRemoveRequest, usePrayerRequests, useSetAnswered, useTogglePrayed, visibilityLabel } from '@/lib/prayers';
+import { useRemoveRequest, usePrayerRequests, useSetAnswered, useTogglePrayed } from '@/lib/prayers';
 import { friendlyError, publicUrl } from '@/lib/supabase';
 
 // Prayer requests the church has shared with you. Tap "I prayed" to let people know they are not alone.
 export default function PrayerScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const userId = useUserId();
   const requests = usePrayerRequests(church_id);
@@ -24,14 +26,14 @@ export default function PrayerScreen() {
 
   return (
     <Screen edges={['bottom']}>
-      <Button title="Share a prayer request" onPress={() => router.push('/prayer-new')} />
+      <Button title={t('prayer.share')} onPress={() => router.push('/prayer-new')} />
       <ErrorText>{requests.error ? friendlyError(requests.error) : null}</ErrorText>
       {requests.isPending ? <Loading /> : null}
-      {requests.data?.length === 0 ? <Body muted>No prayer requests yet. Share one, and the church will pray with you.</Body> : null}
+      {requests.data?.length === 0 ? <Body muted>{t('prayer.empty')}</Body> : null}
 
       {userId ? open.map((request) => <RequestCard key={request.id} request={request} userId={userId} />) : null}
 
-      {answered.length > 0 ? <Heading>Answered</Heading> : null}
+      {answered.length > 0 ? <Heading>{t('prayer.answered')}</Heading> : null}
       {userId ? answered.map((request) => <RequestCard key={request.id} request={request} userId={userId} />) : null}
       <Gap />
     </Screen>
@@ -39,6 +41,7 @@ export default function PrayerScreen() {
 }
 
 function RequestCard({ request, userId }: { request: PrayerRequest; userId: string }) {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isLeader } = usePermissions();
   const pray = useTogglePrayed(church_id);
@@ -47,7 +50,7 @@ function RequestCard({ request, userId }: { request: PrayerRequest; userId: stri
   const [error, setError] = useState<string | null>(null);
 
   const mine = request.author_id === userId;
-  const name = mine ? 'You' : request.author_name || 'Church member';
+  const name = mine ? t('prayer.you') : request.author_name || t('newMessage.churchMember');
 
   async function run(action: () => Promise<unknown>) {
     setError(null);
@@ -58,12 +61,7 @@ function RequestCard({ request, userId }: { request: PrayerRequest; userId: stri
     }
   }
 
-  const prayedText =
-    request.prayer_count === 0
-      ? 'No one has prayed yet'
-      : request.prayer_count === 1
-        ? '1 person prayed'
-        : `${request.prayer_count} people prayed`;
+  const prayedText = request.prayer_count === 0 ? t('prayer.none') : t('prayer.prayed', { count: request.prayer_count });
 
   return (
     <Card>
@@ -71,18 +69,18 @@ function RequestCard({ request, userId }: { request: PrayerRequest; userId: stri
         <Avatar name={request.author_name} uri={publicUrl('avatars', request.author_avatar_path)} size={36} />
         <View style={styles.headerText}>
           <Heading>{name}</Heading>
-          <Body muted>{`${shortDate(request.created_at)} · ${visibilityLabel(request.visibility)}`}</Body>
+          <Body muted>{`${shortDate(request.created_at)} · ${t(`prayer.vis${request.visibility[0].toUpperCase()}${request.visibility.slice(1)}`)}`}</Body>
         </View>
       </View>
 
       <Body>{request.body}</Body>
-      {request.answered ? <Body muted>{`Answered${request.answered_at ? ` · ${shortDate(request.answered_at)}` : ''}`}</Body> : null}
+      {request.answered ? <Body muted>{request.answered_at ? t('prayer.answeredOn', { date: shortDate(request.answered_at) }) : t('prayer.answered')}</Body> : null}
 
       <Body muted>{prayedText}</Body>
       <ErrorText>{error}</ErrorText>
 
       <Button
-        title={request.i_prayed ? 'You prayed ✓ (tap to undo)' : 'I prayed'}
+        title={request.i_prayed ? t('prayer.youPrayed') : t('prayer.iPrayed')}
         variant={request.i_prayed ? 'secondary' : 'primary'}
         loading={pray.isPending}
         onPress={() => run(() => pray.mutateAsync(request.id))}
@@ -92,7 +90,7 @@ function RequestCard({ request, userId }: { request: PrayerRequest; userId: stri
 
       {mine ? (
         <Button
-          title={request.answered ? 'Reopen this request' : 'Mark as answered'}
+          title={request.answered ? t('prayer.reopen') : t('prayer.markAnswered')}
           variant="secondary"
           loading={answer.isPending}
           onPress={() => run(() => answer.mutateAsync({ requestId: request.id, answered: !request.answered }))}
@@ -100,11 +98,11 @@ function RequestCard({ request, userId }: { request: PrayerRequest; userId: stri
       ) : null}
       {mine || isLeader ? (
         <Button
-          title="Remove"
+          title={t('common.remove')}
           variant="danger"
           loading={remove.isPending}
           onPress={() =>
-            confirm('Remove this request?', 'It will disappear for everyone, along with its prayers.', 'Remove', () =>
+            confirm(t('prayer.removeTitle'), t('prayer.removeMessage'), t('common.remove'), () =>
               run(() => remove.mutateAsync(request.id)),
             )
           }

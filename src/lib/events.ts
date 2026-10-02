@@ -6,25 +6,40 @@ import { supabase } from './supabase';
 
 export type EventWithCreator = ChurchEvent & { creator: Pick<Profile, 'full_name'> | null };
 
-const SELECT = '*, creator:profiles(full_name)';
+// Events reach profiles two ways: the person who added the event (created_by) and, through event_rsvps, the people
+// who answered. Naming the foreign key tells the database which one "creator" means.
+const SELECT = '*, creator:profiles!events_created_by_fkey(full_name)';
 
-/** Today's and later events, soonest first. */
-export function useUpcomingEvents(churchId: string) {
-  const today = dateKey();
+/**
+ * Every event that starts on a day from `fromKey` up to, but not including, `toKey` (both YYYY-MM-DD in the phone's
+ * time zone), soonest first. The calendar's month, week and year views each ask for just the days they show.
+ */
+export function useEventsBetween(churchId: string, fromKey: string, toKey: string) {
   return useQuery({
-    queryKey: ['events', churchId, today],
+    queryKey: ['events', churchId, 'between', fromKey, toKey],
     queryFn: async (): Promise<EventWithCreator[]> => {
       const { data, error } = await supabase
         .from('events')
         .select(SELECT)
         .eq('church_id', churchId)
-        .gte('starts_at', parseDateKey(today).toISOString())
+        .gte('starts_at', parseDateKey(fromKey).toISOString())
+        .lt('starts_at', parseDateKey(toKey).toISOString())
         .order('starts_at')
-        .limit(200);
+        .limit(1000);
       if (error) throw error;
       return data;
     },
   });
+}
+
+/** Events grouped by the day they start on. */
+export function groupByDay(events: EventWithCreator[]) {
+  const days = new Map<string, EventWithCreator[]>();
+  for (const event of events) {
+    const key = eventDayKey(event);
+    days.set(key, [...(days.get(key) ?? []), event]);
+  }
+  return days;
 }
 
 export function useEvent(churchId: string, id: string | undefined) {

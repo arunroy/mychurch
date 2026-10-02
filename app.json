@@ -12,6 +12,9 @@
       "icon": "./assets/images/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.usernotifications.time-sensitive": true
       }
     },
     "android": {
@@ -57,6 +60,15 @@
         "expo-calendar",
         {
           "calendarPermission": "MyChurch can add church events to your calendar when you ask it to."
+        }
+      ],
+      "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "MyChurch uses your location only when you send an SOS alert, so people from your church can find you.",
+          "isAndroidBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": false
         }
       ]
     ],

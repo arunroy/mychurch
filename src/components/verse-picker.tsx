@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Body, Chip, TextField } from '@/components/ui';
@@ -17,8 +18,8 @@ export type PassageDraft = {
   verseEnd: number;
 };
 
-/** The complete passage, once a book is chosen. */
-export function toPassage(draft: PassageDraft): Passage | null {
+/** The complete passage, once a book is chosen. The daily verse is always one of the English translations. */
+export function toPassage(draft: PassageDraft): (Passage & { translation: TranslationCode }) | null {
   return draft.book ? { ...draft, book: draft.book } : null;
 }
 
@@ -64,11 +65,15 @@ export function VersePicker({
   value,
   onChange,
   showTranslation = true,
+  lockedBook = false,
 }: {
   value: PassageDraft;
   onChange: (next: PassageDraft) => void;
   showTranslation?: boolean;
+  /** The book is already chosen in `value` and cannot be changed, such as a Psalm for worship. */
+  lockedBook?: boolean;
 }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [panel, setPanel] = useState<Panel>(null);
   const [filter, setFilter] = useState('');
@@ -82,34 +87,36 @@ export function VersePicker({
     <View style={styles.wrap}>
       {showTranslation ? (
         <View style={styles.field}>
-          <Text style={[styles.label, { color: theme.text }]}>Translation</Text>
+          <Text style={[styles.label, { color: theme.text }]}>{t('picker.translation')}</Text>
           <View style={styles.grid}>
-            {TRANSLATIONS.map((t) => (
+            {TRANSLATIONS.map((tr) => (
               <Chip
-                key={t.code}
-                label={t.short}
+                key={tr.code}
+                label={tr.short}
                 wide
-                selected={t.code === value.translation}
-                onPress={() => onChange({ ...value, translation: t.code })}
+                selected={tr.code === value.translation}
+                onPress={() => onChange({ ...value, translation: tr.code })}
               />
             ))}
           </View>
           <Text style={[styles.hint, { color: theme.textSecondary }]}>
-            {TRANSLATIONS.find((t) => t.code === value.translation)?.name}, public domain.
+            {t('picker.publicDomain', { name: TRANSLATIONS.find((tr) => tr.code === value.translation)?.name })}
           </Text>
         </View>
       ) : null}
 
-      <Selector label="Book" value={value.book ?? 'Choose a book'} open={panel === 'book'} onPress={() => toggle('book')} />
-      {panel === 'book' ? (
+      {lockedBook ? null : (
+        <Selector label={t('picker.book')} value={value.book ?? t('picker.chooseBook')} open={panel === 'book'} onPress={() => toggle('book')} />
+      )}
+      {panel === 'book' && !lockedBook ? (
         <View style={styles.panel}>
           <TextField
-            label="Find a book"
+            label={t('bible.findBook')}
             value={filter}
             onChangeText={setFilter}
             autoCapitalize="none"
             autoCorrect={false}
-            placeholder="Start typing, like Rom"
+            placeholder={t('bible.findBookPlaceholder')}
           />
           <View style={styles.grid}>
             {books.map((b) => (
@@ -124,7 +131,7 @@ export function VersePicker({
                 }}
               />
             ))}
-            {books.length === 0 ? <Body muted>No book matches that.</Body> : null}
+            {books.length === 0 ? <Body muted>{t('bible.noBook')}</Body> : null}
           </View>
         </View>
       ) : null}
@@ -132,9 +139,9 @@ export function VersePicker({
       {book ? (
         <>
           <View style={styles.selectors}>
-            <Selector label="Chapter" value={String(value.chapter)} open={panel === 'chapter'} onPress={() => toggle('chapter')} />
-            <Selector label="From verse" value={String(value.verseStart)} open={panel === 'start'} onPress={() => toggle('start')} />
-            <Selector label="To verse" value={String(value.verseEnd)} open={panel === 'end'} onPress={() => toggle('end')} />
+            <Selector label={t('picker.chapter')} value={String(value.chapter)} open={panel === 'chapter'} onPress={() => toggle('chapter')} />
+            <Selector label={t('picker.fromVerse')} value={String(value.verseStart)} open={panel === 'start'} onPress={() => toggle('start')} />
+            <Selector label={t('picker.toVerse')} value={String(value.verseEnd)} open={panel === 'end'} onPress={() => toggle('end')} />
           </View>
 
           {panel === 'chapter' ? (
@@ -189,8 +196,9 @@ export function usePassagePreview(passage: Passage | null) {
 
 export function PassagePreview({ passage }: { passage: Passage | null }) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const preview = usePassagePreview(passage);
-  if (!passage) return <Body muted>Choose a book to see the verse.</Body>;
+  if (!passage) return <Body muted>{t('picker.seeVerse')}</Body>;
   if (preview.isPending) return <ActivityIndicator />;
   if (preview.isError) return <Body>{preview.error.message}</Body>;
   return (

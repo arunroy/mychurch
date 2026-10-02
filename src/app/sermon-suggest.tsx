@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, TextField } from '@/components/ui';
 import { useActiveChurch, usePermissions } from '@/lib/church';
@@ -10,6 +11,7 @@ import { friendlyError } from '@/lib/supabase';
 // Anyone can share a link to an outside sermon they found worth the church's time. It goes to the Pastor, and only
 // after approval do members see it, under External. The app keeps just the link and a note, never the sermon's text.
 export default function SermonSuggestScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { church_id } = useActiveChurch();
   const sermon = useSermon(church_id, id);
@@ -18,7 +20,7 @@ export default function SermonSuggestScreen() {
   if (id && (!sermon.data || !sermon.data.is_mine || sermon.data.source !== 'external')) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>You can only change a link you shared.</Body>
+        <Body muted>{t('sermonSuggest.onlyOwn')}</Body>
       </Screen>
     );
   }
@@ -26,6 +28,7 @@ export default function SermonSuggestScreen() {
 }
 
 function SuggestForm({ existing }: { existing: SermonDetail | null }) {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isPastor } = usePermissions();
   const submit = useSubmitSermon(church_id);
@@ -69,18 +72,12 @@ function SuggestForm({ existing }: { existing: SermonDetail | null }) {
       <ErrorText>{error}</ErrorText>
 
       <Card>
-        <Heading>{existing ? 'Edit the link' : 'Share an outside sermon'}</Heading>
-        <Body muted>
-          {isPastor
-            ? 'As Pastor, this is published straight away.'
-            : existing
-              ? 'Saving your changes sends it back to the Pastor for another review.'
-              : 'Found a sermon the church would benefit from? Share the link. The Pastor looks at it first, and only after approval can members see it under External.'}
-        </Body>
-        <TextField label="Title" value={title} onChangeText={setTitle} maxLength={150} />
-        <TextField label="Who is it by? (optional)" value={speaker} onChangeText={setSpeaker} maxLength={100} autoCapitalize="words" />
+        <Heading>{existing ? t('sermonSuggest.editTitle') : t('sermons.shareOutside')}</Heading>
+        <Body muted>{isPastor ? t('sermonWrite.pastorPublished') : existing ? t('sermonSuggest.resend') : t('sermonSuggest.intro')}</Body>
+        <TextField label={t('common.title')} value={title} onChangeText={setTitle} maxLength={150} />
+        <TextField label={t('sermonSuggest.who')} value={speaker} onChangeText={setSpeaker} maxLength={100} autoCapitalize="words" />
         <TextField
-          label="Link"
+          label={t('sermonSuggest.link')}
           value={url}
           onChangeText={setUrl}
           placeholder="https://"
@@ -88,20 +85,20 @@ function SuggestForm({ existing }: { existing: SermonDetail | null }) {
           autoCorrect={false}
           keyboardType="url"
           maxLength={500}
-          hint={linkBad ? 'Start the link with https://' : 'The page where the sermon can be read, watched or heard.'}
+          hint={linkBad ? t('sermonSuggest.linkBad') : t('sermonSuggest.linkHint')}
         />
         <TextField
-          label="Why is it worth sharing? (optional)"
+          label={t('sermonSuggest.why')}
           value={note}
           onChangeText={setNote}
           multiline
           maxLength={500}
           style={{ minHeight: 90, paddingTop: 12, textAlignVertical: 'top' }}
-          hint="In your own words, in a few lines."
+          hint={t('sermonSuggest.whyHint')}
         />
       </Card>
 
-      <Button title={existing ? 'Save and send for review' : isPastor ? 'Publish' : 'Send to the Pastor'} onPress={onSend} loading={busy} disabled={!canSend} />
+      <Button title={existing ? t('sermonWrite.saveSend') : isPastor ? t('sermonWrite.publish') : t('notes.send')} onPress={onSend} loading={busy} disabled={!canSend} />
       <Gap />
     </Screen>
   );

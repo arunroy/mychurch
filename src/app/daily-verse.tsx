@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { Body, Button, Card, ErrorText, Heading, Loading, Row, Screen } from '@/components/ui';
 import { useActiveChurch } from '@/lib/church';
@@ -14,6 +15,7 @@ function nextFreeDate(taken: string[]) {
 
 // The Pastor's plan: today's verse and the ones scheduled ahead.
 export default function DailyVerseScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const verses = useUpcomingVerses(church_id, true);
 
@@ -27,24 +29,28 @@ export default function DailyVerseScreen() {
       <ErrorText>{verses.error ? friendlyError(verses.error) : null}</ErrorText>
 
       <Button
-        title="Add a verse"
+        title={t('dailyVerse.add')}
         onPress={() =>
           router.push({ pathname: '/verse-edit', params: { date: nextFreeDate(list.map((v) => v.verse_date)) } })
         }
       />
 
       <Card>
-        <Heading>Today and coming up</Heading>
+        <Heading>{t('dailyVerse.upcoming')}</Heading>
         {list.length === 0 ? (
-          <Body muted>Nothing is planned yet. Members see the verse for each day once that day arrives.</Body>
+          <Body muted>{t('dailyVerse.nothing')}</Body>
         ) : (
           list.map((verse) => (
             <Row
               key={verse.verse_date}
               title={verse.reference}
-              subtitle={`${verse.verse_date === today ? 'Today' : formatDay(verse.verse_date)}${
-                verse.reflection ? ' · with reflection' : ''
-              }`}
+              subtitle={
+                verse.reflection
+                  ? t('dailyVerse.withReflection', { day: verse.verse_date === today ? t('dailyVerse.today') : formatDay(verse.verse_date) })
+                  : verse.verse_date === today
+                    ? t('dailyVerse.today')
+                    : formatDay(verse.verse_date)
+              }
               onPress={() => router.push({ pathname: '/verse-edit', params: { date: verse.verse_date } })}
             />
           ))
@@ -52,7 +58,7 @@ export default function DailyVerseScreen() {
       </Card>
 
       {!list.some((v) => v.verse_date === today) ? (
-        <Body muted>There&apos;s no verse for today yet, so members see nothing on their Home screen.</Body>
+        <Body muted>{t('dailyVerse.noneToday')}</Body>
       ) : null}
     </Screen>
   );

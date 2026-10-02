@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -29,6 +30,7 @@ export function ElderThread({
   asLeader: boolean;
   onThreadCreated?: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const accent = useAccent();
   const messages = useElderMessages(threadId);
@@ -73,10 +75,10 @@ export function ElderThread({
         disabled={mine}
         onLongPress={() => setReporting(item)}
         delayLongPress={350}
-        accessibilityHint={mine ? undefined : 'Press and hold to report'}
+        accessibilityHint={mine ? undefined : t('chatTab.holdReport')}
         style={[styles.bubbleRow, mine ? styles.mine : styles.theirs]}>
         <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement }]}>
-          {!mine ? <Text style={[styles.sender, { color: theme.textSecondary }]}>{item.sender_name || 'Church member'}</Text> : null}
+          {!mine ? <Text style={[styles.sender, { color: theme.textSecondary }]}>{item.sender_name || t('newMessage.churchMember')}</Text> : null}
           <Text selectable style={[styles.body, { color: mine ? '#FFFFFF' : theme.text }]}>
             {item.body}
           </Text>
@@ -108,9 +110,7 @@ export function ElderThread({
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={
               <Text style={[styles.empty, { color: theme.textSecondary }, styles.flip]}>
-                {asLeader
-                  ? 'No messages in this thread yet.'
-                  : 'Write to the elders. The Pastor, elders and church admins can all read and reply, and nobody else can.'}
+                {asLeader ? t('elders.noMessages') : t('elders.writeElders')}
               </Text>
             }
           />
@@ -122,13 +122,13 @@ export function ElderThread({
           <TextInput
             value={text}
             onChangeText={setText}
-            placeholder={asLeader ? 'Reply' : 'Message the elders'}
+            placeholder={asLeader ? t('elders.reply') : t('messagesTab.messageElders')}
             placeholderTextColor={theme.textSecondary}
             multiline
             maxLength={2000}
             style={[styles.input, { color: theme.text, backgroundColor: theme.backgroundElement }]}
           />
-          <Button title="Send" onPress={onSend} loading={busy} disabled={!text.trim()} style={styles.send} />
+          <Button title={t('common.send')} onPress={onSend} loading={busy} disabled={!text.trim()} style={styles.send} />
         </View>
       </KeyboardAvoidingView>
       {reporting ? <ReportSheet visible onClose={() => setReporting(null)} type="elders_message" targetId={reporting.id} /> : null}

@@ -82,7 +82,8 @@ export function ChurchProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!userId) return [];
-    return queryClient.fetchQuery({ queryKey: ['memberships', userId], queryFn: () => fetchMemberships(userId) });
+    // staleTime 0: the app treats data as fresh for 30 seconds, so without it this would return what it already had.
+    return queryClient.fetchQuery({ queryKey: ['memberships', userId], queryFn: () => fetchMemberships(userId), staleTime: 0 });
   }, [queryClient, userId]);
 
   return (
@@ -115,7 +116,15 @@ export function usePermissions() {
     isPastor: role === 'pastor',
     isLeader: !!role && LEADERS.includes(role),
     canEditChurch: role === 'pastor' || role === 'admin',
+    // The church's money: the Pastor and elders only, not church admins.
+    canSeeFunds: role === 'pastor' || role === 'elder',
+    /** Opens fundraisers, records money received and sees who gave. */
+    canRunFundraisers: role === 'pastor' || role === 'elder',
+    // Creates and manages the chat groups for committees and fellowships.
+    canManageChatGroups: role === 'pastor' || role === 'elder',
     canChangeRoles: role === 'pastor',
+    // Plans the Sunday Psalm and songs: the Pastor, elders and anyone the Pastor marked as a worship leader.
+    canPlanWorship: role === 'pastor' || role === 'elder' || (role !== null && !!active?.is_worship_leader),
   };
 }
 

@@ -1,13 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
 
+import i18n from '@/i18n';
+
 import type { Membership, MemberRole, Profile } from './database.types';
 import { supabase } from './supabase';
 
 export type Member = Membership & { profile: Profile | null };
 
 export function memberName(member: Member) {
-  return member.profile?.full_name || 'Church member';
+  return member.profile?.full_name || i18n.t('newMessage.churchMember');
 }
 
 export function useMembers(churchId: string) {
@@ -54,6 +56,12 @@ export function useSetRole(churchId: string) {
   );
 }
 
+export function useSetWorshipLeader(churchId: string) {
+  return useMemberAction(churchId, ({ userId, value }: { userId: string; value: boolean }) =>
+    supabase.rpc('set_worship_leader', { p_church: churchId, p_user: userId, p_value: value }),
+  );
+}
+
 export function useJoinCode(churchId: string, enabled: boolean) {
   return useQuery({
     queryKey: ['join-code', churchId],
@@ -75,8 +83,5 @@ export function inviteLink(code: string) {
 }
 
 export function inviteMessage(churchName: string, code: string) {
-  return (
-    `Join ${churchName} on MyChurch. Download the MyChurch app and enter the code ${code}, ` +
-    `or open this link on your phone: ${inviteLink(code)}`
-  );
+  return i18n.t('invite.message', { church: churchName, code, link: inviteLink(code) });
 }

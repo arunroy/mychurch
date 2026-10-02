@@ -1,5 +1,6 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,6 +23,7 @@ export default function ChatScreen() {
 
 // A private conversation. New messages appear here as they arrive, without refreshing.
 function Chat({ userId }: { userId: string }) {
+  const { t } = useTranslation();
   const { id, name } = useLocalSearchParams<{ id: string; name?: string }>();
   const { church_id } = useActiveChurch();
   const theme = useTheme();
@@ -33,7 +35,7 @@ function Chat({ userId }: { userId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [reporting, setReporting] = useState<Message | null>(null);
 
-  const partner = conversations.data?.find((c) => c.id === id)?.other_name || name || 'Chat';
+  const partner = conversations.data?.find((c) => c.id === id)?.other_name || name || t('chatThread.fallbackTitle');
 
   async function onSend() {
     const body = text.trim();
@@ -54,7 +56,7 @@ function Chat({ userId }: { userId: string }) {
         disabled={mine}
         onLongPress={() => setReporting(item)}
         delayLongPress={350}
-        accessibilityHint={mine ? undefined : 'Press and hold to report'}
+        accessibilityHint={mine ? undefined : t('chatTab.holdReport')}
         style={[styles.bubbleRow, mine ? styles.mine : styles.theirs]}>
         <View style={[styles.bubble, { backgroundColor: mine ? accent : theme.backgroundElement }]}>
           <Text selectable style={[styles.body, { color: mine ? '#FFFFFF' : theme.text }]}>
@@ -89,7 +91,7 @@ function Chat({ userId }: { userId: string }) {
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={
               <Text style={[styles.empty, { color: theme.textSecondary }, styles.flip]}>
-                Say hello to {partner}. Only the two of you can read this conversation.
+                {t('chatThread.empty', { name: partner })}
               </Text>
             }
           />
@@ -101,7 +103,7 @@ function Chat({ userId }: { userId: string }) {
           <TextInput
             value={text}
             onChangeText={setText}
-            placeholder="Message"
+            placeholder={t('chatThread.placeholder')}
             placeholderTextColor={theme.textSecondary}
             multiline
             maxLength={2000}
@@ -110,7 +112,7 @@ function Chat({ userId }: { userId: string }) {
               { color: theme.text, backgroundColor: theme.backgroundElement },
             ]}
           />
-          <Button title="Send" onPress={onSend} loading={send.isPending} disabled={!text.trim()} style={styles.send} />
+          <Button title={t('common.send')} onPress={onSend} loading={send.isPending} disabled={!text.trim()} style={styles.send} />
         </View>
       </KeyboardAvoidingView>
       {reporting ? <ReportSheet visible onClose={() => setReporting(null)} type="private_message" targetId={reporting.id} /> : null}

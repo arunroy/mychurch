@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { ReportButton } from '@/components/report-sheet';
@@ -14,6 +15,7 @@ import { friendlyError } from '@/lib/supabase';
 // Members ask the Pastor a question. Only the Pastor sees it at first. The Pastor does not ask; they read, answer and control it. The Pastor answers it, and decides whether it stays
 // private, is shared with the church leaders, or is shared with the whole church.
 export default function QaScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isPastor, isLeader } = usePermissions();
   const questions = useQuestions(church_id);
@@ -48,13 +50,10 @@ export default function QaScreen() {
     <Screen edges={['bottom']}>
       {isPastor ? null : (
         <Card>
-          <Heading>Ask a question</Heading>
-          <Body muted>
-            Your question goes to the Pastor first. The Pastor may answer it, and can choose to share it and its answer with the church
-            leaders or the whole church.
-          </Body>
+          <Heading>{t('qa.ask')}</Heading>
+          <Body muted>{t('qa.askIntro')}</Body>
           <TextField
-            label="Your question"
+            label={t('notes.yourQuestion')}
             value={text}
             onChangeText={setText}
             multiline
@@ -62,28 +61,28 @@ export default function QaScreen() {
             style={{ minHeight: 90, paddingTop: 12, textAlignVertical: 'top' }}
           />
           <ToggleRow
-            title="Don’t show my name"
-            subtitle="Nothing is kept that says who asked, so you can’t take it back, and you will only see the answer if the Pastor shares it with the church. Limited to 5 a day."
+            title={t('notes.anonymous')}
+            subtitle={t('qa.anonymousHint')}
             value={anonymous}
             onValueChange={setAnonymous}
           />
           <ErrorText>{error}</ErrorText>
-          {asked ? <Body>Thank you. Your question has gone to the Pastor.</Body> : null}
-          <Button title="Ask" onPress={onAsk} loading={ask.isPending} disabled={!text.trim()} />
+          {asked ? <Body>{t('notes.thanks')}</Body> : null}
+          <Button title={t('qa.askButton')} onPress={onAsk} loading={ask.isPending} disabled={!text.trim()} />
         </Card>
       )}
 
       <ErrorText>{questions.error ? friendlyError(questions.error) : null}</ErrorText>
       {questions.isPending ? <Loading /> : null}
 
-      <Group title="Waiting for your answer" items={waiting} />
-      <Group title="Answered, only you can see" items={privateAnswered} />
-      <Group title="Your questions" items={mine} />
-      <Group title="Shared with the church leaders" items={leaders} />
-      <Group title="Shared with the whole church" items={church} />
+      <Group title={t('qa.groupWaiting')} items={waiting} />
+      <Group title={t('qa.groupPrivate')} items={privateAnswered} />
+      <Group title={t('qa.groupMine')} items={mine} />
+      <Group title={t('qa.sharedLeaders')} items={leaders} />
+      <Group title={t('qa.sharedChurch')} items={church} />
 
       {!questions.isPending && all.length === 0 ? (
-        <Body muted>{isPastor ? 'No questions yet. When a member asks one, it appears here for you to answer.' : 'Nothing has been shared yet. Ask a question above.'}</Body>
+        <Body muted>{isPastor ? t('qa.emptyPastor') : t('qa.emptyMember')}</Body>
       ) : null}
       <Gap />
     </Screen>
@@ -102,13 +101,8 @@ function Group({ title, items }: { title: string; items: Question[] }) {
   );
 }
 
-function visibilityText(visibility: QuestionVisibility, isMine: boolean) {
-  if (visibility === 'church') return 'Shared with the whole church';
-  if (visibility === 'leaders') return 'Shared with the church leaders';
-  return `Private · only the Pastor${isMine ? ' and you' : ''} can see this`;
-}
-
 function QuestionCard({ question }: { question: Question }) {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isPastor } = usePermissions();
   const answer = useAnswer(church_id);
@@ -130,7 +124,7 @@ function QuestionCard({ question }: { question: Question }) {
   function choose(visibility: QuestionVisibility) {
     if (visibility === question.visibility) return;
     if (visibility === 'church' && !question.answer) {
-      setError('Answer the question first, then you can share it with the whole church.');
+      setError(t('qa.answerFirst'));
       return;
     }
     run(() => setVisibility.mutateAsync({ questionId: question.id, visibility }));
@@ -140,32 +134,40 @@ function QuestionCard({ question }: { question: Question }) {
 
   return (
     <Card>
-      <Body muted>{`${question.asker_name || 'Anonymous'} · ${shortDate(question.asked_at)}`}</Body>
+      <Body muted>{`${question.asker_name || t('qa.anonymousName')} · ${shortDate(question.asked_at)}`}</Body>
       <Body>{question.body}</Body>
-      <Body muted>{visibilityText(question.visibility, question.is_mine)}</Body>
+      <Body muted>
+        {question.visibility === 'church'
+          ? t('qa.sharedChurch')
+          : question.visibility === 'leaders'
+            ? t('qa.sharedLeaders')
+            : question.is_mine
+              ? t('qa.privateYou')
+              : t('qa.privateOnlyPastor')}
+      </Body>
       <ErrorText>{error}</ErrorText>
 
       {question.answer && !editing ? (
         <>
-          <Body muted>{`Answer from ${question.answered_by_name || 'the Pastor'}`}</Body>
+          <Body muted>{t('qa.answerFrom', { name: question.answered_by_name || t('qa.thePastor') })}</Body>
           <Body>{question.answer}</Body>
         </>
       ) : null}
-      {!question.answer && !isPastor ? <Body muted>Waiting for the Pastor to answer.</Body> : null}
+      {!question.answer && !isPastor ? <Body muted>{t('qa.waitingPastor')}</Body> : null}
 
       {isPastor && (!question.answer || editing) ? (
         <>
           <TextField
-            label="Your answer"
+            label={t('qa.yourAnswer')}
             value={text}
             onChangeText={setText}
             multiline
             maxLength={2000}
             style={{ minHeight: 100, paddingTop: 12, textAlignVertical: 'top' }}
-            hint="You choose below who can read this."
+            hint={t('qa.answerHint')}
           />
           <Button
-            title="Save answer"
+            title={t('qa.saveAnswer')}
             loading={answer.isPending}
             disabled={!text.trim()}
             onPress={() =>
@@ -180,14 +182,14 @@ function QuestionCard({ question }: { question: Question }) {
 
       {isPastor ? (
         <>
-          <Body>Who can see this?</Body>
+          <Body>{t('qa.whoCanSee')}</Body>
           <View style={styles.chips}>
             {VISIBILITY_CHOICES.map((choice) => (
-              <Chip key={choice.value} label={choice.label} selected={question.visibility === choice.value} onPress={() => choose(choice.value)} />
+              <Chip key={choice.value} label={t(`qa.vis${choice.value[0].toUpperCase()}${choice.value.slice(1)}`)} selected={question.visibility === choice.value} onPress={() => choose(choice.value)} />
             ))}
           </View>
-          {!question.answer ? <Body muted>Sharing with the whole church needs an answer first.</Body> : null}
-          {question.answer && !editing ? <Button title="Edit the answer" variant="secondary" onPress={() => setEditing(true)} /> : null}
+          {!question.answer ? <Body muted>{t('qa.needAnswer')}</Body> : null}
+          {question.answer && !editing ? <Button title={t('qa.editAnswer')} variant="secondary" onPress={() => setEditing(true)} /> : null}
         </>
       ) : null}
 
@@ -195,11 +197,11 @@ function QuestionCard({ question }: { question: Question }) {
 
       {canRemove ? (
         <Button
-          title="Remove"
+          title={t('common.remove')}
           variant="danger"
           loading={remove.isPending}
           onPress={() =>
-            confirm('Remove this question?', 'It disappears for everyone, along with its answer.', 'Remove', () =>
+            confirm(t('qa.removeTitle'), t('qa.removeMessage'), t('common.remove'), () =>
               run(() => remove.mutateAsync(question.id)),
             )
           }

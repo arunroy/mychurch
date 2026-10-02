@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import { AppState, Platform } from 'react-native';
 
+import i18n from '@/i18n';
+
 import type { Database } from './database.types';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -41,8 +43,8 @@ export function friendlyError(error: unknown): string {
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
     const code = 'code' in error ? String(error.code) : '';
     if (['P0001', 'P0002', '42501', '23514', '28000'].includes(code)) return error.message;
-    if (error.message.toLowerCase().includes('network')) return 'Check your internet connection and try again.';
+    if (error.message.toLowerCase().includes('network')) return i18n.t('errors.network');
     return error.message;
   }
-  return 'Something went wrong. Please try again.';
+  return i18n.t('errors.generic');
 }

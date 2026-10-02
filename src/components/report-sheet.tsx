@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Body, Button, Chip, ErrorText, Heading, TextField } from '@/components/ui';
@@ -27,6 +28,7 @@ export function ReportSheet({
   targetId: string;
   onRemove?: () => void;
 }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { scheme } = useThemePreference();
   const { church_id } = useActiveChurch();
@@ -57,26 +59,26 @@ export function ReportSheet({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={close}>
-      <Pressable style={styles.backdrop} onPress={close} accessibilityLabel="Close" />
+      <Pressable style={styles.backdrop} onPress={close} accessibilityLabel={t('common.close')} />
       <View style={[styles.sheet, { backgroundColor: scheme === 'dark' ? '#1C1C1E' : '#FFFFFF' }]}>
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
           {sent ? (
             <>
-              <Heading>Thank you</Heading>
-              <Body>Your report was sent to the people who look after this. They will take a look.</Body>
-              <Button title="Done" onPress={close} />
+              <Heading>{t('reportSheet.thanks')}</Heading>
+              <Body>{t('reportSheet.sent')}</Body>
+              <Button title={t('reportSheet.done')} onPress={close} />
             </>
           ) : (
             <>
-              <Heading>Report this</Heading>
-              <Body muted>Tell us what is wrong. Your name is not shown to the person you report.</Body>
+              <Heading>{t('reportSheet.title')}</Heading>
+              <Body muted>{t('reportSheet.intro')}</Body>
               <View style={styles.chips}>
                 {REPORT_REASONS.map((r) => (
-                  <Chip key={r.value} label={r.label} selected={reason === r.value} onPress={() => setReason(r.value)} />
+                  <Chip key={r.value} label={t(`reports.reason${r.value[0].toUpperCase()}${r.value.slice(1)}`)} selected={reason === r.value} onPress={() => setReason(r.value)} />
                 ))}
               </View>
               <TextField
-                label="Anything to add? (optional)"
+                label={t('reportSheet.details')}
                 value={details}
                 onChangeText={setDetails}
                 multiline
@@ -84,10 +86,10 @@ export function ReportSheet({
                 style={{ minHeight: 70, paddingTop: 12, textAlignVertical: 'top' }}
               />
               <ErrorText>{error}</ErrorText>
-              <Button title="Send report" onPress={send} loading={report.isPending} disabled={!reason} />
+              <Button title={t('reportSheet.send')} onPress={send} loading={report.isPending} disabled={!reason} />
               {onRemove ? (
                 <Button
-                  title="Remove this instead"
+                  title={t('reportSheet.removeInstead')}
                   variant="danger"
                   onPress={() => {
                     close();
@@ -96,7 +98,7 @@ export function ReportSheet({
                 />
               ) : null}
               <Pressable onPress={close} accessibilityRole="button" style={styles.cancel}>
-                <Text style={{ color: theme.textSecondary, fontSize: 16 }}>Cancel</Text>
+                <Text style={{ color: theme.textSecondary, fontSize: 16 }}>{t('common.cancel')}</Text>
               </Pressable>
             </>
           )}
@@ -107,13 +109,15 @@ export function ReportSheet({
 }
 
 /** A small "Report" link that opens the sheet for one thing. */
-export function ReportButton({ type, targetId, label = 'Report' }: { type: ReportTargetType; targetId: string; label?: string }) {
+export function ReportButton({ type, targetId, label }: { type: ReportTargetType; targetId: string; label?: string }) {
+  const { t } = useTranslation();
   const theme = useTheme();
+  const text = label ?? t('reportSheet.report');
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={() => setOpen(true)} hitSlop={8}>
-        <Text style={{ color: theme.textSecondary, fontSize: 14, textDecorationLine: 'underline' }}>{label}</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel={text} onPress={() => setOpen(true)} hitSlop={8}>
+        <Text style={{ color: theme.textSecondary, fontSize: 14, textDecorationLine: 'underline' }}>{text}</Text>
       </Pressable>
       <ReportSheet visible={open} onClose={() => setOpen(false)} type={type} targetId={targetId} />
     </>

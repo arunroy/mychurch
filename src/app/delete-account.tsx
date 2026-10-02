@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Body, Button, Card, ErrorText, Gap, Heading, Screen, TextField } from '@/components/ui';
 import { deleteMyAccount } from '@/lib/account';
@@ -6,6 +7,7 @@ import { friendlyError } from '@/lib/supabase';
 
 // Permanently deletes the account. Reachable from More and from the profile, also for people who have no church yet.
 export default function DeleteAccountScreen() {
+  const { t } = useTranslation();
   const [typed, setTyped] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,29 +29,29 @@ export default function DeleteAccountScreen() {
   return (
     <Screen edges={['bottom']}>
       <Card>
-        <Heading>Delete my account</Heading>
-        <Body>This is permanent. It cannot be undone.</Body>
+        <Heading>{t('deleteAccount.title')}</Heading>
+        <Body>{t('deleteAccount.permanent')}</Body>
       </Card>
 
       <Card>
-        <Heading>What is deleted</Heading>
-        <Body>• Your profile, photo and email sign-in</Body>
-        <Body>• Your membership of every church you belong to</Body>
-        <Body>• Your private messages and messages to the elders. The other person loses those conversations too.</Body>
-        <Body>• Your church chat messages, prayer requests and the prayers you added, your polls and votes, and your RSVPs</Body>
-        <Body>• The articles and outside sermon links you submitted</Body>
-        <Body>• Your notification settings and the reply codes saved on this phone</Body>
+        <Heading>{t('deleteAccount.whatDeleted')}</Heading>
+        <Body>{t('deleteAccount.d1')}</Body>
+        <Body>{t('deleteAccount.d2')}</Body>
+        <Body>{t('deleteAccount.d3')}</Body>
+        <Body>{t('deleteAccount.d4')}</Body>
+        <Body>{t('deleteAccount.d5')}</Body>
+        <Body>{t('deleteAccount.d6')}</Body>
       </Card>
 
       <Card>
-        <Heading>What stays</Heading>
-        <Body>• Events and daily verses you added for the church, and answers you gave as a leader, without your name</Body>
-        <Body>• Anonymous messages and questions. Nothing links them to you.</Body>
+        <Heading>{t('deleteAccount.whatStays')}</Heading>
+        <Body>{t('deleteAccount.s1')}</Body>
+        <Body>{t('deleteAccount.s2')}</Body>
       </Card>
 
       <Card>
         <TextField
-          label="Type DELETE to confirm"
+          label={t('deleteAccount.typeDelete')}
           value={typed}
           onChangeText={setTyped}
           autoCapitalize="characters"
@@ -57,7 +59,7 @@ export default function DeleteAccountScreen() {
           placeholder="DELETE"
         />
         <ErrorText>{error}</ErrorText>
-        <Button title="Delete my account for good" variant="danger" onPress={onDelete} loading={busy} disabled={!confirmed} />
+        <Button title={t('deleteAccount.button')} variant="danger" onPress={onDelete} loading={busy} disabled={!confirmed} />
       </Card>
       <Gap />
     </Screen>

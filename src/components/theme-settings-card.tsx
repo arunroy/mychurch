@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Body, Card, Chip, Heading, useAccentText } from '@/components/ui';
@@ -8,45 +9,42 @@ import { useTheme } from '@/hooks/use-theme';
 import { useChurch } from '@/lib/church';
 import { useThemePreference, type ThemePreference } from '@/lib/theme-preference';
 
-const MODES: { value: ThemePreference; label: string }[] = [
-  { value: 'system', label: 'System' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-];
+const MODES: ThemePreference[] = ['system', 'light', 'dark'];
 
 /**
  * Light, dark or system, and a theme. A theme is a matched set of background, text and accent
  * colours, so every choice looks designed. Saved on this device.
  */
 export function ThemeSettingsCard() {
+  const { t } = useTranslation();
   const { preference, setPreference, scheme, themeId, setThemeId } = useThemePreference();
   const churchColour = useChurch().active?.church.accent_color ?? DEFAULT_ACCENT;
   const plain = Colors[scheme];
 
   return (
     <Card>
-      <Heading>Theme settings</Heading>
+      <Heading>{t('themeSettings.title')}</Heading>
 
-      <Body>Mode</Body>
+      <Body>{t('themeSettings.mode')}</Body>
       <View style={styles.chips}>
         {MODES.map((mode) => (
-          <Chip key={mode.value} label={mode.label} selected={preference === mode.value} onPress={() => setPreference(mode.value)} />
+          <Chip key={mode} label={t(`themeSettings.${mode}`)} selected={preference === mode} onPress={() => setPreference(mode)} />
         ))}
       </View>
-      <Body muted>System follows your phone&apos;s light or dark setting.</Body>
+      <Body muted>{t('themeSettings.systemHint')}</Body>
 
-      <Body>Theme</Body>
+      <Body>{t('themeSettings.theme')}</Body>
       <View style={styles.swatches}>
-        <Swatch name="Plain" selected={themeId === null} onPress={() => setThemeId(null)}>
+        <Swatch name={t('themeSettings.plain')} selected={themeId === null} onPress={() => setThemeId(null)}>
           <View style={[styles.preview, { backgroundColor: plain.background }]}>
             <Text style={[styles.aa, { color: plain.text }]}>Aa</Text>
             <View style={[styles.dot, { backgroundColor: churchColour }]} />
           </View>
         </Swatch>
-        {THEMES.map((t) => {
-          const palette = t[scheme];
+        {THEMES.map((theme) => {
+          const palette = theme[scheme];
           return (
-            <Swatch key={t.id} name={t.name} selected={themeId === t.id} onPress={() => setThemeId(t.id)}>
+            <Swatch key={theme.id} name={theme.name} selected={themeId === theme.id} onPress={() => setThemeId(theme.id)}>
               <LinearGradient colors={[...palette.gradient]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.preview}>
                 <Text style={[styles.aa, { color: palette.text }]}>Aa</Text>
                 <View style={[styles.dot, { backgroundColor: palette.accent }]} />
@@ -55,7 +53,7 @@ export function ThemeSettingsCard() {
           );
         })}
       </View>
-      <Body muted>Plain uses your church&apos;s own colour. Every other theme brings its own matching colours.</Body>
+      <Body muted>{t('themeSettings.plainHint')}</Body>
     </Card>
   );
 }
@@ -71,12 +69,13 @@ function Swatch({
   onPress: () => void;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const accentText = useAccentText();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${name} theme`}
+      accessibilityLabel={t('themeSettings.swatch', { name })}
       accessibilityState={{ selected }}
       onPress={onPress}
       style={styles.swatch}>

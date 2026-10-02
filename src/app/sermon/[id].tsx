@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { SourceTag } from '@/components/sermon-tag';
 import { ReportButton } from '@/components/report-sheet';
@@ -14,6 +15,7 @@ import { friendlyError } from '@/lib/supabase';
 // One sermon. A member's article is shown in full; an outside sermon is a link; the Pastor's can be text, links or both.
 // The Pastor reviews waiting entries here, approving them or declining with a note.
 export default function SermonScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { church_id } = useActiveChurch();
   const { isPastor } = usePermissions();
@@ -28,8 +30,8 @@ export default function SermonScreen() {
   if (!sermon.data) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>This sermon is no longer in the list.</Body>
-        <Button title="Back to sermons" variant="secondary" onPress={() => router.back()} />
+        <Body muted>{t('sermon.gone')}</Body>
+        <Button title={t('sermon.backTo')} variant="secondary" onPress={() => router.back()} />
       </Screen>
     );
   }
@@ -43,12 +45,12 @@ export default function SermonScreen() {
     try {
       await WebBrowser.openBrowserAsync(url);
     } catch {
-      setError('Could not open that link.');
+      setError(t('sermon.linkFail'));
     }
   }
 
   function onDelete() {
-    confirm('Delete this sermon?', `“${item.title}” will be removed from the list for everyone.`, 'Delete', async () => {
+    confirm(t('sermon.deleteTitle'), t('sermon.deleteMessage', { title: item.title }), t('common.delete'), async () => {
       try {
         await remove.mutateAsync(item.id);
         router.back();
@@ -68,11 +70,14 @@ export default function SermonScreen() {
     }
   }
 
+  const who = item.author_name || t('polls.aMember');
   const byLine =
     item.source === 'member'
-      ? `By ${item.author_name || 'a church member'}`
+      ? t('sermon.byMember', { name: who })
       : item.source === 'external'
-        ? `Shared by ${item.author_name || 'a church member'}${item.speaker ? ` · by ${item.speaker}` : ''}`
+        ? item.speaker
+          ? t('sermon.sharedByWith', { name: who, speaker: item.speaker })
+          : t('sermons.sharedBy', { name: who })
         : item.speaker;
 
   return (
@@ -84,22 +89,20 @@ export default function SermonScreen() {
       {item.status === 'pending' ? (
         <Card>
           <Body>
-            {isPastor
-              ? 'This is waiting for your review. Until you approve it, only you and its author can see it.'
-              : 'This is waiting for the Pastor to review it. Until it is approved, only you and the Pastor can see it.'}
+            {isPastor ? t('sermon.pendingPastor') : t('sermon.pendingMember')}
           </Body>
         </Card>
       ) : null}
       {item.status === 'declined' ? (
         <Card>
-          <Heading>Not approved</Heading>
-          <Body>{item.review_note || 'The Pastor decided not to publish this.'}</Body>
-          {canEditOwn ? <Body muted>You can change it and send it back for another review.</Body> : null}
+          <Heading>{t('sermons.statusDeclined')}</Heading>
+          <Body>{item.review_note || t('sermon.declinedDefault')}</Body>
+          {canEditOwn ? <Body muted>{t('sermon.canChange')}</Body> : null}
         </Card>
       ) : null}
       {!item.published && official ? (
         <Card>
-          <Body>This is a draft. Only you can see it until it is published.</Body>
+          <Body>{t('sermon.draftNote')}</Body>
         </Card>
       ) : null}
 
@@ -111,21 +114,21 @@ export default function SermonScreen() {
 
       {item.body ? (
         <Card>
-          {item.source === 'external' ? <Body muted>Why it was shared</Body> : null}
+          {item.source === 'external' ? <Body muted>{t('sermon.whyShared')}</Body> : null}
           <Body>{item.body}</Body>
         </Card>
       ) : null}
 
       {item.read_url ? (
         <>
-          <Button title={item.source === 'external' ? 'Open the sermon' : 'Read the sermon'} onPress={() => open(item.read_url!)} />
-          <Body muted>{`Opens ${linkSite(item.read_url)}`}</Body>
+          <Button title={item.source === 'external' ? t('sermon.openSermon') : t('sermon.readSermon')} onPress={() => open(item.read_url!)} />
+          <Body muted>{t('sermon.opens', { site: linkSite(item.read_url) })}</Body>
         </>
       ) : null}
       {item.media_url ? (
         <>
-          <Button title="Watch or listen" variant={item.read_url ? 'secondary' : 'primary'} onPress={() => open(item.media_url!)} />
-          <Body muted>{`Opens ${linkSite(item.media_url)}`}</Body>
+          <Button title={t('sermon.watch')} variant={item.read_url ? 'secondary' : 'primary'} onPress={() => open(item.media_url!)} />
+          <Body muted>{t('sermon.opens', { site: linkSite(item.media_url) })}</Body>
         </>
       ) : null}
 
@@ -133,34 +136,34 @@ export default function SermonScreen() {
 
       {isPastor && !official && item.status === 'pending' ? (
         <Card>
-          <Heading>Your decision</Heading>
+          <Heading>{t('sermon.yourDecision')}</Heading>
           <TextField
-            label="A note for the author (optional)"
+            label={t('sermon.noteLabel')}
             value={note}
             onChangeText={setNote}
             multiline
             maxLength={500}
             style={{ minHeight: 80, paddingTop: 12, textAlignVertical: 'top' }}
-            hint="The author sees this if you decline."
+            hint={t('sermon.noteHint')}
           />
-          <Button title="Approve and publish" onPress={() => onReview(true)} loading={review.isPending} />
-          <Button title="Decline" variant="secondary" onPress={() => onReview(false)} loading={review.isPending} />
+          <Button title={t('sermon.approve')} onPress={() => onReview(true)} loading={review.isPending} />
+          <Button title={t('members.decline')} variant="secondary" onPress={() => onReview(false)} loading={review.isPending} />
         </Card>
       ) : null}
 
       {isPastor && official ? (
-        <Button title="Edit" variant="secondary" onPress={() => router.push({ pathname: '/sermon-edit', params: { id: item.id } })} />
+        <Button title={t('verse.edit')} variant="secondary" onPress={() => router.push({ pathname: '/sermon-edit', params: { id: item.id } })} />
       ) : null}
       {canEditOwn ? (
         <Button
-          title="Edit"
+          title={t('verse.edit')}
           variant="secondary"
           onPress={() =>
             router.push({ pathname: item.source === 'member' ? '/sermon-write' : '/sermon-suggest', params: { id: item.id } })
           }
         />
       ) : null}
-      {isPastor || canEditOwn ? <Button title="Delete" variant="danger" onPress={onDelete} loading={remove.isPending} /> : null}
+      {isPastor || canEditOwn ? <Button title={t('common.delete')} variant="danger" onPress={onDelete} loading={remove.isPending} /> : null}
     </Screen>
   );
 }
