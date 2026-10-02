@@ -82,7 +82,7 @@ export default function SermonScreen() {
 
   return (
     <Screen edges={['bottom']}>
-      <SourceTag source={item.source} />
+      <SourceTag source={item.source} link={item.read_url || item.media_url} />
       <Title>{item.title}</Title>
       <ErrorText>{error}</ErrorText>
 

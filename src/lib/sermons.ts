@@ -62,6 +62,42 @@ export function isWebLink(value: string) {
   return /^https?:\/\/\S+$/i.test(value.trim()) && value.trim().length <= 500;
 }
 
+// Sites people often share sermons from, by how they are usually written.
+const KNOWN_SITES: Record<string, string> = {
+  'sermoncentral.com': 'SermonCentral',
+  'youtube.com': 'YouTube',
+  'youtu.be': 'YouTube',
+  'm.youtube.com': 'YouTube',
+  'vimeo.com': 'Vimeo',
+  'facebook.com': 'Facebook',
+  'spotify.com': 'Spotify',
+  'open.spotify.com': 'Spotify',
+  'podcasts.apple.com': 'Apple Podcasts',
+  'desiringgod.org': 'Desiring God',
+  'gty.org': 'Grace to You',
+  'ligonier.org': 'Ligonier',
+  'thegospelcoalition.org': 'TGC',
+  'sermonaudio.com': 'SermonAudio',
+  'biblegateway.com': 'Bible Gateway',
+};
+
+/** "SermonCentral" for a SermonCentral link, or the site's address for others, for the tag on a sermon. */
+export function siteName(url: string) {
+  const host = linkSite(url).toLowerCase();
+  return KNOWN_SITES[host] ?? KNOWN_SITES[host.split('.').slice(-2).join('.')] ?? host;
+}
+
+/**
+ * The link to open straight from the list, skipping the sermon's own screen: the reading link, or the video when
+ * there is only that. Only for approved, published sermons that are not a member's article (those are read in the
+ * app). Null when the sermon should open its own screen instead.
+ */
+export function directLink(sermon: SermonItem) {
+  if (sermon.source === 'member' || sermon.status !== 'approved' || !sermon.published) return null;
+  const link = sermon.read_url || sermon.media_url;
+  return link && isWebLink(link) ? link : null;
+}
+
 /** "sermoncentral.com" from a full address, for labelling where a link goes. */
 export function linkSite(url: string) {
   try {

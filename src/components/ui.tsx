@@ -261,6 +261,7 @@ export function Row({
   left,
   right,
   onPress,
+  onLongPress,
   chevron = true,
 }: {
   title: string;
@@ -268,14 +269,18 @@ export function Row({
   left?: ReactNode;
   right?: ReactNode;
   onPress?: () => void;
+  /** A second action, such as opening a sermon's own screen to edit it. */
+  onLongPress?: () => void;
   /** Off for rows that pick a choice rather than open something. */
   chevron?: boolean;
 }) {
   const theme = useTheme();
   return (
     <Pressable
-      disabled={!onPress}
+      disabled={!onPress && !onLongPress}
       onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={350}
       accessibilityRole={onPress ? 'button' : undefined}
       style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}>
       {left}

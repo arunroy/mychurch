@@ -392,6 +392,10 @@ export type SermonItem = {
   author_name: string | null;
   is_mine: boolean;
   review_note: string | null;
+  /** Where to read it, such as a SermonCentral page. */
+  read_url: string | null;
+  /** A video or audio link. */
+  media_url: string | null;
 };
 
 export type SermonDetail = {

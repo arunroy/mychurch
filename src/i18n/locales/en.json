@@ -541,7 +541,8 @@
     "statusPending": "Waiting for review",
     "statusDeclined": "Not approved",
     "statusDraft": "Draft",
-    "sharedBy": "Shared by {{name}}"
+    "sharedBy": "Shared by {{name}}",
+    "holdToManage": "Tap a sermon to read it. Press and hold one to edit or delete it."
   },
   "sermon": {
     "gone": "This sermon is no longer in the list.",
