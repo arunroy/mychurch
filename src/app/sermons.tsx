@@ -5,7 +5,7 @@ import type { TFunction } from 'i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { SourceTag } from '@/components/sermon-tag';
-import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Loading, Row, Screen, TextField } from '@/components/ui';
+import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Row, Screen, TextField, Segmented } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { formatDay } from '@/lib/dates';
@@ -68,11 +68,11 @@ export default function SermonsScreen() {
       <TextField label={t('sermons.searchLabel')} value={search} onChangeText={setSearch} placeholder={t('sermons.searchPlaceholder')} autoCorrect={false} />
 
       {searching ? null : (
-        <View style={styles.chips}>
-          {SOURCES.map((source) => (
-            <Chip key={source.value} label={t(`sermons.filter${source.value[0].toUpperCase()}${source.value.slice(1)}`)} selected={filter === source.value} onPress={() => setFilter(source.value)} />
-          ))}
-        </View>
+        <Segmented
+          value={filter}
+          onChange={setFilter}
+          options={SOURCES.map((source) => ({ value: source.value, label: t(`sermons.filter${source.value[0].toUpperCase()}${source.value.slice(1)}`) }))}
+        />
       )}
       {searching ? <Body muted>{t('sermons.searching', { count: shown.length })}</Body> : null}
 

@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ColorPicker } from '@/components/color-picker';
 import { FeaturesCard } from '@/components/features-card';
 import { YoutubeChannelCard } from '@/components/youtube-channel-card';
-import { Avatar, Body, Button, Card, ErrorText, Heading, Screen, TextField, ToggleRow } from '@/components/ui';
+import { Avatar, Button, Card, ErrorText, Heading, Screen, TextField, ToggleRow } from '@/components/ui';
+import { ACCENT } from '@/constants/theme';
 import type { Church } from '@/lib/database.types';
 import { useActiveChurch, useChurch } from '@/lib/church';
 import { pickAndUploadImage } from '@/lib/images';
 import { friendlyError, publicUrl, supabase } from '@/lib/supabase';
 
 type Editable = Partial<
-  Pick<Church, 'name' | 'city' | 'contact_email' | 'accent_color' | 'logo_path' | 'requires_approval' | 'directory_enabled'>
+  Pick<Church, 'name' | 'city' | 'contact_email' | 'logo_path' | 'requires_approval' | 'directory_enabled'>
 >;
 
 // Pastor and church admins only (the database enforces this too).
@@ -54,7 +54,7 @@ export default function ChurchSettingsScreen() {
 
       <Card>
         <Heading>{t('settings.logo')}</Heading>
-        <Avatar name={church.name} uri={publicUrl('church-logos', church.logo_path)} color={church.accent_color} size={72} />
+        <Avatar name={church.name} uri={publicUrl('church-logos', church.logo_path)} color={ACCENT} size={72} />
         <Button title={t('settings.changeLogo')} variant="secondary" onPress={changeLogo} loading={busy === 'logo'} />
       </Card>
 
@@ -75,12 +75,6 @@ export default function ChurchSettingsScreen() {
           loading={busy === 'details'}
           disabled={!detailsChanged || name.trim().length < 2}
         />
-      </Card>
-
-      <Card>
-        <Heading>{t('settings.colour')}</Heading>
-        <Body muted>{t('settings.colourHint')}</Body>
-        <ColorPicker value={church.accent_color} onChange={(color) => save({ accent_color: color }, 'color')} />
       </Card>
 
       <FeaturesCard />

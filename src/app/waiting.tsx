@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Avatar, Body, Button, Card, ErrorText, Screen, Title } from '@/components/ui';
+import { ACCENT } from '@/constants/theme';
 import { signOut, useIsPlatformAdmin, useUserId } from '@/lib/auth';
 import { useChurch } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
@@ -49,7 +50,7 @@ export default function WaitingScreen() {
 
   return (
     <Screen>
-      <Avatar name={church.name} uri={publicUrl('church-logos', church.logo_path)} color={church.accent_color} size={72} />
+      <Avatar name={church.name} uri={publicUrl('church-logos', church.logo_path)} color={ACCENT} size={72} />
       <Title>{heading}</Title>
       <Body muted>{detail}</Body>
       <Button title={t('waiting.checkAgain')} onPress={checkAgain} loading={checking} />

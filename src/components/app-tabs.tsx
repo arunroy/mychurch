@@ -40,7 +40,7 @@ export default function AppTabs({
           styles.list,
           {
             backgroundColor: theme.backgroundElement,
-            borderTopColor: theme.backgroundSelected,
+            borderTopColor: theme.border,
             height: TAB_BAR_CONTENT_HEIGHT + insets.bottom,
             paddingBottom: insets.bottom,
           },
@@ -55,7 +55,7 @@ export default function AppTabs({
         ) : null}
         {featureOn('chat') ? (
           <TabTrigger name="chat" href="/chat" asChild>
-            <TabButton label={t('tabs.chat')} icon="people-outline" activeIcon="people" badge={chatUnread} />
+            <TabButton label={t('tabs.chat')} icon="chatbubbles-outline" activeIcon="chatbubbles" badge={chatUnread} />
           </TabTrigger>
         ) : null}
         {featureOn('messages') ? (
@@ -91,15 +91,15 @@ function TabButton({
       accessibilityState={{ selected: !!isFocused }}
       accessibilityLabel={badge > 0 ? t('tabs.newBadge', { label, count: badge }) : label}
       style={styles.button}>
-      <View style={[styles.pill, isFocused ? { backgroundColor: theme.backgroundSelected } : null]}>
-        <Ionicons name={isFocused ? activeIcon : icon} size={30} color={color} />
+      <View style={styles.pill}>
+        <Ionicons name={isFocused ? activeIcon : icon} size={26} color={color} />
         {badge > 0 ? (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{badge > 99 ? '99+' : badge}</Text>
           </View>
         ) : null}
       </View>
-      <Text style={[styles.label, { color, fontWeight: isFocused ? 700 : 500 }]} numberOfLines={1}>
+      <Text style={[styles.label, { color }]} numberOfLines={1} maxFontSizeMultiplier={1.3}>
         {label}
       </Text>
     </Pressable>
@@ -117,19 +117,19 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.two,
   },
   button: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  pill: { width: 64, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  label: { fontSize: 13 },
+  pill: { width: 44, height: 30, alignItems: 'center', justifyContent: 'center' },
+  label: { fontSize: 11, fontWeight: 600 },
   badge: {
     position: 'absolute',
-    top: -2,
-    right: 4,
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
+    top: -4,
+    right: 6,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     paddingHorizontal: 5,
     backgroundColor: '#D92D20',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  badgeText: { color: '#FFFFFF', fontSize: 12, fontWeight: 700 },
+  badgeText: { color: '#FFFFFF', fontSize: 11, fontWeight: 700 },
 });

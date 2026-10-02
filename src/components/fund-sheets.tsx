@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { DateField } from '@/components/date-time-fields';
-import { Body, Button, Card, Chip, ErrorText, Heading, Row, TextField } from '@/components/ui';
+import { Body, Button, Card, Chip, ErrorText, Heading, Row, TextField, Segmented } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useActiveChurch } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
@@ -33,7 +33,7 @@ export function Sheet({ onClose, children }: { onClose: () => void; children: Re
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={t('common.close')} />
-        <View style={[styles.sheet, { backgroundColor: scheme === 'dark' ? '#1C1C1E' : '#FFFFFF' }]}>
+        <View style={[styles.sheet, { backgroundColor: scheme === 'dark' ? '#000000' : '#F2F2F7' }]}>
           <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
             {children}
             <Pressable onPress={onClose} accessibilityRole="button" style={styles.cancel}>
@@ -180,10 +180,14 @@ export function FundTransactionSheet({
   return (
     <Sheet onClose={onClose}>
       <Heading>{existing ? t('funds.editTitle') : t('funds.addTitle')}</Heading>
-      <View style={styles.chips}>
-        <Chip label={t('funds.moneyIn')} wide selected={kind === 'in'} onPress={() => setKind('in')} />
-        <Chip label={t('funds.moneyOut')} wide selected={kind === 'out'} onPress={() => setKind('out')} />
-      </View>
+      <Segmented
+        value={kind}
+        onChange={setKind}
+        options={[
+          { value: 'in', label: t('funds.moneyIn') },
+          { value: 'out', label: t('funds.moneyOut') },
+        ]}
+      />
       <TextField
         label={t('funds.amount', { currency })}
         value={amountText}

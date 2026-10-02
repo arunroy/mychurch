@@ -1,10 +1,8 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
 
-import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Screen, TextField } from '@/components/ui';
-import { Spacing } from '@/constants/theme';
+import { Body, Button, Card, ErrorText, Gap, Heading, Screen, TextField, Row, Checkmark } from '@/components/ui';
 import { useActiveChurch } from '@/lib/church';
 import type { PrayerVisibility } from '@/lib/database.types';
 import { useShareRequest, VISIBILITY_CHOICES } from '@/lib/prayers';
@@ -47,14 +45,18 @@ export default function PrayerNewScreen() {
 
       <Card>
         <Heading>{t('prayerNew.whoSee')}</Heading>
-        <View style={styles.chips}>
-          {VISIBILITY_CHOICES.map((choice) => (
-            <Chip key={choice.value} label={t(`prayerNew.choice${choice.value[0].toUpperCase()}${choice.value.slice(1)}`)} selected={choice.value === visibility} onPress={() => setVisibility(choice.value)} />
-          ))}
-        </View>
-        <Body muted>{t(`prayerNew.hint${visibility[0].toUpperCase()}${visibility.slice(1)}`)}</Body>
-        <Body muted>{t('prayerNew.nameShown')}</Body>
+        {VISIBILITY_CHOICES.map((choice) => (
+          <Row
+            key={choice.value}
+            title={t(`prayerNew.choice${choice.value[0].toUpperCase()}${choice.value.slice(1)}`)}
+            right={<Checkmark visible={choice.value === visibility} />}
+            chevron={false}
+            onPress={() => setVisibility(choice.value)}
+          />
+        ))}
       </Card>
+      <Body muted>{t(`prayerNew.hint${visibility[0].toUpperCase()}${visibility.slice(1)}`)}</Body>
+      <Body muted>{t('prayerNew.nameShown')}</Body>
 
       <Button title={t('prayerNew.shareButton')} onPress={onShare} loading={share.isPending} disabled={!body.trim()} />
       <Gap />
@@ -62,6 +64,3 @@ export default function PrayerNewScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-});

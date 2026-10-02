@@ -36,11 +36,14 @@
     "newBadge": "{{label}}, {{count}} नया"
   },
   "home": {
-    "welcome": "स्वागत है, {{name}}",
     "churchSection": "चर्च",
     "wantToJoin_one": "{{count}} व्यक्ति जुड़ना चाहता है",
     "wantToJoin_other": "{{count}} लोग जुड़ना चाहते हैं",
-    "reviewRequests": "अनुरोध देखें"
+    "reviewRequests": "अनुरोध देखें",
+    "goodMorning": "सुप्रभात, {{name}}",
+    "goodAfternoon": "नमस्ते, {{name}}",
+    "goodEvening": "शुभ संध्या, {{name}}",
+    "leadersSection": "अगुवों के लिए"
   },
   "shortcuts": {
     "bible": "बाइबल",
@@ -272,7 +275,6 @@
     "cityPlaceholder": "पुणे",
     "email": "चर्च का संपर्क ईमेल",
     "emailHint": "हम इसका उपयोग यह पुष्टि करने के लिए करते हैं कि चर्च वास्तविक है।",
-    "colour": "चर्च का रंग",
     "submit": "चर्च पंजीकृत करें",
     "after": "चर्च की पुष्टि हो जाने पर आप अपना लोगो जोड़ सकते हैं और सदस्यों को आमंत्रित कर सकते हैं।"
   },
@@ -297,8 +299,6 @@
     "details": "विवरण",
     "contactEmail": "संपर्क ईमेल",
     "saveDetails": "विवरण सहेजें",
-    "colour": "रंग",
-    "colourHint": "पूरे ऐप में बटनों और हाइलाइट के लिए उपयोग होता है।",
     "joining": "जुड़ना",
     "approveTitle": "नए सदस्यों को स्वीकृति दें",
     "approveOn": "जो भी जुड़ता है, उसे कोई अगुवा स्वीकार करता है।",
@@ -383,15 +383,10 @@
   },
   "themeSettings": {
     "title": "थीम सेटिंग",
-    "mode": "मोड",
     "system": "सिस्टम",
     "light": "लाइट",
     "dark": "डार्क",
-    "systemHint": "सिस्टम आपके फ़ोन की लाइट या डार्क सेटिंग का पालन करता है।",
-    "theme": "थीम",
-    "plain": "सादा",
-    "plainHint": "सादा आपके चर्च का अपना रंग उपयोग करता है। हर दूसरी थीम अपने मेल खाते रंग लाती है।",
-    "swatch": "{{name}} थीम"
+    "systemHint": "सिस्टम आपके फ़ोन की लाइट या डार्क सेटिंग का पालन करता है।"
   },
   "churchHeader": {
     "switch": "बदलें ▾",
@@ -732,7 +727,10 @@
     "membersTitle": "{{name}} के सदस्य",
     "newInChat": "{{name}}, नए संदेश",
     "groupEmpty": "{{name}} में अभी कोई संदेश नहीं। अपने समूह को नमस्ते कहें।",
-    "groupPlaceholder": "{{name}} को संदेश लिखें"
+    "groupPlaceholder": "{{name}} को संदेश लिखें",
+    "groupsSection": "आपके समूह",
+    "groupsFooter": "समूह को केवल उसके सदस्य पढ़ सकते हैं। समूह पास्टर और एल्डर बनाते हैं।",
+    "noGroups": "आप अभी किसी समूह में नहीं हैं।"
   },
   "messagesTab": {
     "title": "संदेश",

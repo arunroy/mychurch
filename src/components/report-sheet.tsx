@@ -60,7 +60,7 @@ export function ReportSheet({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={close}>
       <Pressable style={styles.backdrop} onPress={close} accessibilityLabel={t('common.close')} />
-      <View style={[styles.sheet, { backgroundColor: scheme === 'dark' ? '#1C1C1E' : '#FFFFFF' }]}>
+      <View style={[styles.sheet, { backgroundColor: scheme === 'dark' ? '#000000' : '#F2F2F7' }]}>
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
           {sent ? (
             <>

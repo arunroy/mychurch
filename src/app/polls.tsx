@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -93,12 +94,20 @@ function PollCard({ poll, userId }: { poll: PollSummary; userId: string }) {
             onPress={() => toggle(option.id)}
             accessibilityRole={poll.multiple ? 'checkbox' : 'radio'}
             accessibilityState={{ checked: chosen, disabled: poll.is_closed }}
-            style={[styles.option, { borderColor: chosen ? accentText : theme.backgroundSelected }]}>
-            <View style={[styles.bar, { width: `${share * 100}%`, backgroundColor: theme.backgroundSelected }]} />
-            <Text style={[styles.mark, { color: accentText }]}>{chosen ? '✓' : ''}</Text>
-            <Text style={[styles.label, { color: theme.text }]}>{option.label}</Text>
-            {showResults && option.votes !== null ? (
-              <Text style={[styles.count, { color: theme.textSecondary }]}>{option.votes}</Text>
+            style={styles.option}>
+            <View style={styles.optionLine}>
+              <View style={[styles.mark, { borderColor: chosen ? accentText : theme.border, backgroundColor: chosen ? accentText : 'transparent' }]}>
+                {chosen ? <Ionicons name="checkmark" size={14} color={theme.backgroundElement} /> : null}
+              </View>
+              <Text style={[styles.label, { color: theme.text }]}>{option.label}</Text>
+              {showResults && option.votes !== null ? (
+                <Text style={[styles.count, { color: theme.textSecondary }]}>{option.votes}</Text>
+              ) : null}
+            </View>
+            {showResults ? (
+              <View style={[styles.track, { backgroundColor: theme.backgroundSelected }]}>
+                <View style={[styles.bar, { width: `${share * 100}%`, backgroundColor: chosen ? accentText : theme.textSecondary }]} />
+              </View>
             ) : null}
           </Pressable>
         );
@@ -156,20 +165,13 @@ function PollCard({ poll, userId }: { poll: PollSummary; userId: string }) {
 }
 
 const styles = StyleSheet.create({
-  option: {
-    minHeight: 48,
-    borderWidth: 1.5,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    overflow: 'hidden',
-  },
-  // Fills the row in proportion to the votes, behind the text.
-  bar: { position: 'absolute', left: 0, top: 0, bottom: 0 },
-  mark: { width: 16, fontSize: 16, fontWeight: 700 },
-  label: { flex: 1, fontSize: 16, lineHeight: 22, paddingVertical: Spacing.two },
+  option: { minHeight: 46, paddingVertical: 8, gap: 8, justifyContent: 'center' },
+  optionLine: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  // The share of the votes, under the choice.
+  track: { height: 6, borderRadius: 3, marginLeft: 34, overflow: 'hidden' },
+  bar: { height: 6, borderRadius: 3 },
+  mark: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  label: { flex: 1, fontSize: 17, lineHeight: 22 },
   count: { fontSize: 15, fontWeight: 600 },
   manage: { flexDirection: 'row', gap: Spacing.two },
   manageButton: { flex: 1 },

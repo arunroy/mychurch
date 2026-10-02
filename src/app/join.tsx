@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator } from 'react-native';
 
 import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, TextField } from '@/components/ui';
+import { ACCENT } from '@/constants/theme';
 import { useChurch } from '@/lib/church';
 import { clearPendingInviteCode, getPendingInviteCode } from '@/lib/invite';
 import { goToChurch } from '@/lib/navigation';
@@ -105,7 +106,7 @@ export default function JoinScreen() {
             key={church.id}
             title={church.name}
             subtitle={church.city}
-            left={<Avatar name={church.name} uri={publicUrl('church-logos', church.logo_path)} color={church.accent_color} />}
+            left={<Avatar name={church.name} uri={publicUrl('church-logos', church.logo_path)} color={ACCENT} />}
             right={
               alreadyIn.has(church.id) ? (
                 <Body muted>{t('common.joined')}</Body>

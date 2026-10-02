@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Body, Button, Card, Chip, ErrorText, Heading, Row, useAccent, useAccentText } from '@/components/ui';
+import { Body, Button, Card, Chip, ErrorText, Heading, Row, useAccent, useAccentSoft, useAccentText } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { dayAfter, monthGrid, monthName, monthTitle, shiftMonth, weekdayLabels, weekKeys, weekRangeLabel } from '@/lib/calendar';
@@ -76,6 +76,7 @@ export function MonthView() {
   const theme = useTheme();
   const accent = useAccent();
   const accentText = useAccentText();
+  const accentSoft = useAccentSoft();
   const { church_id } = useActiveChurch();
   const today = dateKey();
   const now = parseDateKey(today);
@@ -137,7 +138,7 @@ export function MonthView() {
                 <View
                   style={[
                     styles.day,
-                    isSelected ? { backgroundColor: accent } : isToday ? { borderColor: accentText, borderWidth: 2 } : null,
+                    isSelected ? { backgroundColor: accent } : isToday ? { backgroundColor: accentSoft } : null,
                   ]}>
                   <Text
                     style={[

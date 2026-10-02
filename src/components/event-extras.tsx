@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { Body, Button, Card, Chip, ErrorText, Heading } from '@/components/ui';
+import { Body, Button, Card, Chip, ErrorText, Heading, Segmented } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import type { ChurchEvent, RsvpStatus } from '@/lib/database.types';
 import { addToPhoneCalendar, phoneCalendarSupported } from '@/lib/phone-calendar';
@@ -56,11 +56,11 @@ export function EventExtras({ event }: { event: ChurchEvent }) {
 
       <Card>
         <Heading>{t('extras.coming')}</Heading>
-        <View style={styles.chips}>
-          {RSVP_CHOICES.map((choice) => (
-            <Chip key={choice.value} label={choiceLabel(choice.value)} selected={mine === choice.value} onPress={() => choose(choice.value)} />
-          ))}
-        </View>
+        <Segmented
+          value={mine ?? ''}
+          onChange={(value) => value && choose(value as (typeof RSVP_CHOICES)[number]['value'])}
+          options={RSVP_CHOICES.map((choice) => ({ value: choice.value as string, label: choiceLabel(choice.value) }))}
+        />
         <Body muted>{totals || t('extras.noAnswers')}</Body>
         {summary.data?.people && summary.data.people.length > 0 ? (
           <View style={styles.people}>
