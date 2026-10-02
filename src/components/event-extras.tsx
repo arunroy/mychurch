@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Body, Button, Card, Chip, ErrorText, Heading } from '@/components/ui';
@@ -11,6 +12,7 @@ import { friendlyError } from '@/lib/supabase';
 
 /** "Are you coming?", a reminder on this phone, and adding the event to the phone's calendar. */
 export function EventExtras({ event }: { event: ChurchEvent }) {
+  const { t } = useTranslation();
   const summary = useRsvpSummary(event.id);
   const setRsvp = useSetRsvp(event.id);
   const { minutes, reload } = useReminder(event.id);
@@ -35,11 +37,13 @@ export function EventExtras({ event }: { event: ChurchEvent }) {
     return run(() => setRsvp.mutateAsync(mine === status ? null : status));
   }
 
+  const choiceLabel = (value: RsvpStatus) => t(`extras.${value}`);
+  const reminderLabel = (m: number) => (m === 60 ? t('extras.hourBefore') : t('extras.dayBefore'));
   const totals = summary.data
     ? [
-        summary.data.going ? `${summary.data.going} going` : null,
-        summary.data.maybe ? `${summary.data.maybe} maybe` : null,
-        summary.data.declined ? `${summary.data.declined} can’t go` : null,
+        summary.data.going ? t('extras.nGoing', { count: summary.data.going }) : null,
+        summary.data.maybe ? t('extras.nMaybe', { count: summary.data.maybe }) : null,
+        summary.data.declined ? t('extras.nNo', { count: summary.data.declined }) : null,
       ]
         .filter(Boolean)
         .join(' · ')
@@ -51,18 +55,18 @@ export function EventExtras({ event }: { event: ChurchEvent }) {
       {note ? <Body>{note}</Body> : null}
 
       <Card>
-        <Heading>Are you coming?</Heading>
+        <Heading>{t('extras.coming')}</Heading>
         <View style={styles.chips}>
           {RSVP_CHOICES.map((choice) => (
-            <Chip key={choice.value} label={choice.label} selected={mine === choice.value} onPress={() => choose(choice.value)} />
+            <Chip key={choice.value} label={choiceLabel(choice.value)} selected={mine === choice.value} onPress={() => choose(choice.value)} />
           ))}
         </View>
-        <Body muted>{totals || 'No answers yet.'}</Body>
+        <Body muted>{totals || t('extras.noAnswers')}</Body>
         {summary.data?.people && summary.data.people.length > 0 ? (
           <View style={styles.people}>
             {summary.data.people.map((person, index) => (
               <Body key={`${person.name}-${index}`} muted>
-                {`${person.name}: ${RSVP_CHOICES.find((c) => c.value === person.status)?.label}`}
+                {`${person.name}: ${choiceLabel(person.status)}`}
               </Body>
             ))}
           </View>
@@ -71,25 +75,23 @@ export function EventExtras({ event }: { event: ChurchEvent }) {
 
       {upcoming && (remindersSupported || phoneCalendarSupported) ? (
         <Card>
-          <Heading>Don’t miss it</Heading>
+          <Heading>{t('extras.dontMiss')}</Heading>
           {remindersSupported ? (
             <>
               <Body muted>
-                {minutes
-                  ? `A reminder is set on this phone, ${REMINDER_CHOICES.find((c) => c.minutes === minutes)?.label ?? 'before'}.`
-                  : 'Get a reminder on this phone.'}
+                {minutes ? t('extras.reminderSet', { when: reminderLabel(minutes) }) : t('extras.getReminder')}
               </Body>
               <View style={styles.chips}>
                 {REMINDER_CHOICES.map((choice) => (
                   <Chip
                     key={choice.minutes}
-                    label={choice.label}
+                    label={reminderLabel(choice.minutes)}
                     selected={minutes === choice.minutes}
                     onPress={() =>
                       run(async () => {
                         await setReminder(event, choice.minutes);
                         await reload();
-                        setNote('Reminder set.');
+                        setNote(t('extras.reminderDone'));
                       })
                     }
                   />
@@ -97,7 +99,7 @@ export function EventExtras({ event }: { event: ChurchEvent }) {
               </View>
               {minutes ? (
                 <Button
-                  title="Remove the reminder"
+                  title={t('extras.removeReminder')}
                   variant="secondary"
                   onPress={() =>
                     run(async () => {
@@ -111,12 +113,12 @@ export function EventExtras({ event }: { event: ChurchEvent }) {
           ) : null}
           {phoneCalendarSupported ? (
             <Button
-              title="Add to my calendar"
+              title={t('extras.addToCalendar')}
               variant="secondary"
               onPress={() =>
                 run(async () => {
                   const saved = await addToPhoneCalendar(event);
-                  if (saved) setNote('Added to your calendar.');
+                  if (saved) setNote(t('extras.addedToCalendar'));
                 })
               }
             />

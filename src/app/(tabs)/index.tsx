@@ -5,6 +5,7 @@ import { AnnouncementCards } from '@/components/announcement-cards';
 import { ChurchHeader } from '@/components/church-header';
 import { HomeShortcuts } from '@/components/home-shortcuts';
 import { InviteCard } from '@/components/invite-card';
+import { SosBanner } from '@/components/sos-banner';
 import { SpecialDaysCard } from '@/components/special-days-card';
 import { VerseCard } from '@/components/verse-card';
 import { Button, Card, Heading, Screen } from '@/components/ui';
@@ -25,6 +26,8 @@ export default function HomeScreen() {
   return (
     <Screen edges={['top']}>
       <ChurchHeader />
+
+      <SosBanner />
 
       <Card>
         <Heading>{t('home.welcome', { name: firstName })}</Heading>

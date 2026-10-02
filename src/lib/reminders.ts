@@ -3,6 +3,8 @@ import * as Notifications from 'expo-notifications';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Platform } from 'react-native';
 
+import i18n from '@/i18n';
+
 import type { ChurchEvent } from './database.types';
 
 // "Remind me" for an event. The reminder is a notification the phone schedules for itself, so it works
@@ -45,7 +47,7 @@ export async function cancelReminder(eventId: string) {
 /** Schedules a reminder the given number of minutes before the event starts. Throws a readable message if it can't. */
 export async function setReminder(event: ChurchEvent, minutes: number) {
   const fireAt = new Date(new Date(event.starts_at).getTime() - minutes * 60 * 1000);
-  if (fireAt.getTime() <= Date.now()) throw new Error('That time has already passed. Pick a shorter reminder.');
+  if (fireAt.getTime() <= Date.now()) throw new Error(i18n.t('errors.reminderPast'));
 
   let { status } = await Notifications.getPermissionsAsync();
   if (status !== 'granted') ({ status } = await Notifications.requestPermissionsAsync());
@@ -62,7 +64,7 @@ export async function setReminder(event: ChurchEvent, minutes: number) {
   const notificationId = await Notifications.scheduleNotificationAsync({
     content: {
       title: event.title,
-      body: minutes >= 24 * 60 ? 'Tomorrow at your church.' : 'Starting in an hour.',
+      body: minutes >= 24 * 60 ? i18n.t('extras.reminderTomorrow') : i18n.t('extras.reminderHour'),
       data: { type: 'event', event_id: event.id },
     },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: fireAt, channelId: 'default' },

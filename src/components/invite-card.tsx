@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Share, StyleSheet, Text, View } from 'react-native';
 
 import { Body, Button, Card, ErrorText, Heading } from '@/components/ui';
@@ -13,6 +14,7 @@ import { friendlyError, supabase } from '@/lib/supabase';
 
 /** The church's join code with ways to share it. Leaders only. */
 export function InviteCard() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { church } = useActiveChurch();
   const { isLeader, canEditChurch } = usePermissions();
@@ -32,9 +34,9 @@ export function InviteCard() {
 
   function newCode() {
     confirm(
-      'Make a new code?',
-      'The old code and invite links will stop working. People already in the church are not affected.',
-      'Make new code',
+      t('invite.newCodeTitle'),
+      t('invite.newCodeMessage'),
+      t('invite.newCodeAction'),
       async () => {
         const { error: codeError } = await supabase.rpc('regenerate_join_code', { p_church: church.id });
         if (codeError) setError(friendlyError(codeError));
@@ -45,20 +47,18 @@ export function InviteCard() {
 
   return (
     <Card>
-      <Heading>Invite members</Heading>
+      <Heading>{t('invite.title')}</Heading>
       <Body muted>
-        {church.requires_approval
-          ? 'People who use this code still need approval from you or an elder.'
-          : 'Anyone with this code joins straight away.'}
+        {church.requires_approval ? t('invite.needApproval') : t('invite.joinsDirect')}
       </Body>
       <View style={[styles.codeBox, { backgroundColor: theme.background }]}>
-        <Text selectable style={[styles.code, { color: theme.text }]} accessibilityLabel={`Join code ${joinCode.split('').join(' ')}`}>
+        <Text selectable style={[styles.code, { color: theme.text }]} accessibilityLabel={t('invite.codeLabel', { code: joinCode.split('').join(' ') })}>
           {joinCode}
         </Text>
       </View>
-      <Button title="Share invite" onPress={() => Share.share({ message: inviteMessage(church.name, joinCode) })} />
-      <Button title={copied ? 'Copied' : 'Copy code'} variant="secondary" onPress={copy} />
-      {canEditChurch ? <Button title="Make a new code" variant="secondary" onPress={newCode} /> : null}
+      <Button title={t('invite.share')} onPress={() => Share.share({ message: inviteMessage(church.name, joinCode) })} />
+      <Button title={copied ? t('invite.copied') : t('invite.copy')} variant="secondary" onPress={copy} />
+      {canEditChurch ? <Button title={t('invite.newCode')} variant="secondary" onPress={newCode} /> : null}
       <ErrorText>{error}</ErrorText>
     </Card>
   );

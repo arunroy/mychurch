@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { ActivityIndicator } from 'react-native';
 
 import { Avatar, Body, Button, Card, ErrorText, Heading, Row, useAccentText } from '@/components/ui';
@@ -13,25 +15,26 @@ import { friendlyError, publicUrl } from '@/lib/supabase';
 // Only worth a place on Home when someone's day is today or tomorrow.
 const WINDOW_DAYS = 1;
 
-function when(entry: UpcomingDay) {
+function when(entry: UpcomingDay, t: TFunction) {
   const date = formatMonthDay(entry.month, entry.day);
-  if (entry.daysAway === 0) return 'Today';
-  if (entry.daysAway === 1) return `Tomorrow · ${date}`;
-  return `${date} · in ${entry.daysAway} days`;
+  if (entry.daysAway === 0) return t('specialDays.today');
+  if (entry.daysAway === 1) return t('specialDays.tomorrow', { date });
+  return t('specialDays.inDays', { date, count: entry.daysAway });
 }
 
-function describe(entry: UpcomingDay) {
+function describe(entry: UpcomingDay, t: TFunction) {
   const kind =
     entry.kind === 'birthday'
-      ? 'Birthday'
+      ? t('specialDays.birthday')
       : entry.years
-        ? `Anniversary, ${entry.years} ${entry.years === 1 ? 'year' : 'years'}`
-        : 'Anniversary';
-  return `${kind} · ${when(entry)}`;
+        ? t('specialDays.years', { count: entry.years })
+        : t('specialDays.anniversary');
+  return `${kind} · ${when(entry, t)}`;
 }
 
 /** Birthdays and anniversaries today and tomorrow, so the church can wish and pray for each other. */
 export function SpecialDaysCard() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isLeader } = usePermissions();
   const userId = useUserId();
@@ -60,8 +63,8 @@ export function SpecialDaysCard() {
 
   return (
     <Card>
-      <Heading>Birthdays and anniversaries</Heading>
-      {today.length ? <Body>{`Pray for ${today.map((entry) => entry.name).join(', ')} today.`}</Body> : null}
+      <Heading>{t('shortcuts.specialDays')}</Heading>
+      {today.length ? <Body>{t('specialDays.pray', { names: today.map((entry) => entry.name).join(', ') })}</Body> : null}
       <ErrorText>{error}</ErrorText>
       {coming.map((entry) => {
         const canWish = entry.daysAway === 0 && !!entry.user_id && entry.user_id !== userId;
@@ -69,7 +72,7 @@ export function SpecialDaysCard() {
           <Row
             key={`${entry.source}-${entry.id}`}
             title={entry.name}
-            subtitle={canWish ? `${describe(entry)} · tap to send wishes` : describe(entry)}
+            subtitle={canWish ? t('specialDays.wishes', { text: describe(entry, t) }) : describe(entry, t)}
             left={
               entry.source === 'member' ? (
                 <Avatar name={entry.name} uri={publicUrl('avatars', entry.avatar_path)} />
@@ -82,7 +85,7 @@ export function SpecialDaysCard() {
           />
         );
       })}
-      {isLeader ? <Button title="Add or remove dates" variant="secondary" onPress={() => router.push('/special-days')} /> : null}
+      {isLeader ? <Button title={t('specialDays.manage')} variant="secondary" onPress={() => router.push('/special-days')} /> : null}
     </Card>
   );
 }

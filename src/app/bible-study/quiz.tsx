@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Body, Button, Card, Heading, Loading, Row, Screen } from '@/components/ui';
@@ -15,6 +16,7 @@ const WRONG = '#B3261E';
 
 // A ten-question round. Nothing is saved: no scores, no names, no leaderboard.
 export default function QuizScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const saved = useQuizQuestions(church_id);
   const [round, setRound] = useState<RoundQuestion[] | null>(null);
@@ -28,13 +30,13 @@ export default function QuizScreen() {
   if (!round || !level) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>Ten questions, no timer. Pick a level to start.</Body>
+        <Body muted>{t('quiz.intro')}</Body>
         <Card>
           {LEVELS.map((l) => (
             <Row
               key={l.level}
-              title={l.label}
-              subtitle={l.blurb}
+              title={t(`quiz.level${l.level[0].toUpperCase()}${l.level.slice(1)}`)}
+              subtitle={t(`quiz.blurb${l.level[0].toUpperCase()}${l.level.slice(1)}`)}
               onPress={() => {
                 setLevel(l.level);
                 setRound(buildRound(l.level, churchQuestions));
@@ -69,6 +71,7 @@ function Round({
   onAgain: () => void;
   onChangeLevel: () => void;
 }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -78,11 +81,11 @@ function Round({
     return (
       <Screen edges={['bottom']}>
         <Card>
-          <Heading>{`You got ${score} out of ${questions.length}`}</Heading>
-          <Body>{score === questions.length ? 'Perfect! Well done.' : score >= questions.length / 2 ? 'Great job! Keep learning.' : 'Good try! Every round teaches something new.'}</Body>
+          <Heading>{t('quiz.score', { score, total: questions.length })}</Heading>
+          <Body>{score === questions.length ? t('quiz.perfect') : score >= questions.length / 2 ? t('quiz.great') : t('quiz.good')}</Body>
         </Card>
-        <Button title="Play again" onPress={onAgain} />
-        <Button title="Change level" variant="secondary" onPress={onChangeLevel} />
+        <Button title={t('quiz.again')} onPress={onAgain} />
+        <Button title={t('quiz.changeLevel')} variant="secondary" onPress={onChangeLevel} />
       </Screen>
     );
   }
@@ -103,7 +106,7 @@ function Round({
 
   return (
     <Screen edges={['bottom']}>
-      <Body muted>{`Question ${index + 1} of ${questions.length}`}</Body>
+      <Body muted>{t('quiz.questionOf', { n: index + 1, total: questions.length })}</Body>
       <Card>
         <Heading>{q.question}</Heading>
       </Card>
@@ -127,8 +130,8 @@ function Round({
                 },
               ]}>
               <Text style={[styles.optionText, { color: theme.text }]}>{option}</Text>
-              {isRight ? <Text style={[styles.mark, { color: RIGHT }]}>Correct</Text> : null}
-              {isWrong ? <Text style={[styles.mark, { color: WRONG }]}>Not quite</Text> : null}
+              {isRight ? <Text style={[styles.mark, { color: RIGHT }]}>{t('quiz.correct')}</Text> : null}
+              {isWrong ? <Text style={[styles.mark, { color: WRONG }]}>{t('quiz.notQuite')}</Text> : null}
             </Pressable>
           );
         })}
@@ -142,7 +145,7 @@ function Round({
               {q.reference ? <Body muted>{q.reference}</Body> : null}
             </Card>
           ) : null}
-          <Button title={index + 1 === questions.length ? 'See my score' : 'Next question'} onPress={next} />
+          <Button title={index + 1 === questions.length ? t('quiz.seeScore') : t('quiz.next')} onPress={next} />
         </>
       ) : null}
     </Screen>

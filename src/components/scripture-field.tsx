@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Body, Button } from '@/components/ui';
 import { VersePicker, type PassageDraft } from '@/components/verse-picker';
 import { displayBook, findBook, formatReference } from '@/lib/bible-books';
@@ -31,16 +33,17 @@ export function passageFields(passage: PassageDraft | null) {
 
 /** Pick an optional main passage for a sermon: book, chapter and verses, with no translation. */
 export function ScriptureField({ value, onChange }: { value: PassageDraft | null; onChange: (next: PassageDraft | null) => void }) {
+  const { t } = useTranslation();
   const reference = passageFields(value).reference;
   return value ? (
     <>
       <VersePicker value={value} onChange={onChange} showTranslation={false} />
       {reference ? <Body>{reference}</Body> : null}
-      <Button title="Remove the passage" variant="secondary" onPress={() => onChange(null)} />
+      <Button title={t('scripture.remove')} variant="secondary" onPress={() => onChange(null)} />
     </>
   ) : (
     <Button
-      title="Choose a passage"
+      title={t('scripture.choose')}
       variant="secondary"
       onPress={() => onChange({ translation: 'web', book: null, chapter: 1, verseStart: 1, verseEnd: 1 })}
     />

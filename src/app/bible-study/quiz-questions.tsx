@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { DateField } from '@/components/date-time-fields';
@@ -17,22 +18,21 @@ const LETTERS = ['A', 'B', 'C', 'D'];
 
 // Leaders (Pastor, elders, admins) write the church's own questions, and can plan them for a week.
 export default function QuizQuestionsScreen() {
+  const { t } = useTranslation();
   const { isLeader } = usePermissions();
   if (!isLeader) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>Only the Pastor, elders and church admins can write quiz questions.</Body>
+        <Body muted>{t('quiz.onlyLeaders')}</Body>
       </Screen>
     );
   }
   return <Manager />;
 }
 
-function levelLabel(level: QuizLevel) {
-  return LEVELS.find((l) => l.level === level)?.label ?? level;
-}
-
 function Manager() {
+  const { t } = useTranslation();
+  const levelLabel = (level: QuizLevel) => t(`quiz.level${level[0].toUpperCase()}${level.slice(1)}`);
   const { church_id } = useActiveChurch();
   const userId = useUserId()!;
   const all = useQuizQuestions(church_id);
@@ -85,7 +85,7 @@ function Manager() {
   }
 
   function onRemove(item: QuizQuestion) {
-    confirm('Remove this question?', `"${item.question}" will be taken out of the quiz.`, 'Remove', async () => {
+    confirm(t('qa.removeTitle'), t('quiz.removeMessage', { question: item.question }), t('common.remove'), async () => {
       try {
         await remove.mutateAsync(item.id);
       } catch (e) {
@@ -100,48 +100,50 @@ function Manager() {
   const running = list.filter((q) => !q.week_of || q.week_of <= thisWeek);
 
   const describe = (q: QuizQuestion) =>
-    `${levelLabel(q.level)} · ${q.week_of ? `week of ${formatDay(q.week_of)}` : 'any week'}`;
+    q.week_of
+      ? t('quiz.describeWeek', { level: levelLabel(q.level), day: formatDay(q.week_of) })
+      : t('quiz.describeAny', { level: levelLabel(q.level) });
 
   return (
     <Screen edges={['bottom']}>
       <ErrorText>{error ?? (all.error ? friendlyError(all.error) : null)}</ErrorText>
 
       <Card>
-        <Heading>New question</Heading>
-        <Body>Level</Body>
+        <Heading>{t('quiz.newQuestion')}</Heading>
+        <Body>{t('quiz.level')}</Body>
         <View style={styles.chips}>
           {LEVELS.map((l) => (
-            <Chip key={l.level} label={l.label} selected={l.level === level} onPress={() => setLevel(l.level)} />
+            <Chip key={l.level} label={levelLabel(l.level)} selected={l.level === level} onPress={() => setLevel(l.level)} />
           ))}
         </View>
         <TextField
-          label="Question"
+          label={t('pollNew.question')}
           value={question}
           onChangeText={setQuestion}
           multiline
           maxLength={200}
-          placeholder="Who built the ark?"
+          placeholder={t('quiz.questionPlaceholder')}
           style={{ minHeight: 80, paddingTop: 12, textAlignVertical: 'top' }}
         />
         {options.map((option, i) => (
           <View key={i} style={styles.option}>
             <TextField
-              label={`Choice ${LETTERS[i]}`}
+              label={t('quiz.choiceLetter', { letter: LETTERS[i] })}
               value={option}
               onChangeText={(text) => setOption(i, text)}
               maxLength={100}
-              hint={i === correct ? 'This is the right answer.' : undefined}
+              hint={i === correct ? t('quiz.isRight') : undefined}
             />
             <View style={styles.chips}>
-              <Chip label={i === correct ? 'Right answer' : 'Make this the right answer'} selected={i === correct} onPress={() => setCorrect(i)} />
-              {options.length > 2 ? <Chip label="Remove choice" onPress={() => removeOption(i)} /> : null}
+              <Chip label={i === correct ? t('quiz.rightAnswer') : t('quiz.makeRight')} selected={i === correct} onPress={() => setCorrect(i)} />
+              {options.length > 2 ? <Chip label={t('quiz.removeChoice')} onPress={() => removeOption(i)} /> : null}
             </View>
           </View>
         ))}
-        {options.length < 4 ? <Button title="Add another choice" variant="secondary" onPress={() => setOptions((list) => [...list, ''])} /> : null}
-        <TextField label="Where to read it (optional)" value={reference} onChangeText={setReference} maxLength={60} placeholder="Genesis 6:14" />
+        {options.length < 4 ? <Button title={t('quiz.addChoice')} variant="secondary" onPress={() => setOptions((list) => [...list, ''])} /> : null}
+        <TextField label={t('quiz.whereRead')} value={reference} onChangeText={setReference} maxLength={60} placeholder="Genesis 6:14" />
         <TextField
-          label="Short explanation (optional)"
+          label={t('quiz.explanation')}
           value={explanation}
           onChangeText={setExplanation}
           multiline
@@ -149,38 +151,38 @@ function Manager() {
           style={{ minHeight: 80, paddingTop: 12, textAlignVertical: 'top' }}
         />
         <ToggleRow
-          title="Plan it for a week"
-          subtitle="It is saved now, but kids only see it from that week. Questions for the current week are asked first."
+          title={t('quiz.planWeek')}
+          subtitle={t('quiz.planWeekHint')}
           value={planned}
           onValueChange={setPlanned}
         />
         {planned ? (
           <DateField
-            label="Week of"
+            label={t('quiz.weekOf')}
             value={week}
             onChange={setWeek}
-            hint={isValidDateKey(week) ? `Starts Monday ${formatDay(mondayKey(parseDateKey(week)))}` : 'Choose a day in that week.'}
+            hint={isValidDateKey(week) ? t('quiz.startsMonday', { day: formatDay(mondayKey(parseDateKey(week))) }) : t('quiz.chooseDayInWeek')}
           />
         ) : null}
-        <Button title="Add question" onPress={onAdd} loading={add.isPending} disabled={!valid} />
+        <Button title={t('quiz.addQuestion')} onPress={onAdd} loading={add.isPending} disabled={!valid} />
       </Card>
 
       {all.isPending ? <Loading /> : null}
 
       {ahead.length ? (
         <Card>
-          <Heading>Planned for coming weeks</Heading>
+          <Heading>{t('quiz.planned')}</Heading>
           {ahead.map((q) => (
-            <Row key={q.id} title={q.question} subtitle={describe(q)} right={<Button title="Remove" variant="danger" onPress={() => onRemove(q)} />} />
+            <Row key={q.id} title={q.question} subtitle={describe(q)} right={<Button title={t('common.remove')} variant="danger" onPress={() => onRemove(q)} />} />
           ))}
         </Card>
       ) : null}
 
       <Card>
-        <Heading>In the quiz now</Heading>
-        {all.data && running.length === 0 ? <Body muted>Nothing yet. Rounds use questions the app makes up until you add some.</Body> : null}
+        <Heading>{t('quiz.nowRunning')}</Heading>
+        {all.data && running.length === 0 ? <Body muted>{t('quiz.noneYet')}</Body> : null}
         {running.map((q) => (
-          <Row key={q.id} title={q.question} subtitle={describe(q)} right={<Button title="Remove" variant="danger" onPress={() => onRemove(q)} />} />
+          <Row key={q.id} title={q.question} subtitle={describe(q)} right={<Button title={t('common.remove')} variant="danger" onPress={() => onRemove(q)} />} />
         ))}
       </Card>
       <Gap />

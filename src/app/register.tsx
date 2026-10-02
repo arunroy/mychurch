@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ColorPicker } from '@/components/color-picker';
 import { Body, Button, ErrorText, Screen, TextField } from '@/components/ui';
@@ -8,6 +9,7 @@ import { goToChurch } from '@/lib/navigation';
 import { friendlyError, supabase } from '@/lib/supabase';
 
 export default function RegisterChurchScreen() {
+  const { t } = useTranslation();
   const { refresh, setActiveChurch } = useChurch();
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
@@ -38,26 +40,23 @@ export default function RegisterChurchScreen() {
 
   return (
     <Screen edges={['bottom']}>
-      <Body muted>
-        You&apos;ll be the church&apos;s Pastor in the app. You can add other Pastors, elders and staff once it&apos;s set
-        up.
-      </Body>
-      <TextField label="Church name" value={name} onChangeText={setName} placeholder="Grace Chapel" maxLength={120} />
-      <TextField label="City" value={city} onChangeText={setCity} placeholder="Springfield" maxLength={120} />
+      <Body muted>{t('register.intro')}</Body>
+      <TextField label={t('register.name')} value={name} onChangeText={setName} placeholder={t('join.searchPlaceholder')} maxLength={120} />
+      <TextField label={t('register.city')} value={city} onChangeText={setCity} placeholder={t('register.cityPlaceholder')} maxLength={120} />
       <TextField
-        label="Church contact email"
+        label={t('register.email')}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
         placeholder="office@gracechapel.org"
-        hint="We use this to confirm the church is real."
+        hint={t('register.emailHint')}
       />
-      <Body>Church colour</Body>
+      <Body>{t('register.colour')}</Body>
       <ColorPicker value={color} onChange={setColor} />
       <ErrorText>{error}</ErrorText>
-      <Button title="Register church" onPress={register} loading={busy} disabled={!valid} />
-      <Body muted>You can add your logo and invite members once your church is verified.</Body>
+      <Button title={t('register.submit')} onPress={register} loading={busy} disabled={!valid} />
+      <Body muted>{t('register.after')}</Body>
     </Screen>
   );
 }

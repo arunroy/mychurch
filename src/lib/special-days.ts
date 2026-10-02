@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import i18n from '@/i18n';
+
 import type { SpecialDayEntry, SpecialDayKind } from './database.types';
 import { supabase } from './supabase';
 
@@ -13,7 +15,8 @@ export function daysInMonth(month: number) {
 }
 
 export function formatMonthDay(month: number, day: number) {
-  return `${day} ${MONTHS[month - 1]}`;
+  const names = i18n.t('months.long', { returnObjects: true }) as string[];
+  return `${day} ${names[month - 1] ?? MONTHS[month - 1]}`;
 }
 
 export type UpcomingDay = SpecialDayEntry & {

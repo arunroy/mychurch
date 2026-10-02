@@ -1,5 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { SourceTag } from '@/components/sermon-tag';
@@ -15,6 +17,7 @@ import { friendlyError } from '@/lib/supabase';
 // filters. Search looks at all of them, and every sermon carries a tag saying where it comes from. Articles and
 // outside links only appear here once the Pastor has approved them.
 export default function SermonsScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isPastor } = usePermissions();
   const sermons = useSermons(church_id);
@@ -34,13 +37,13 @@ export default function SermonsScreen() {
       <View style={styles.buttons}>
         {isPastor ? (
           <>
-            <Button title="Add a sermon" onPress={() => router.push('/sermon-edit')} style={styles.button} />
-            <Button title="Add an outside sermon" variant="secondary" onPress={() => router.push('/sermon-suggest')} style={styles.button} />
+            <Button title={t('sermons.addSermon')} onPress={() => router.push('/sermon-edit')} style={styles.button} />
+            <Button title={t('sermons.addOutside')} variant="secondary" onPress={() => router.push('/sermon-suggest')} style={styles.button} />
           </>
         ) : (
           <>
-            <Button title="Write an article" onPress={() => router.push('/sermon-write')} style={styles.button} />
-            <Button title="Share an outside sermon" variant="secondary" onPress={() => router.push('/sermon-suggest')} style={styles.button} />
+            <Button title={t('sermons.writeArticle')} onPress={() => router.push('/sermon-write')} style={styles.button} />
+            <Button title={t('sermons.shareOutside')} variant="secondary" onPress={() => router.push('/sermon-suggest')} style={styles.button} />
           </>
         )}
       </View>
@@ -50,31 +53,31 @@ export default function SermonsScreen() {
 
       {waitingForReview.length > 0 ? (
         <>
-          <Heading>{`Waiting for your review (${waitingForReview.length})`}</Heading>
+          <Heading>{t('sermons.waitingReview', { count: waitingForReview.length })}</Heading>
           <List items={waitingForReview} showStatus />
         </>
       ) : null}
 
       {mine.length > 0 ? (
         <>
-          <Heading>Your submissions</Heading>
+          <Heading>{t('sermons.yourSubmissions')}</Heading>
           <List items={mine} showStatus />
         </>
       ) : null}
 
-      <TextField label="Search all sermons" value={search} onChangeText={setSearch} placeholder="Title, speaker, author or passage" autoCorrect={false} />
+      <TextField label={t('sermons.searchLabel')} value={search} onChangeText={setSearch} placeholder={t('sermons.searchPlaceholder')} autoCorrect={false} />
 
       {searching ? null : (
         <View style={styles.chips}>
           {SOURCES.map((source) => (
-            <Chip key={source.value} label={source.filter} selected={filter === source.value} onPress={() => setFilter(source.value)} />
+            <Chip key={source.value} label={t(`sermons.filter${source.value[0].toUpperCase()}${source.value.slice(1)}`)} selected={filter === source.value} onPress={() => setFilter(source.value)} />
           ))}
         </View>
       )}
-      {searching ? <Body muted>{`Searching every sermon: ${shown.length} found.`}</Body> : null}
+      {searching ? <Body muted>{t('sermons.searching', { count: shown.length })}</Body> : null}
 
       {!sermons.isPending && shown.length === 0 ? (
-        <Body muted>{searching ? 'No sermon matches that.' : emptyText(filter)}</Body>
+        <Body muted>{searching ? t('sermons.noMatch') : emptyText(filter, t)}</Body>
       ) : null}
       {shown.length > 0 ? <List items={shown} /> : null}
       <Gap />
@@ -82,19 +85,20 @@ export default function SermonsScreen() {
   );
 }
 
-function emptyText(filter: SermonSource) {
-  if (filter === 'pastor') return 'No sermons from the Pastor yet.';
-  if (filter === 'member') return 'No articles from members yet. Write one, and once the Pastor approves it, it appears here.';
-  return 'No outside sermons yet. Share one you found, and once the Pastor approves it, it appears here.';
+function emptyText(filter: SermonSource, t: TFunction) {
+  if (filter === 'pastor') return t('sermons.emptyPastor');
+  if (filter === 'member') return t('sermons.emptyMember');
+  return t('sermons.emptyExternal');
 }
 
-function statusText(item: SermonItem) {
-  if (item.status === 'pending') return 'Waiting for review';
-  if (item.status === 'declined') return 'Not approved';
-  return item.published ? null : 'Draft';
+function statusText(item: SermonItem, t: TFunction) {
+  if (item.status === 'pending') return t('sermons.statusPending');
+  if (item.status === 'declined') return t('sermons.statusDeclined');
+  return item.published ? null : t('sermons.statusDraft');
 }
 
 function List({ items, showStatus }: { items: SermonItem[]; showStatus?: boolean }) {
+  const { t } = useTranslation();
   return (
     <Card>
       {items.map((sermon) => (
@@ -102,8 +106,8 @@ function List({ items, showStatus }: { items: SermonItem[]; showStatus?: boolean
           key={sermon.id}
           title={sermon.title}
           subtitle={[
-            showStatus || sermon.status !== 'approved' ? statusText(sermon) : sermon.published ? null : 'Draft',
-            sermon.author_name ? (sermon.source === 'external' ? `Shared by ${sermon.author_name}` : sermon.author_name) : null,
+            showStatus || sermon.status !== 'approved' ? statusText(sermon, t) : sermon.published ? null : t('sermons.statusDraft'),
+            sermon.author_name ? (sermon.source === 'external' ? t('sermons.sharedBy', { name: sermon.author_name }) : sermon.author_name) : null,
             sermon.speaker || null,
             formatDay(sermon.sermon_date),
             sermon.reference || null,

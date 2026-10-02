@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { DateField } from '@/components/date-time-fields';
 import { Body, Button, Card, ErrorText, Gap, Heading, Loading, Screen, TextField } from '@/components/ui';
@@ -57,6 +58,7 @@ function VerseForm({
   onDateChange: (date: string) => void;
   existing: DailyVerse | null;
 }) {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const save = useSaveVerse(church_id);
   const remove = useDeleteVerse(church_id);
@@ -95,7 +97,7 @@ function VerseForm({
   }
 
   function onDelete() {
-    confirm('Delete this verse?', `The verse for ${formatDay(date)} will be removed.`, 'Delete', async () => {
+    confirm(t('dailyVerse.deleteTitle'), t('dailyVerse.deleteMessage', { day: formatDay(date) }), t('common.delete'), async () => {
       try {
         await remove.mutateAsync(date);
         router.back();
@@ -110,21 +112,21 @@ function VerseForm({
       <ErrorText>{error}</ErrorText>
 
       <Card>
-        <Heading>Day</Heading>
-        <DateField label="Date" value={dateText} onChange={changeDate} hint={dateOk ? formatDay(dateText) : 'Choose the date.'} />
-        {existing ? <Body muted>This day already has a verse. Saving replaces it.</Body> : null}
+        <Heading>{t('dailyVerse.day')}</Heading>
+        <DateField label={t('study.date')} value={dateText} onChange={changeDate} hint={dateOk ? formatDay(dateText) : t('sermonEdit.chooseDate')} />
+        {existing ? <Body muted>{t('dailyVerse.existing')}</Body> : null}
       </Card>
 
       <Card>
-        <Heading>Verse</Heading>
+        <Heading>{t('dailyVerse.verseHeading')}</Heading>
         <VersePicker value={passage} onChange={setPassage} />
         <PassagePreview passage={chosen} />
       </Card>
 
       <Card>
-        <Heading>Reflection</Heading>
+        <Heading>{t('verse.reflection')}</Heading>
         <TextField
-          label="A few words for your church (optional)"
+          label={t('dailyVerse.reflectionLabel')}
           value={reflection}
           onChangeText={setReflection}
           multiline
@@ -134,12 +136,12 @@ function VerseForm({
       </Card>
 
       <Button
-        title={existing ? 'Save changes' : 'Save verse'}
+        title={existing ? t('notes.saveChanges') : t('dailyVerse.save')}
         onPress={onSave}
         loading={save.isPending}
         disabled={!dateOk || !chosen || !preview.isSuccess}
       />
-      {existing ? <Button title="Delete this verse" variant="danger" onPress={onDelete} loading={remove.isPending} /> : null}
+      {existing ? <Button title={t('dailyVerse.deleteButton')} variant="danger" onPress={onDelete} loading={remove.isPending} /> : null}
       <Gap />
     </Screen>
   );

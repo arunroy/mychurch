@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator } from 'react-native';
 
 import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, TextField } from '@/components/ui';
@@ -10,6 +11,7 @@ import { goToChurch } from '@/lib/navigation';
 import { friendlyError, publicUrl, supabase } from '@/lib/supabase';
 
 export default function JoinScreen() {
+  const { t } = useTranslation();
   // Invite links open this screen with ?code=...
   const params = useLocalSearchParams<{ code?: string }>();
   const { refresh, setActiveChurch, memberships } = useChurch();
@@ -70,34 +72,34 @@ export default function JoinScreen() {
   return (
     <Screen edges={['bottom']}>
       <Card>
-        <Heading>Have a code?</Heading>
+        <Heading>{t('join.haveCode')}</Heading>
         <TextField
-          label="Church code"
+          label={t('join.churchCode')}
           value={code}
           onChangeText={(text) => setCode(text.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
           autoCapitalize="characters"
           autoCorrect={false}
           maxLength={8}
           placeholder="ABCD2345"
-          hint="Your Pastor or church office can give you this."
+          hint={t('join.codeHint')}
         />
-        <Button title="Join" onPress={joinWithCode} loading={busy === 'code'} disabled={code.length !== 8 || !!busy} />
+        <Button title={t('join.join')} onPress={joinWithCode} loading={busy === 'code'} disabled={code.length !== 8 || !!busy} />
       </Card>
 
       <ErrorText>{error}</ErrorText>
 
       <Card>
-        <Heading>Or find your church</Heading>
+        <Heading>{t('join.orFind')}</Heading>
         <TextField
-          label="Church name or city"
+          label={t('join.nameOrCity')}
           value={search}
           onChangeText={setSearch}
           autoCorrect={false}
-          placeholder="Grace Chapel"
+          placeholder={t('join.searchPlaceholder')}
           returnKeyType="search"
         />
         {results.isFetching ? <ActivityIndicator /> : null}
-        {results.data?.length === 0 ? <Body muted>No churches match that yet.</Body> : null}
+        {results.data?.length === 0 ? <Body muted>{t('join.noMatch')}</Body> : null}
         {results.data?.map((church) => (
           <Row
             key={church.id}
@@ -106,10 +108,10 @@ export default function JoinScreen() {
             left={<Avatar name={church.name} uri={publicUrl('church-logos', church.logo_path)} color={church.accent_color} />}
             right={
               alreadyIn.has(church.id) ? (
-                <Body muted>Joined</Body>
+                <Body muted>{t('common.joined')}</Body>
               ) : (
                 <Button
-                  title="Ask to join"
+                  title={t('join.askToJoin')}
                   variant="secondary"
                   onPress={() => requestToJoin(church.id)}
                   loading={busy === church.id}
@@ -119,7 +121,7 @@ export default function JoinScreen() {
             }
           />
         ))}
-        <Body muted>Asking to join sends a request your church leaders approve.</Body>
+        <Body muted>{t('join.askNote')}</Body>
       </Card>
     </Screen>
   );

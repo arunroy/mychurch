@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ColorPicker } from '@/components/color-picker';
+import { YoutubeChannelCard } from '@/components/youtube-channel-card';
 import { Avatar, Body, Button, Card, ErrorText, Heading, Screen, TextField, ToggleRow } from '@/components/ui';
 import type { Church } from '@/lib/database.types';
 import { useActiveChurch, useChurch } from '@/lib/church';
@@ -13,6 +15,7 @@ type Editable = Partial<
 
 // Pastor and church admins only (the database enforces this too).
 export default function ChurchSettingsScreen() {
+  const { t } = useTranslation();
   const { church } = useActiveChurch();
   const { refresh } = useChurch();
   const [name, setName] = useState(church.name);
@@ -49,24 +52,24 @@ export default function ChurchSettingsScreen() {
       <ErrorText>{error}</ErrorText>
 
       <Card>
-        <Heading>Logo</Heading>
+        <Heading>{t('settings.logo')}</Heading>
         <Avatar name={church.name} uri={publicUrl('church-logos', church.logo_path)} color={church.accent_color} size={72} />
-        <Button title="Change logo" variant="secondary" onPress={changeLogo} loading={busy === 'logo'} />
+        <Button title={t('settings.changeLogo')} variant="secondary" onPress={changeLogo} loading={busy === 'logo'} />
       </Card>
 
       <Card>
-        <Heading>Details</Heading>
-        <TextField label="Church name" value={name} onChangeText={setName} maxLength={120} />
-        <TextField label="City" value={city} onChangeText={setCity} maxLength={120} />
+        <Heading>{t('settings.details')}</Heading>
+        <TextField label={t('register.name')} value={name} onChangeText={setName} maxLength={120} />
+        <TextField label={t('register.city')} value={city} onChangeText={setCity} maxLength={120} />
         <TextField
-          label="Contact email"
+          label={t('settings.contactEmail')}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
         />
         <Button
-          title="Save details"
+          title={t('settings.saveDetails')}
           onPress={() => save({ name: name.trim(), city: city.trim(), contact_email: email.trim() }, 'details')}
           loading={busy === 'details'}
           disabled={!detailsChanged || name.trim().length < 2}
@@ -74,27 +77,27 @@ export default function ChurchSettingsScreen() {
       </Card>
 
       <Card>
-        <Heading>Colour</Heading>
-        <Body muted>Used for buttons and highlights throughout the app.</Body>
+        <Heading>{t('settings.colour')}</Heading>
+        <Body muted>{t('settings.colourHint')}</Body>
         <ColorPicker value={church.accent_color} onChange={(color) => save({ accent_color: color }, 'color')} />
       </Card>
 
+      <YoutubeChannelCard />
+
       <Card>
-        <Heading>Joining</Heading>
+        <Heading>{t('settings.joining')}</Heading>
         <ToggleRow
-          title="Approve new members"
+          title={t('settings.approveTitle')}
           subtitle={
-            church.requires_approval
-              ? 'A leader approves everyone who joins.'
-              : 'Anyone with the code joins straight away. People who find the church by search still need approval.'
+            church.requires_approval ? t('settings.approveOn') : t('settings.approveOff')
           }
           value={church.requires_approval}
           onValueChange={(value) => save({ requires_approval: value }, 'approval')}
           disabled={busy === 'approval'}
         />
         <ToggleRow
-          title="Member directory"
-          subtitle="Lets members see who else belongs to the church. Each person can still hide themselves."
+          title={t('settings.directoryTitle')}
+          subtitle={t('settings.directoryHint')}
           value={church.directory_enabled}
           onValueChange={(value) => save({ directory_enabled: value }, 'directory')}
           disabled={busy === 'directory'}

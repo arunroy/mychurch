@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ReportButton } from '@/components/report-sheet';
@@ -16,16 +17,17 @@ import { friendlyError } from '@/lib/supabase';
 
 // Any member can ask the church a question. Results show once you've voted, or when the poll has closed.
 export default function PollsScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const userId = useUserId();
   const polls = usePolls(church_id);
 
   return (
     <Screen edges={['bottom']}>
-      <Button title="Start a poll" onPress={() => router.push('/poll-new')} />
+      <Button title={t('polls.start')} onPress={() => router.push('/poll-new')} />
       <ErrorText>{polls.error ? friendlyError(polls.error) : null}</ErrorText>
       {polls.isPending ? <Loading /> : null}
-      {polls.data?.length === 0 ? <Body muted>No polls yet. Ask the church something.</Body> : null}
+      {polls.data?.length === 0 ? <Body muted>{t('polls.empty')}</Body> : null}
       {userId ? polls.data?.map((poll) => <PollCard key={poll.id} poll={poll} userId={userId} />) : null}
       <Gap />
     </Screen>
@@ -35,6 +37,7 @@ export default function PollsScreen() {
 const sameSet = (a: string[], b: string[]) => a.length === b.length && a.every((id) => b.includes(id));
 
 function PollCard({ poll, userId }: { poll: PollSummary; userId: string }) {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isLeader } = usePermissions();
   const theme = useTheme();
@@ -68,16 +71,16 @@ function PollCard({ poll, userId }: { poll: PollSummary; userId: string }) {
   }
 
   const footer = poll.is_closed
-    ? 'Closed'
+    ? t('polls.closed')
     : poll.closes_at
-      ? `Closes ${shortDate(poll.closes_at)}`
-      : 'Open until closed';
+      ? t('polls.closes', { date: shortDate(poll.closes_at) })
+      : t('polls.openUntilClosed');
 
   return (
     <Card>
       <Heading>{poll.question}</Heading>
       <Body muted>
-        {`${poll.creator_name || 'A church member'} · ${footer}${poll.multiple ? ' · choose any' : ''}`}
+        {`${poll.creator_name || t('polls.aMember')} · ${footer}${poll.multiple ? ` · ${t('polls.chooseAny')}` : ''}`}
       </Body>
 
       {poll.options.map((option) => {
@@ -102,16 +105,16 @@ function PollCard({ poll, userId }: { poll: PollSummary; userId: string }) {
       })}
 
       {showResults && poll.total_voters !== null ? (
-        <Body muted>{poll.total_voters === 1 ? '1 person voted' : `${poll.total_voters} people voted`}</Body>
+        <Body muted>{t('polls.voted', { count: poll.total_voters })}</Body>
       ) : (
-        <Body muted>Vote to see the results.</Body>
+        <Body muted>{t('polls.voteToSee')}</Body>
       )}
 
       <ErrorText>{error}</ErrorText>
 
       {!poll.is_closed ? (
         <Button
-          title={hasVoted ? 'Change my vote' : 'Vote'}
+          title={hasVoted ? t('polls.changeVote') : t('polls.vote')}
           onPress={() => run(() => vote.mutateAsync({ pollId: poll.id, optionIds: selected }))}
           loading={vote.isPending}
           disabled={selected.length === 0 || sameSet(selected, poll.my_option_ids)}
@@ -124,24 +127,24 @@ function PollCard({ poll, userId }: { poll: PollSummary; userId: string }) {
         <View style={styles.manage}>
           {!poll.is_closed ? (
             <Button
-              title="Close poll"
+              title={t('polls.closePoll')}
               variant="secondary"
               style={styles.manageButton}
               loading={close.isPending}
               onPress={() =>
-                confirm('Close this poll?', 'Nobody will be able to vote any more, and everyone will see the results.', 'Close', () =>
+                confirm(t('polls.closeTitle'), t('polls.closeMessage'), t('polls.closeAction'), () =>
                   run(() => close.mutateAsync(poll.id)),
                 )
               }
             />
           ) : null}
           <Button
-            title="Remove"
+            title={t('common.remove')}
             variant="danger"
             style={styles.manageButton}
             loading={remove.isPending}
             onPress={() =>
-              confirm('Remove this poll?', 'The poll and all its votes will be deleted.', 'Remove', () =>
+              confirm(t('polls.removeTitle'), t('polls.removeMessage'), t('common.remove'), () =>
                 run(() => remove.mutateAsync(poll.id)),
               )
             }

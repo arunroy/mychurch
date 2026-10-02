@@ -1,5 +1,6 @@
 import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Body, Button, Card, ErrorText, Gap, Heading, Screen, TextField, ToggleRow } from '@/components/ui';
@@ -13,6 +14,7 @@ import { friendlyError } from '@/lib/supabase';
 
 // Write to the Pastor without your name attached. If you want an answer you get a code to check back with.
 export default function AnonymousScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const theme = useTheme();
   const send = useSendAnonymous(church_id);
@@ -56,30 +58,24 @@ export default function AnonymousScreen() {
   return (
     <Screen edges={['bottom']}>
       <Card>
-        <Heading>Write to the Pastor</Heading>
-        <Body muted>
-          Your name is not saved with this message. The Pastor, the elders and everyone else in the app can read it but not see who
-          wrote it. You can send up to 3 a day.
-        </Body>
+        <Heading>{t('anonymous.writeTitle')}</Heading>
+        <Body muted>{t('anonymous.intro')}</Body>
       </Card>
 
       <ErrorText>{error}</ErrorText>
 
       {sent ? (
         <Card>
-          <Heading>Sent</Heading>
+          <Heading>{t('anonymous.sent')}</Heading>
           {sentCode ? (
             <>
-              <Body>Your reply code is:</Body>
+              <Body>{t('anonymous.replyCode')}</Body>
               <Text selectable style={[styles.code, { color: theme.text }]}>
                 {sentCode}
               </Text>
-              <Body muted>
-                It is saved on this phone, so you can check for the Pastor&apos;s answer below. Keep it safe: it is the only way to
-                see a reply, and it cannot be recovered.
-              </Body>
+              <Body muted>{t('anonymous.codeNote')}</Body>
               <Button
-                title={copied ? 'Copied' : 'Copy the code'}
+                title={copied ? t('invite.copied') : t('anonymous.copyCode')}
                 variant="secondary"
                 onPress={async () => {
                   await Clipboard.setStringAsync(sentCode);
@@ -88,14 +84,14 @@ export default function AnonymousScreen() {
               />
             </>
           ) : (
-            <Body muted>The Pastor will read it. Since you did not ask for a reply, there will not be one.</Body>
+            <Body muted>{t('anonymous.noReplyAsked')}</Body>
           )}
         </Card>
       ) : null}
 
       <Card>
         <TextField
-          label="Your message"
+          label={t('anonymous.yourMessage')}
           value={body}
           onChangeText={setBody}
           multiline
@@ -103,30 +99,30 @@ export default function AnonymousScreen() {
           style={{ minHeight: 140, paddingTop: 12, textAlignVertical: 'top' }}
         />
         <ToggleRow
-          title="I would like a reply"
-          subtitle="You get a code to check back with. Without one, the Pastor cannot answer you."
+          title={t('anonymous.wantReply')}
+          subtitle={t('anonymous.wantReplyHint')}
           value={wantReply}
           onValueChange={setWantReply}
         />
-        <Button title="Send anonymously" onPress={onSend} loading={send.isPending} disabled={!body.trim()} />
+        <Button title={t('anonymous.sendAnon')} onPress={onSend} loading={send.isPending} disabled={!body.trim()} />
       </Card>
 
       <Card>
-        <Heading>Check for a reply</Heading>
+        <Heading>{t('anonymous.checkTitle')}</Heading>
         {saved.data && saved.data.length > 0 ? (
           saved.data.map((item) => <SavedReply key={item.code} item={item} />)
         ) : (
-          <Body muted>Codes from messages you send from this phone appear here.</Body>
+          <Body muted>{t('anonymous.noCodes')}</Body>
         )}
         <TextField
-          label="Or type a code"
+          label={t('anonymous.typeCode')}
           value={typedCode}
           onChangeText={setTypedCode}
           autoCapitalize="characters"
           autoCorrect={false}
           placeholder="XXXX-XXXX-XXXX-XXXX"
         />
-        <Button title="Check" variant="secondary" onPress={onCheckTyped} loading={checking} disabled={typedCode.trim().length < 8} />
+        <Button title={t('anonymous.check')} variant="secondary" onPress={onCheckTyped} loading={checking} disabled={typedCode.trim().length < 8} />
         {typedResult ? <ReplyResult result={typedResult} /> : null}
       </Card>
       <Gap />
@@ -135,17 +131,19 @@ export default function AnonymousScreen() {
 }
 
 function ReplyResult({ result }: { result: AnonymousReplyCheck }) {
-  if (!result.found) return <Body muted>No message matches that code.</Body>;
-  if (!result.reply) return <Body muted>No reply yet. Check back later.</Body>;
+  const { t } = useTranslation();
+  if (!result.found) return <Body muted>{t('anonymous.noMatch')}</Body>;
+  if (!result.reply) return <Body muted>{t('anonymous.noReplyYet')}</Body>;
   return (
     <View style={styles.reply}>
-      <Body muted>{`The Pastor replied${result.replied_on ? ` on ${shortDate(result.replied_on)}` : ''}:`}</Body>
+      <Body muted>{result.replied_on ? t('anonymous.repliedOn', { date: shortDate(result.replied_on) }) : t('anonymous.replied')}</Body>
       <Body>{result.reply}</Body>
     </View>
   );
 }
 
 function SavedReply({ item }: { item: SavedCode }) {
+  const { t } = useTranslation();
   const [result, setResult] = useState<AnonymousReplyCheck | null>(null);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -165,7 +163,7 @@ function SavedReply({ item }: { item: SavedCode }) {
     <View style={styles.saved}>
       <Body muted>{`${shortDate(`${item.sentOn}T12:00:00`)} · ${item.preview}`}</Body>
       <ErrorText>{error}</ErrorText>
-      <Button title="Check for a reply" variant="secondary" onPress={check} loading={checking} />
+      <Button title={t('anonymous.checkTitle')} variant="secondary" onPress={check} loading={checking} />
       {result ? <ReplyResult result={result} /> : null}
     </View>
   );

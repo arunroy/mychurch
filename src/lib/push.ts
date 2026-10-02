@@ -41,6 +41,10 @@ export function useOpenNotificationTarget(enabled: boolean) {
       router.push({ pathname: '/elders/[id]', params: { id: data.thread_id } });
     } else if (data.type === 'event' && typeof data.event_id === 'string') {
       router.push({ pathname: '/event/[id]', params: { id: data.event_id } });
+    } else if (data.type === 'video') {
+      router.push('/videos');
+    } else if (data.type === 'sos' && typeof data.alert_id === 'string') {
+      router.push({ pathname: '/sos-alert', params: { id: data.alert_id } });
     }
   }, [last, enabled]);
 }
@@ -61,6 +65,14 @@ export async function registerForPushNotifications(userId: string) {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'Church updates',
       importance: Notifications.AndroidImportance.DEFAULT,
+    });
+    // SOS alerts: the loudest kind, so they are seen and heard straight away.
+    await Notifications.setNotificationChannelAsync('alerts', {
+      name: 'SOS alerts',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 500, 250, 500, 250, 500],
+      sound: 'default',
+      bypassDnd: true,
     });
   }
 

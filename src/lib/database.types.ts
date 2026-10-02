@@ -72,6 +72,52 @@ export type BibleNote = {
   updated_at: string;
 };
 
+/** The church's funds settings. Only the Pastor and elders can read or change them. */
+export type ChurchFunds = {
+  church_id: string;
+  /** ISO 4217 code, like INR or GBP. */
+  currency: string;
+  opening_balance: number;
+  opening_date: string;
+  /** A short note like "Federal Bank ••1234". Never a full account number. */
+  account_label: string;
+  updated_by: string | null;
+  updated_at: string;
+};
+
+/** One entry in the church's ledger. Money in is positive and money out is negative. */
+export type FundTransaction = {
+  id: string;
+  church_id: string;
+  occurred_on: string;
+  description: string;
+  note: string;
+  amount: number;
+  /** Who the money came from (or was paid to). The name stays on the entry even after a member leaves. */
+  party_name: string;
+  party_user_id: string | null;
+  source: 'manual' | 'bank';
+  created_by: string | null;
+  created_at: string;
+  updated_by: string | null;
+  updated_at: string;
+};
+
+export type FundTransactionWithPeople = FundTransaction & {
+  adder: { full_name: string } | null;
+  editor: { full_name: string } | null;
+};
+
+export type FundsSummary = {
+  currency: string;
+  account_label: string;
+  opening_balance: number;
+  opening_date: string;
+  balance: number;
+  transaction_count: number;
+  latest_on: string | null;
+};
+
 export type QuizLevel = 'little' | 'kids' | 'youth';
 
 /** A multiple-choice question a leader wrote. */
@@ -102,6 +148,12 @@ export type Church = {
   status: ChurchStatus;
   requires_approval: boolean;
   directory_enabled: boolean;
+  /** What the Pastor pasted, and the channel it was resolved to. Set only by the set-youtube-channel function. */
+  youtube_url: string | null;
+  youtube_channel_id: string | null;
+  /** The newest video members were told about; set only by the functions. */
+  youtube_last_video_id: string | null;
+  youtube_last_published_at: string | null;
   created_by: string | null;
   created_at: string;
   verified_at: string | null;
@@ -407,6 +459,57 @@ export type ChatPost = {
   created_at: string;
 };
 
+/** A chat group (a committee or fellowship). General, the church-wide chat, is not a group. */
+export type ChatGroup = {
+  id: string;
+  name: string;
+  description: string;
+  member_count: number;
+  created_at: string;
+};
+
+/** A group as the Pastor and elders see it when managing: they may not be in it. */
+export type ManageableChatGroup = ChatGroup & { i_am_member: boolean };
+
+export type ChatGroupMember = { user_id: string; full_name: string; avatar_path: string | null };
+
+/** Unread messages in one chat. group_id is null for General. */
+export type ChatUnread = { group_id: string | null; unread: number };
+
+export type SosStatus = 'active' | 'safe' | 'false_alarm' | 'ended_by_leader' | 'expired';
+
+export type SosAlert = {
+  id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_avatar_path: string | null;
+  message: string;
+  latitude: number | null;
+  longitude: number | null;
+  accuracy_m: number | null;
+  location_at: string | null;
+  started_at: string;
+};
+
+export type SosHistoryEntry = {
+  id: string;
+  sender_name: string;
+  status: SosStatus;
+  message: string;
+  started_at: string;
+  ended_at: string | null;
+};
+
+export type SosAlertRow = {
+  id: string;
+  church_id: string;
+  sender_id: string;
+  status: SosStatus;
+  message: string;
+  started_at: string;
+  ended_at: string | null;
+};
+
 export type ConversationSummary = {
   id: string;
   other_user_id: string;
@@ -444,6 +547,23 @@ export type Database = {
         Profile,
         { id: string; full_name?: string; avatar_path?: string | null },
         { full_name?: string; avatar_path?: string | null; birth_month?: number | null; birth_day?: number | null }
+      >;
+      church_funds: Table<
+        ChurchFunds,
+        Pick<ChurchFunds, 'church_id'> & Partial<Pick<ChurchFunds, 'currency' | 'opening_balance' | 'opening_date' | 'account_label'>>,
+        Partial<Pick<ChurchFunds, 'currency' | 'opening_balance' | 'opening_date' | 'account_label'>>,
+        [Relationship<'church_funds_church_id_fkey', 'church_id', 'churches'>]
+      >;
+      fund_transactions: Table<
+        FundTransaction,
+        Pick<FundTransaction, 'church_id' | 'occurred_on' | 'description' | 'amount' | 'created_by'> &
+          Partial<Pick<FundTransaction, 'note' | 'party_name' | 'party_user_id'>>,
+        Partial<Pick<FundTransaction, 'occurred_on' | 'description' | 'note' | 'amount' | 'party_name' | 'party_user_id'>>,
+        [
+          Relationship<'fund_transactions_church_id_fkey', 'church_id', 'churches'>,
+          Relationship<'fund_transactions_created_by_fkey', 'created_by', 'profiles'>,
+          Relationship<'fund_transactions_updated_by_fkey', 'updated_by', 'profiles'>,
+        ]
       >;
       bible_notes: Table<
         BibleNote,
@@ -530,8 +650,8 @@ export type Database = {
         [Relationship<'announcements_church_id_fkey', 'church_id', 'churches'>]
       >;
       church_chat_messages: Table<
-        { id: string; church_id: string; sender_id: string; body: string; created_at: string },
-        { church_id: string; sender_id: string; body: string },
+        { id: string; church_id: string; group_id: string | null; sender_id: string; body: string; created_at: string },
+        { church_id: string; sender_id: string; body: string; group_id?: string | null },
         never,
         [Relationship<'church_chat_messages_church_id_fkey', 'church_id', 'churches'>]
       >;
@@ -634,11 +754,31 @@ export type Database = {
       cast_vote: { Args: { p_poll: string; p_options: string[] }; Returns: undefined };
       close_poll: { Args: { p_poll: string }; Returns: undefined };
       delete_poll: { Args: { p_poll: string }; Returns: undefined };
+      active_sos_alerts: { Args: { p_church: string }; Returns: SosAlert[] };
+      sos_history: { Args: { p_church: string }; Returns: SosHistoryEntry[] };
+      update_sos_location: {
+        Args: { p_alert: string; p_latitude: number; p_longitude: number; p_accuracy?: number | null };
+        Returns: undefined;
+      };
+      end_sos_alert: { Args: { p_alert: string; p_reason: 'safe' | 'false_alarm' | 'ended_by_leader' }; Returns: undefined };
+      church_funds_summary: { Args: { p_church: string }; Returns: FundsSummary[] };
       church_special_days: { Args: { p_church: string }; Returns: SpecialDayEntry[] };
       church_polls: { Args: { p_church: string }; Returns: PollSummary[] };
       church_chat_unread_count: { Args: { p_church: string }; Returns: number };
       mark_church_chat_read: { Args: { p_church: string }; Returns: undefined };
-      church_chat_feed: { Args: { p_church: string; p_limit?: number }; Returns: ChatPost[] };
+      church_chat_feed: { Args: { p_church: string; p_limit?: number; p_group?: string | null }; Returns: ChatPost[] };
+      chat_unread_counts: { Args: { p_church: string }; Returns: ChatUnread[] };
+      mark_chat_group_read: { Args: { p_group: string }; Returns: undefined };
+      my_chat_groups: { Args: { p_church: string }; Returns: ChatGroup[] };
+      manageable_chat_groups: { Args: { p_church: string }; Returns: ManageableChatGroup[] };
+      chat_group_members_list: { Args: { p_group: string }; Returns: ChatGroupMember[] };
+      create_chat_group: {
+        Args: { p_church: string; p_name: string; p_description: string; p_members: string[] };
+        Returns: string;
+      };
+      update_chat_group: { Args: { p_group: string; p_name: string; p_description: string }; Returns: undefined };
+      set_chat_group_members: { Args: { p_group: string; p_members: string[] }; Returns: undefined };
+      delete_chat_group: { Args: { p_group: string }; Returns: undefined };
       my_conversations: { Args: { p_church: string }; Returns: ConversationSummary[] };
       messageable_members: { Args: { p_church: string }; Returns: Messageable[] };
     };

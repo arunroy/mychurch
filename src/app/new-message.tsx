@@ -1,15 +1,17 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator } from 'react-native';
 
 import { Avatar, Body, Card, ErrorText, Row, Screen, TextField } from '@/components/ui';
-import { ROLE_LABELS, useActiveChurch } from '@/lib/church';
+import { useActiveChurch } from '@/lib/church';
 import { startConversation, useMessageable } from '@/lib/messages';
 import { friendlyError, publicUrl } from '@/lib/supabase';
 
 // Pick someone in the church to write to. Leaders can always be reached; everyone else appears
 // if they are in the member directory.
 export default function NewMessageScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const people = useMessageable(church_id);
   const [filter, setFilter] = useState('');
@@ -33,13 +35,13 @@ export default function NewMessageScreen() {
 
   return (
     <Screen edges={['bottom']}>
-      <TextField label="Search" value={filter} onChangeText={setFilter} placeholder="Name" autoCorrect={false} />
+      <TextField label={t('common.search')} value={filter} onChangeText={setFilter} placeholder={t('common.name')} autoCorrect={false} />
 
       {people.isPending ? <ActivityIndicator /> : null}
       <ErrorText>{error ?? (people.error ? friendlyError(people.error) : null)}</ErrorText>
 
       {people.data && shown.length === 0 ? (
-        <Body muted>{filter ? 'Nobody matches that name.' : 'There is nobody to message yet.'}</Body>
+        <Body muted>{filter ? t('newMessage.noMatch') : t('newMessage.nobody')}</Body>
       ) : null}
 
       {shown.length > 0 ? (
@@ -47,8 +49,8 @@ export default function NewMessageScreen() {
           {shown.map((person) => (
             <Row
               key={person.user_id}
-              title={person.full_name || 'Church member'}
-              subtitle={person.role === 'member' ? undefined : ROLE_LABELS[person.role]}
+              title={person.full_name || t('newMessage.churchMember')}
+              subtitle={person.role === 'member' ? undefined : t(`roles.${person.role}`)}
               left={<Avatar name={person.full_name} uri={publicUrl('avatars', person.avatar_path)} />}
               right={starting === person.user_id ? <ActivityIndicator /> : undefined}
               onPress={() => open(person.user_id, person.full_name)}

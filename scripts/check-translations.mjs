@@ -51,5 +51,25 @@ for (const file of files.filter((f) => f !== 'en.json')) {
   }
 }
 
+// Every text the code asks for by a fixed key must exist in English. Keys built from a variable, like
+// t(`roles.${role}`), cannot be checked here and are skipped.
+function sourceFiles(directory) {
+  const found = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = new URL(entry.name + (entry.isDirectory() ? '/' : ''), directory);
+    if (entry.isDirectory()) found.push(...sourceFiles(path));
+    else if (/\.(tsx?|jsx?)$/.test(entry.name)) found.push(path);
+  }
+  return found;
+}
+
+console.log('source');
+for (const file of sourceFiles(new URL('../src/', import.meta.url))) {
+  const code = readFileSync(file, 'utf8');
+  for (const match of code.matchAll(/\bt\(\s*'([\w.]+)'/g)) {
+    if (!englishBases.has(match[1]) && !(match[1] in english)) report(`${file.pathname.split('/src/')[1]} asks for a text that is not in English: ${match[1]}`);
+  }
+}
+
 console.log(problems ? `\n${problems} problem(s)` : '\nAll languages match English.');
 process.exit(problems ? 1 : 0);

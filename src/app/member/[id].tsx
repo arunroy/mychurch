@@ -1,5 +1,6 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ReportButton } from '@/components/report-sheet';
 import { Avatar, Body, Button, Card, ErrorText, Heading, Row, Screen, Title } from '@/components/ui';
@@ -7,18 +8,13 @@ import { startConversation } from '@/lib/messages';
 import type { MemberRole } from '@/lib/database.types';
 import { ROLE_LABELS, useActiveChurch, usePermissions } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
+import { getDateLocale } from '@/lib/dates';
 import { memberName, useMembers, useRemoveMember, useSetRole } from '@/lib/members';
 import { friendlyError, publicUrl } from '@/lib/supabase';
 
-const ROLE_DESCRIPTIONS: Record<MemberRole, string> = {
-  pastor: 'Runs the church in the app, including settings, roles and the private Pastor inbox.',
-  elder: 'Approves members, can remove any event from the calendar, and will run polls and answer questions.',
-  admin: 'Church office or tech help: settings, members and the calendar. Can’t read private messages.',
-  member: 'Takes part in everything shared with the church.',
-};
-
 // Leaders manage one member here. Only a Pastor can change roles.
 export default function MemberScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { church } = useActiveChurch();
   const { canChangeRoles, isPastor, isLeader } = usePermissions();
@@ -52,9 +48,9 @@ export default function MemberScreen() {
 
   function removeMember() {
     confirm(
-      `Remove ${name}?`,
-      `They'll lose access to ${church.name} and would need to ask to join again.`,
-      'Remove',
+      t('member.removeTitle', { name }),
+      t('member.removeMessage', { church: church.name }),
+      t('common.remove'),
       () =>
         remove.mutate(member!.user_id, {
           onSuccess: () => router.back(),
@@ -70,23 +66,26 @@ export default function MemberScreen() {
       <Title>{name}</Title>
       <Body muted>
         {member.status === 'pending'
-          ? 'Waiting for approval'
-          : `${ROLE_LABELS[member.role]} · joined ${new Date(member.approved_at ?? member.created_at).toLocaleDateString()}`}
+          ? t('member.waiting')
+          : t('member.roleJoined', {
+              role: t(`roles.${member.role}`),
+              date: new Date(member.approved_at ?? member.created_at).toLocaleDateString(getDateLocale()),
+            })}
       </Body>
 
       <ErrorText>{error}</ErrorText>
 
-      {member.status === 'approved' ? <Button title={`Message ${name}`} onPress={openChat} loading={opening} /> : null}
-      {member.status === 'approved' ? <ReportButton type="member" targetId={member.user_id} label="Report this member" /> : null}
+      {member.status === 'approved' ? <Button title={t('member.message', { name })} onPress={openChat} loading={opening} /> : null}
+      {member.status === 'approved' ? <ReportButton type="member" targetId={member.user_id} label={t('member.report')} /> : null}
 
       {canChangeRoles && member.status === 'approved' ? (
         <Card>
-          <Heading>Role</Heading>
+          <Heading>{t('member.role')}</Heading>
           {(Object.keys(ROLE_LABELS) as MemberRole[]).map((role) => (
             <Row
               key={role}
-              title={ROLE_LABELS[role]}
-              subtitle={ROLE_DESCRIPTIONS[role]}
+              title={t(`roles.${role}`)}
+              subtitle={t(`roleDescriptions.${role}`)}
               right={member.role === role ? <Body>✓</Body> : undefined}
               onPress={member.role === role || setRole.isPending ? undefined : () => changeRole(role)}
             />
@@ -95,7 +94,7 @@ export default function MemberScreen() {
       ) : null}
 
       {canRemove ? (
-        <Button title={`Remove from ${church.name}`} variant="danger" onPress={removeMember} loading={remove.isPending} />
+        <Button title={t('member.removeFrom', { church: church.name })} variant="danger" onPress={removeMember} loading={remove.isPending} />
       ) : null}
     </Screen>
   );

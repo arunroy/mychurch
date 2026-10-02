@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { EventExtras } from '@/components/event-extras';
 import { ReportButton } from '@/components/report-sheet';
@@ -11,6 +12,7 @@ import { canManageEvent, eventDayText, eventTimeText, useDeleteEvent, useEvent }
 import { friendlyError } from '@/lib/supabase';
 
 export default function EventScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { church_id } = useActiveChurch();
   const { isLeader } = usePermissions();
@@ -24,8 +26,8 @@ export default function EventScreen() {
   if (!event.data) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>This event is no longer on the calendar.</Body>
-        <Button title="Back to the calendar" variant="secondary" onPress={() => router.back()} />
+        <Body muted>{t('event.gone')}</Body>
+        <Button title={t('event.back')} variant="secondary" onPress={() => router.back()} />
       </Screen>
     );
   }
@@ -34,7 +36,7 @@ export default function EventScreen() {
   const canManage = canManageEvent(item, userId ?? undefined, isLeader);
 
   function onDelete() {
-    confirm('Delete this event?', `“${item.title}” will be removed from the church calendar for everyone.`, 'Delete', async () => {
+    confirm(t('event.deleteTitle'), t('event.deleteMessage', { title: item.title }), t('common.delete'), async () => {
       try {
         await remove.mutateAsync(item.id);
         router.back();
@@ -63,14 +65,14 @@ export default function EventScreen() {
 
       <EventExtras event={item} />
 
-      <Body muted>{item.creator?.full_name ? `Added by ${item.creator.full_name}` : 'Added by a church member'}</Body>
+      <Body muted>{item.creator?.full_name ? t('event.addedBy', { name: item.creator.full_name }) : t('event.addedByMember')}</Body>
 
       {item.created_by !== userId ? <ReportButton type="event" targetId={item.id} /> : null}
 
       {canManage ? (
         <>
-          <Button title="Edit" variant="secondary" onPress={() => router.push({ pathname: '/event-edit', params: { id: item.id } })} />
-          <Button title="Delete this event" variant="danger" onPress={onDelete} loading={remove.isPending} />
+          <Button title={t('verse.edit')} variant="secondary" onPress={() => router.push({ pathname: '/event-edit', params: { id: item.id } })} />
+          <Button title={t('event.deleteButton')} variant="danger" onPress={onDelete} loading={remove.isPending} />
         </>
       ) : null}
     </Screen>

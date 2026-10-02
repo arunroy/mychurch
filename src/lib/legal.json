@@ -1,7 +1,7 @@
 {
   "appName": "MyChurch",
   "supportEmail": "arunroysweb@gmail.com",
-  "updated": "1 October 2026",
+  "updated": "2 October 2026",
   "privacy": {
     "title": "Privacy policy",
     "intro": "MyChurch helps a church stay connected. Each church has its own space in the app, run by its Pastor and leaders. This page explains what we collect, who can see it, and the choices you have. Please read it before you use the app.",
@@ -13,7 +13,7 @@
           "Your church membership: which churches you belong to, your role (member, elder, admin or Pastor), and whether you choose to appear in the member directory.",
           "What you write and do in the app: church chat messages, private messages, messages to the elders, prayer requests and the prayers you add, polls you start and your votes, questions, articles and links you share, events you add and your RSVPs, and your reports about content.",
           "Notifications: if you allow them, a token that lets your phone receive notifications from the app.",
-          "We do not collect your location, your contacts or an advertising ID. Adding an event to your calendar is done by your phone's own screen when you ask for it."
+          "Your location, but only when you send an SOS alert (see the section on SOS alerts). We do not collect your contacts or an advertising ID. Adding an event to your calendar is done by your phone's own screen when you ask for it."
         ]
       },
       {
@@ -22,6 +22,16 @@
           "When you write to the Pastor anonymously, or ask an anonymous question, nothing stored with the message or question says who you are, and only the day it was sent is kept, not the time.",
           "To stop abuse, the app keeps a small count of how many anonymous messages and questions each person sent today. That count is not linked to any message or question. Anyone with direct access to the database could see that a person used the service on a given day, so anonymous means anonymous inside the app, to other members and to your church's leaders.",
           "If you ask for a reply, you are given a code. Only a scrambled form of the code is stored, so we cannot recover it for you."
+        ]
+      },
+      {
+        "heading": "SOS alerts and your location",
+        "body": [
+          "Any approved member can send an SOS alert to the other members of their church. When you do, the app asks your phone for its location, once when you send it and then every few seconds while the alert is open and the app is on your screen. The app never tracks your location in the background and never at any other time.",
+          "The alert, your name and photo, and your location are shown to every approved member of your church while the alert is open, and a notification is sent to their phones. This is the point of the feature: so people from your church can find you.",
+          "The alert ends when you say you are safe, when the Pastor or an elder ends it, or automatically after two hours. When it ends, your location is erased. A record that an alert was sent, by whom, when, and how it ended is kept for 30 days and can be seen by the Pastor and elders, without any location.",
+          "If you refuse location permission, the alert is still sent, without a location.",
+          "SOS alerts are not a replacement for the police, fire or ambulance. Call your local emergency number first. Notifications can be delayed or silenced by your phone's settings, so we cannot promise every member will see an alert."
         ]
       },
       {

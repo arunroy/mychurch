@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Screen, TextField } from '@/components/ui';
@@ -11,6 +12,7 @@ import { friendlyError } from '@/lib/supabase';
 
 // Any member can share a prayer request and choose who sees it.
 export default function PrayerNewScreen() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const share = useShareRequest(church_id);
   const [body, setBody] = useState('');
@@ -32,9 +34,9 @@ export default function PrayerNewScreen() {
       <ErrorText>{error}</ErrorText>
 
       <Card>
-        <Heading>Your request</Heading>
+        <Heading>{t('prayerNew.yourRequest')}</Heading>
         <TextField
-          label="How can the church pray for you?"
+          label={t('prayerNew.howPray')}
           value={body}
           onChangeText={setBody}
           multiline
@@ -44,17 +46,17 @@ export default function PrayerNewScreen() {
       </Card>
 
       <Card>
-        <Heading>Who can see it</Heading>
+        <Heading>{t('prayerNew.whoSee')}</Heading>
         <View style={styles.chips}>
           {VISIBILITY_CHOICES.map((choice) => (
-            <Chip key={choice.value} label={choice.label} selected={choice.value === visibility} onPress={() => setVisibility(choice.value)} />
+            <Chip key={choice.value} label={t(`prayerNew.choice${choice.value[0].toUpperCase()}${choice.value.slice(1)}`)} selected={choice.value === visibility} onPress={() => setVisibility(choice.value)} />
           ))}
         </View>
-        <Body muted>{VISIBILITY_CHOICES.find((c) => c.value === visibility)?.hint}</Body>
-        <Body muted>Your name is shown with your request.</Body>
+        <Body muted>{t(`prayerNew.hint${visibility[0].toUpperCase()}${visibility.slice(1)}`)}</Body>
+        <Body muted>{t('prayerNew.nameShown')}</Body>
       </Card>
 
-      <Button title="Share request" onPress={onShare} loading={share.isPending} disabled={!body.trim()} />
+      <Button title={t('prayerNew.shareButton')} onPress={onShare} loading={share.isPending} disabled={!body.trim()} />
       <Gap />
     </Screen>
   );

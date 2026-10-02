@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Body, Button, Card, Chip, ErrorText, Gap, Heading, Loading, Row, Screen, TextField } from '@/components/ui';
@@ -10,7 +11,6 @@ import type { SpecialDayEntry, SpecialDayKind } from '@/lib/database.types';
 import {
   daysInMonth,
   formatMonthDay,
-  MONTHS,
   useAddSpecialDay,
   useRemoveSpecialDay,
   useSpecialDays,
@@ -19,11 +19,12 @@ import { friendlyError } from '@/lib/supabase';
 
 // Leaders (Pastor, elders, admins) keep the church's list of birthdays and anniversaries.
 export default function SpecialDaysScreen() {
+  const { t } = useTranslation();
   const { isLeader } = usePermissions();
   if (!isLeader) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>Only the Pastor, elders and church admins can change birthdays and anniversaries.</Body>
+        <Body muted>{t('specialDays.onlyLeaders')}</Body>
       </Screen>
     );
   }
@@ -31,6 +32,7 @@ export default function SpecialDaysScreen() {
 }
 
 function Manager() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const userId = useUserId()!;
   const days = useSpecialDays(church_id);
@@ -62,7 +64,7 @@ function Manager() {
   }
 
   function onRemove(entry: SpecialDayEntry) {
-    confirm('Remove this date?', `${entry.name}'s ${entry.kind} will disappear from everyone's Home screen.`, 'Remove', async () => {
+    confirm(t('specialDays.removeTitle'), t('specialDays.removeMessage', { name: entry.name }), t('common.remove'), async () => {
       try {
         await remove.mutateAsync(entry.id);
       } catch (e) {
@@ -81,30 +83,30 @@ function Manager() {
       <ErrorText>{error ?? (days.error ? friendlyError(days.error) : null)}</ErrorText>
 
       <Card>
-        <Heading>Add a date</Heading>
+        <Heading>{t('specialDays.addTitle')}</Heading>
         <View style={styles.chips}>
-          <Chip label="Birthday" selected={kind === 'birthday'} onPress={() => setKind('birthday')} />
-          <Chip label="Anniversary" selected={kind === 'anniversary'} onPress={() => setKind('anniversary')} />
+          <Chip label={t('specialDays.birthday')} selected={kind === 'birthday'} onPress={() => setKind('birthday')} />
+          <Chip label={t('specialDays.anniversary')} selected={kind === 'anniversary'} onPress={() => setKind('anniversary')} />
         </View>
         <TextField
-          label={kind === 'birthday' ? 'Whose birthday' : 'Whose anniversary'}
+          label={kind === 'birthday' ? t('specialDays.whoseBirthday') : t('specialDays.whoseAnniversary')}
           value={name}
           onChangeText={setName}
           maxLength={100}
           autoCapitalize="words"
-          placeholder={kind === 'birthday' ? 'Mary Okafor' : 'John and Ruth Mensah'}
+          placeholder={kind === 'birthday' ? t('specialDays.phBirthday') : t('specialDays.phAnniversary')}
         />
-        <Body>Month</Body>
+        <Body>{t('specialDays.month')}</Body>
         <View style={styles.chips}>
-          {MONTHS.map((label, i) => (
-            <Chip key={label} label={label.slice(0, 3)} selected={month === i + 1} onPress={() => setMonth(i + 1)} />
+          {(t('months.short', { returnObjects: true }) as string[]).map((label, i) => (
+            <Chip key={i} label={label} selected={month === i + 1} onPress={() => setMonth(i + 1)} />
           ))}
         </View>
-        <TextField label="Day" value={day} onChangeText={setDay} keyboardType="number-pad" maxLength={2} placeholder="14" />
+        <TextField label={t('profile.day')} value={day} onChangeText={setDay} keyboardType="number-pad" maxLength={2} placeholder="14" />
         {kind === 'anniversary' ? (
           <TextField
-            label="Year married (optional)"
-            hint="Lets Home say how many years."
+            label={t('specialDays.yearMarried')}
+            hint={t('specialDays.yearHint')}
             value={year}
             onChangeText={setYear}
             keyboardType="number-pad"
@@ -112,27 +114,25 @@ function Manager() {
             placeholder="1999"
           />
         ) : null}
-        <Button title="Add" onPress={onAdd} loading={add.isPending} disabled={!name.trim() || !validDay || !validYear} />
+        <Button title={t('specialDays.add')} onPress={onAdd} loading={add.isPending} disabled={!name.trim() || !validDay || !validYear} />
       </Card>
 
       <Card>
-        <Heading>Dates you added</Heading>
+        <Heading>{t('specialDays.added')}</Heading>
         {days.isPending ? <Loading /> : null}
-        {days.data && added.length === 0 ? <Body muted>Nothing added yet.</Body> : null}
+        {days.data && added.length === 0 ? <Body muted>{t('specialDays.none')}</Body> : null}
         {added.map((entry) => (
           <Row
             key={entry.id}
             title={entry.name}
-            subtitle={`${entry.kind === 'birthday' ? 'Birthday' : 'Anniversary'} · ${formatMonthDay(entry.month, entry.day)}${entry.year ? `, ${entry.year}` : ''}`}
-            right={<Button title="Remove" variant="danger" onPress={() => onRemove(entry)} />}
+            subtitle={`${entry.kind === 'birthday' ? t('specialDays.birthday') : t('specialDays.anniversary')} · ${formatMonthDay(entry.month, entry.day)}${entry.year ? `, ${entry.year}` : ''}`}
+            right={<Button title={t('common.remove')} variant="danger" onPress={() => onRemove(entry)} />}
           />
         ))}
       </Card>
 
       <Body muted>
-        {own === 0
-          ? 'Members can add their own birthday in their profile settings. Those show here for everyone too.'
-          : `${own === 1 ? '1 member has' : `${own} members have`} added their own birthday in their profile settings. Only they can change it.`}
+        {own === 0 ? t('specialDays.ownNone') : t('specialDays.own', { count: own })}
       </Body>
       <Gap />
     </Screen>

@@ -1,11 +1,12 @@
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { DateFieldProps, TimeFieldProps } from '@/components/date-time-types';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { combineDateTime, dateKey, formatDay, isValidDateKey, isValidTime, parseDateKey, timeText } from '@/lib/dates';
+import { combineDateTime, dateKey, formatDay, getDateLocale, isValidDateKey, isValidTime, parseDateKey, timeText } from '@/lib/dates';
 
 // Native date and time pickers: the phone's own dialog on Android, an inline picker on iPhone.
 // The web version of this file uses the browser's date and time inputs.
@@ -36,6 +37,7 @@ function Box({ label, shown, placeholder, open, onPress, hint }: {
 }
 
 export function DateField({ label, value, onChange, hint }: DateFieldProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const current = isValidDateKey(value) ? parseDateKey(value) : new Date();
 
@@ -56,7 +58,7 @@ export function DateField({ label, value, onChange, hint }: DateFieldProps) {
       <Box
         label={label}
         shown={isValidDateKey(value) ? formatDay(value) : ''}
-        placeholder="Choose a date"
+        placeholder={t('dateTime.chooseDate')}
         open={open}
         onPress={press}
         hint={hint}
@@ -69,6 +71,7 @@ export function DateField({ label, value, onChange, hint }: DateFieldProps) {
 }
 
 export function TimeField({ label, value, onChange, optional, hint }: TimeFieldProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const valid = isValidTime(value);
@@ -91,8 +94,8 @@ export function TimeField({ label, value, onChange, optional, hint }: TimeFieldP
     <View style={styles.wrap}>
       <Box
         label={label}
-        shown={valid ? current.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) : ''}
-        placeholder={optional ? 'None' : 'Choose a time'}
+        shown={valid ? current.toLocaleTimeString(getDateLocale(), { hour: 'numeric', minute: '2-digit' }) : ''}
+        placeholder={optional ? t('dateTime.none') : t('dateTime.chooseTime')}
         open={open}
         onPress={press}
         hint={hint}

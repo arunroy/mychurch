@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Linking } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Linking, View } from 'react-native';
 
 import { ThemeSettingsCard } from '@/components/theme-settings-card';
 import { InviteCard } from '@/components/invite-card';
 import { Avatar, Card, Row, Screen, Title } from '@/components/ui';
 import { signOut, useIsPlatformAdmin, useProfile } from '@/lib/auth';
-import { useActiveChurch, useChurch } from '@/lib/church';
+import { useActiveChurch, useChurch, usePermissions } from '@/lib/church';
 import { confirm } from '@/lib/confirm';
 import { SUPPORT_EMAIL } from '@/lib/legal';
 import { publicUrl } from '@/lib/supabase';
@@ -18,6 +19,7 @@ export default function MoreScreen() {
   const active = useActiveChurch();
   const { memberships } = useChurch();
   const isPlatformAdmin = useIsPlatformAdmin();
+  const { isLeader } = usePermissions();
   const name = profile.data?.full_name ?? '';
 
   return (
@@ -31,6 +33,20 @@ export default function MoreScreen() {
           left={<Avatar name={name} uri={publicUrl('avatars', profile.data?.avatar_path)} />}
           onPress={() => router.push('/profile')}
         />
+      </Card>
+
+      <Card>
+        <Row
+          title={t('shortcuts.sos')}
+          subtitle={t('more.sosHint')}
+          left={
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#D92D20', alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="warning" size={22} color="#FFFFFF" />
+            </View>
+          }
+          onPress={() => router.push('/sos')}
+        />
+        {isLeader ? <Row title={t('shortcuts.sosHistory')} onPress={() => router.push('/sos-history')} /> : null}
       </Card>
 
       <ThemeSettingsCard />

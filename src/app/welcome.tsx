@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Body, Button, ErrorText, Screen, TextField, Title } from '@/components/ui';
 import { signOut, useUserId } from '@/lib/auth';
@@ -7,6 +8,7 @@ import { friendlyError, supabase } from '@/lib/supabase';
 
 // First sign-in: ask for the name church members will see.
 export default function WelcomeScreen() {
+  const { t } = useTranslation();
   const userId = useUserId();
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
@@ -24,7 +26,7 @@ export default function WelcomeScreen() {
       .select('id');
     if (saveError || !data?.length) {
       // No row updated means the account has no profile (it was created before the database was set up).
-      setError(saveError ? friendlyError(saveError) : "Your account isn't set up yet. Ask the app's admin for help.");
+      setError(saveError ? friendlyError(saveError) : t('welcome.noProfile'));
       setBusy(false);
       return;
     }
@@ -33,24 +35,24 @@ export default function WelcomeScreen() {
 
   return (
     <Screen>
-      <Title>What&apos;s your name?</Title>
-      <Body muted>This is how your Pastor and church family will see you.</Body>
+      <Title>{t('welcome.title')}</Title>
+      <Body muted>{t('welcome.intro')}</Body>
       <TextField
-        label="Your name"
+        label={t('profile.yourName')}
         value={name}
         onChangeText={setName}
         autoComplete="name"
         textContentType="name"
         autoCapitalize="words"
-        placeholder="Mary Johnson"
+        placeholder={t('welcome.placeholder')}
         maxLength={100}
         autoFocus
         returnKeyType="done"
         onSubmitEditing={() => name.trim().length >= 2 && save()}
       />
       <ErrorText>{error}</ErrorText>
-      <Button title="Continue" onPress={save} loading={busy} disabled={name.trim().length < 2} />
-      <Button title="Sign out" variant="secondary" onPress={signOut} />
+      <Button title={t('common.continue')} onPress={save} loading={busy} disabled={name.trim().length < 2} />
+      <Button title={t('common.signOut')} variant="secondary" onPress={signOut} />
     </Screen>
   );
 }

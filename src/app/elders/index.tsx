@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 
 import { ElderThread } from '@/components/elder-thread';
@@ -18,6 +19,7 @@ export default function EldersScreen() {
 }
 
 function Inbox() {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const theme = useTheme();
   const inbox = useElderInbox(church_id, true);
@@ -28,7 +30,7 @@ function Inbox() {
       <ErrorText>{inbox.error ? friendlyError(inbox.error) : null}</ErrorText>
 
       {inbox.data?.length === 0 ? (
-        <Body muted>Nothing here yet. When a member writes to the elders, it shows up here for every leader.</Body>
+        <Body muted>{t('elders.nothing')}</Body>
       ) : null}
 
       {inbox.data && inbox.data.length > 0 ? (
@@ -36,13 +38,13 @@ function Inbox() {
           {inbox.data.map((thread) => (
             <Row
               key={thread.thread_id}
-              title={thread.member_name || 'Church member'}
+              title={thread.member_name || t('newMessage.churchMember')}
               subtitle={thread.last_message_preview}
               left={<Avatar name={thread.member_name} uri={publicUrl('avatars', thread.member_avatar_path)} />}
               right={
                 <>
                   <Text style={[styles.meta, { color: theme.textSecondary }]}>{messageTime(new Date(thread.last_message_at))}</Text>
-                  {thread.needs_reply ? <Text style={styles.needsReply}>Needs reply</Text> : null}
+                  {thread.needs_reply ? <Text style={styles.needsReply}>{t('elders.needsReply')}</Text> : null}
                 </>
               }
               onPress={() =>

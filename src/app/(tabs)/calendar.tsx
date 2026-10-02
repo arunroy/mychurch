@@ -1,53 +1,37 @@
 import { router } from 'expo-router';
-import { ActivityIndicator } from 'react-native';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
 
-import { Body, Button, Card, ErrorText, Heading, Row, Screen, Title } from '@/components/ui';
-import { useActiveChurch } from '@/lib/church';
-import { dateKey, formatDay } from '@/lib/dates';
-import { eventDayKey, eventTimeText, useUpcomingEvents } from '@/lib/events';
-import { friendlyError } from '@/lib/supabase';
+import { MonthView, WeekView, YearView } from '@/components/calendar-views';
+import { Button, Chip, Screen, Title } from '@/components/ui';
+import { Spacing } from '@/constants/theme';
 
-// The church's shared calendar: anyone can add to it, everyone sees it.
+type CalendarView = 'month' | 'week' | 'events';
+
+// The church's shared calendar: anyone can add to it, everyone sees it. Opens on the month; the week view
+// is a day-by-day agenda, and Events lists the whole year.
 export default function CalendarScreen() {
-  const { church_id } = useActiveChurch();
-  const events = useUpcomingEvents(church_id);
-
-  const days = new Map<string, NonNullable<typeof events.data>>();
-  for (const event of events.data ?? []) {
-    const key = eventDayKey(event);
-    days.set(key, [...(days.get(key) ?? []), event]);
-  }
-  const today = dateKey();
+  const { t } = useTranslation();
+  const [view, setView] = useState<CalendarView>('month');
 
   return (
     <Screen edges={['top']}>
-      <Title>Calendar</Title>
+      <Title>{t('calendar.title')}</Title>
 
-      <Button title="Add an event" onPress={() => router.push('/event-edit')} />
+      <View style={styles.views}>
+        <Chip label={t('calendar.viewMonth')} wide selected={view === 'month'} onPress={() => setView('month')} />
+        <Chip label={t('calendar.viewWeek')} wide selected={view === 'week'} onPress={() => setView('week')} />
+        <Chip label={t('calendar.viewEvents')} wide selected={view === 'events'} onPress={() => setView('events')} />
+      </View>
 
-      {events.isPending ? <ActivityIndicator /> : null}
-      <ErrorText>{events.error ? friendlyError(events.error) : null}</ErrorText>
+      <Button title={t('calendar.add')} onPress={() => router.push('/event-edit')} />
 
-      {events.data && events.data.length === 0 ? (
-        <Card>
-          <Heading>Nothing coming up</Heading>
-          <Body muted>Anyone in the church can add an event, and everyone sees it here.</Body>
-        </Card>
-      ) : null}
-
-      {[...days].map(([key, list]) => (
-        <Card key={key}>
-          <Heading>{key === today ? `Today · ${formatDay(key)}` : formatDay(key)}</Heading>
-          {list.map((event) => (
-            <Row
-              key={event.id}
-              title={event.title}
-              subtitle={[eventTimeText(event), event.location].filter(Boolean).join(' · ')}
-              onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}
-            />
-          ))}
-        </Card>
-      ))}
+      {view === 'month' ? <MonthView /> : view === 'week' ? <WeekView /> : <YearView />}
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  views: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+});

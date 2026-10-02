@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { DateField } from '@/components/date-time-fields';
 import { passageFields, passageFromSaved, ScriptureField } from '@/components/scripture-field';
@@ -17,6 +18,7 @@ const MAX_TEXT = 8000;
 // Adds one of the Pastor's own sermons, or with ?id= edits one. Only the Pastor; the database enforces that too.
 // Members write articles and suggest outside sermons through their own screens, which go to the Pastor for review.
 export default function SermonEditScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { church_id } = useActiveChurch();
   const { isPastor } = usePermissions();
@@ -25,7 +27,7 @@ export default function SermonEditScreen() {
   if (!isPastor) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>Only the Pastor can add or change the church&apos;s own sermons.</Body>
+        <Body muted>{t('sermonEdit.onlyPastor')}</Body>
       </Screen>
     );
   }
@@ -33,7 +35,7 @@ export default function SermonEditScreen() {
   if (id && !sermon.data) {
     return (
       <Screen edges={['bottom']}>
-        <Body muted>This sermon is no longer in the list.</Body>
+        <Body muted>{t('sermon.gone')}</Body>
       </Screen>
     );
   }
@@ -41,6 +43,7 @@ export default function SermonEditScreen() {
 }
 
 function SermonForm({ existing }: { existing: SermonDetail | null }) {
+  const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const userId = useUserId();
   const save = useSaveSermon(church_id, userId!);
@@ -93,35 +96,35 @@ function SermonForm({ existing }: { existing: SermonDetail | null }) {
       <ErrorText>{error}</ErrorText>
 
       <Card>
-        <Heading>Sermon</Heading>
-        <TextField label="Title" value={title} onChangeText={setTitle} maxLength={150} />
-        <TextField label="Speaker (optional)" value={speaker} onChangeText={setSpeaker} maxLength={100} autoCapitalize="words" />
-        <DateField label="Date" value={dateText} onChange={setDateText} hint={dateOk ? formatDay(dateText) : 'Choose the date.'} />
+        <Heading>{t('sermonEdit.sermon')}</Heading>
+        <TextField label={t('common.title')} value={title} onChangeText={setTitle} maxLength={150} />
+        <TextField label={t('sermonEdit.speaker')} value={speaker} onChangeText={setSpeaker} maxLength={100} autoCapitalize="words" />
+        <DateField label={t('study.date')} value={dateText} onChange={setDateText} hint={dateOk ? formatDay(dateText) : t('sermonEdit.chooseDate')} />
       </Card>
 
       <Card>
-        <Heading>Scripture (optional)</Heading>
+        <Heading>{t('sermonWrite.scripture')}</Heading>
         <ScriptureField value={passage} onChange={setPassage} />
       </Card>
 
       <Card>
-        <Heading>Sermon text (optional)</Heading>
+        <Heading>{t('sermonEdit.textTitle')}</Heading>
         <TextField
-          label="Write or paste your own sermon"
+          label={t('sermonEdit.writeOrPaste')}
           value={text}
           onChangeText={setText}
           multiline
           maxLength={MAX_TEXT}
           style={{ minHeight: 180, paddingTop: 12, textAlignVertical: 'top' }}
-          hint={`${text.length} of ${MAX_TEXT} characters. Only add text you wrote or have permission to share.`}
+          hint={t('sermonEdit.textHint', { count: text.length, max: MAX_TEXT })}
         />
       </Card>
 
       <Card>
-        <Heading>Links (optional)</Heading>
-        <Body muted>A link to read the sermon elsewhere, and/or a video or audio link. Members tap through to open them.</Body>
+        <Heading>{t('sermonEdit.linksTitle')}</Heading>
+        <Body muted>{t('sermonEdit.linksIntro')}</Body>
         <TextField
-          label="Link to read the sermon"
+          label={t('sermonEdit.readLink')}
           value={readUrl}
           onChangeText={setReadUrl}
           placeholder="https://"
@@ -129,10 +132,10 @@ function SermonForm({ existing }: { existing: SermonDetail | null }) {
           autoCorrect={false}
           keyboardType="url"
           maxLength={500}
-          hint={readBad ? 'Start the link with https://' : undefined}
+          hint={readBad ? t('sermonSuggest.linkBad') : undefined}
         />
         <TextField
-          label="Link to watch or listen"
+          label={t('sermonEdit.mediaLink')}
           value={mediaUrl}
           onChangeText={setMediaUrl}
           placeholder="https://"
@@ -140,21 +143,21 @@ function SermonForm({ existing }: { existing: SermonDetail | null }) {
           autoCorrect={false}
           keyboardType="url"
           maxLength={500}
-          hint={mediaBad ? 'Start the link with https://' : undefined}
+          hint={mediaBad ? t('sermonSuggest.linkBad') : undefined}
         />
-        {!hasContent ? <Body muted>Add the sermon text, a link, or both.</Body> : null}
+        {!hasContent ? <Body muted>{t('sermonEdit.addContent')}</Body> : null}
       </Card>
 
       <Card>
         <ToggleRow
-          title="Published"
-          subtitle={published ? 'Everyone in the church can see this sermon.' : 'A draft: only you can see it.'}
+          title={t('sermonEdit.published')}
+          subtitle={published ? t('sermonEdit.publishedOn') : t('sermonEdit.publishedOff')}
           value={published}
           onValueChange={setPublished}
         />
       </Card>
 
-      <Button title={existing ? 'Save changes' : 'Add sermon'} onPress={onSave} loading={save.isPending} disabled={!canSave} />
+      <Button title={existing ? t('notes.saveChanges') : t('sermons.addSermon')} onPress={onSave} loading={save.isPending} disabled={!canSave} />
       <Gap />
     </Screen>
   );
