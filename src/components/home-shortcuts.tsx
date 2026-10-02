@@ -22,7 +22,7 @@ type Shortcut = {
   icon: keyof typeof Ionicons.glyphMap | { material: keyof typeof MaterialCommunityIcons.glyphMap };
   /** The colour of the square behind the icon. */
   color: keyof typeof IconColors;
-  path: '/bible' | '/worship' | '/worship-planner' | '/fundraisers' | '/funds' | '/videos' | '/bible-study' | '/special-days' | '/members' | '/reports' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
+  path: '/bible' | '/fasting' | '/worship' | '/worship-planner' | '/fundraisers' | '/funds' | '/videos' | '/bible-study' | '/special-days' | '/members' | '/reports' | '/qa' | '/sermons' | '/prayer' | '/polls' | '/daily-verse' | '/announcements' | '/church-settings';
   badge?: number;
   /** The switch the Pastor must turn on for this row. Without one, the row is always available. */
   feature?: FeatureKey;
@@ -57,6 +57,7 @@ export function HomeShortcuts() {
     // Everyone sees Worship on Sunday until 6 PM, once something is planned.
     { label: t('shortcuts.worship'), icon: 'musical-notes-outline', color: 'purple', path: '/worship', feature: 'worship', show: hasWorship },
     { label: t('shortcuts.prayer'), icon: { material: 'hands-pray' }, color: 'pink', path: '/prayer', feature: 'prayer', show: true },
+    { label: t('shortcuts.fasting'), icon: 'time-outline', color: 'orange', path: '/fasting', feature: 'fasting', show: true },
     { label: t('shortcuts.sermons'), icon: 'document-text-outline', color: 'green', path: '/sermons', badge: sermonsToReview, feature: 'sermons', show: true },
     // Everyone sees Videos once the church has a channel; the people who can add one see it to be reminded to.
     { label: t('shortcuts.videos'), icon: 'play-outline', color: 'red', path: '/videos', badge: newVideos, feature: 'videos', show: !!church.youtube_channel_id || canEditChurch },

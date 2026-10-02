@@ -65,7 +65,8 @@
     "sosHistory": "SOS history",
     "fundraisers": "Fundraisers",
     "worship": "Worship",
-    "worshipPlanner": "Worship Planner"
+    "worshipPlanner": "Worship Planner",
+    "fasting": "Fasting prayer"
   },
   "verse": {
     "today": "Today's verse",
@@ -1221,5 +1222,37 @@
     "promptTitle": "Choose what your church uses",
     "promptBody": "Nothing is switched on yet, so members see a bare Home. Turn on the features you want, like the Bible, prayer requests or chat.",
     "promptButton": "Choose features"
+  },
+  "fasting": {
+    "settings": "Settings",
+    "covered": "{{covered}} of {{total}} slots have someone praying",
+    "yours_one": "You are praying in {{count}} slot.",
+    "yours_other": "You are praying in {{count}} slots.",
+    "tapToJoin": "Tap a half hour to pray in it. You can take as many as you like.",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening and night",
+    "meeting": "Church meeting, no prayer slots",
+    "nobody": "Nobody yet",
+    "footer": "Everyone in the church can see this timetable. Your phone reminds you 15 minutes before each of your slots.",
+    "reminderTitle": "Fasting prayer",
+    "reminderBody": "Your prayer slot starts at {{time}}.",
+    "settingsTitle": "Fasting prayer day",
+    "whichFriday": "Which Friday of the month",
+    "friday1": "1st",
+    "friday2": "2nd",
+    "friday3": "3rd",
+    "friday4": "4th",
+    "starts": "Starts",
+    "ends": "Ends",
+    "timeHint": "Use the 24-hour clock, on the hour or half hour. 24:00 is midnight.",
+    "timeBad": "Times must look like 06:00 or 21:30, on the hour or half hour, and the day must end after it starts.",
+    "breaks": "Breaks for church meetings",
+    "from": "From",
+    "to": "To",
+    "addBreak": "Add a break",
+    "breaksHint": "No prayer slots are offered during a break.",
+    "save": "Save",
+    "useDefaults": "Back to the usual times"
   }
 }

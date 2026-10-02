@@ -14,6 +14,7 @@ export const FEATURES = [
   { key: 'videos', label: 'shortcuts.videos' },
   { key: 'worship', label: 'shortcuts.worship' },
   { key: 'prayer', label: 'shortcuts.prayer' },
+  { key: 'fasting', label: 'shortcuts.fasting' },
   { key: 'qa', label: 'shortcuts.qa' },
   { key: 'polls', label: 'shortcuts.polls' },
   { key: 'announcements', label: 'shortcuts.announcements' },
