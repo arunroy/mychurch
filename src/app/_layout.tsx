@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, type Href } from 'expo-router';
+import { PlayfairDisplay_700Bold, useFonts } from '@expo-google-fonts/playfair-display';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -96,9 +97,11 @@ function RootNavigator() {
   const profile = useProfile();
   const { state } = useChurch();
   useRememberInviteLinks();
+  // The church's name on Home is set in this serif. If it fails to load, the phone's own font is used instead.
+  const [fontsLoaded, fontError] = useFonts({ PlayfairDisplay_700Bold });
 
   const signedIn = isConfigured && !!session;
-  const loading = authLoading || (signedIn && (profile.isPending || state === 'loading'));
+  const loading = (!fontsLoaded && !fontError) || authLoading || (signedIn && (profile.isPending || state === 'loading'));
   const needsName = signedIn && !profile.isPending && !profile.data?.full_name;
   const onboarded = signedIn && !loading && !needsName;
 
@@ -205,6 +208,7 @@ function RootNavigator() {
           <Stack.Screen name="new-message" options={{ title: t('messagesTab.newMessage') }} />
           <Stack.Screen name="chat-room" options={{ title: t('chatTab.title') }} />
           <Stack.Screen name="chat/[id]" options={{ title: t('chatTab.title') }} />
+          <Stack.Screen name="verse" options={{ title: t('verse.today') }} />
           <Stack.Screen name="fasting" options={{ title: t('shortcuts.fasting') }} />
           <Stack.Screen name="worship" options={{ title: t('shortcuts.worship') }} />
           <Stack.Screen name="worship-planner" options={{ title: t('shortcuts.worshipPlanner') }} />

@@ -74,7 +74,8 @@
     "addToday": "Add today's verse",
     "ofTheDay": "Verse of the day · {{date}}",
     "reflection": "Reflection",
-    "edit": "Edit"
+    "edit": "Edit",
+    "noneToday": "There is no verse for today yet."
   },
   "more": {
     "title": "More",
@@ -273,7 +274,7 @@
     "intro": "You'll be the church's Pastor in the app. You can add other Pastors, elders and staff once it's set up.",
     "name": "Church name",
     "city": "City",
-    "cityPlaceholder": "Springfield",
+    "cityPlaceholder": "Cardiff",
     "email": "Church contact email",
     "emailHint": "We use this to confirm the church is real.",
     "submit": "Register church",

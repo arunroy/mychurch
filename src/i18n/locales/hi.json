@@ -74,7 +74,8 @@
     "addToday": "आज का वचन जोड़ें",
     "ofTheDay": "आज का वचन · {{date}}",
     "reflection": "मनन",
-    "edit": "बदलें"
+    "edit": "बदलें",
+    "noneToday": "आज के लिए अभी कोई वचन नहीं है।"
   },
   "more": {
     "title": "और",

@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text } from 'react-native';
 
-import { Body, Button, Card, Heading, Label } from '@/components/ui';
+import { Body, Button, Card, Heading, IconSquare, Label, ListSection, Row } from '@/components/ui';
 import { useTheme } from '@/hooks/use-theme';
 import { useLanguage } from '@/i18n/language-preference';
 import { lookUpPassage } from '@/lib/bible';
@@ -37,8 +37,11 @@ function useVerseInBibleLanguage(verse: DailyVerse) {
   });
 }
 
-/** Today's verse and reflection on the Home screen. Leaders get a nudge to add one when it's missing. */
-export function VerseCard() {
+/**
+ * Today's verse on Home, as one row like the rest of Home: its reference, and a tap opens the verse in full. The
+ * Pastor gets a row to add one when it's missing.
+ */
+export function VerseRow() {
   const { t } = useTranslation();
   const { church_id } = useActiveChurch();
   const { isPastor } = usePermissions();
@@ -49,14 +52,52 @@ export function VerseCard() {
   if (!verse.data) {
     if (!isPastor) return null;
     return (
-      <Card>
-        <Heading>{t('verse.today')}</Heading>
-        <Body muted>{t('verse.notChosen')}</Body>
-        <Button title={t('verse.addToday')} onPress={() => router.push('/verse-edit')} />
-      </Card>
+      <ListSection inset={44}>
+        <Row
+          title={t('verse.addToday')}
+          subtitle={t('verse.notChosen')}
+          left={<IconSquare icon="add" color="indigo" />}
+          onPress={() => router.push('/verse-edit')}
+        />
+      </ListSection>
     );
   }
 
+  return <VerseRowFor verse={verse.data} />;
+}
+
+function VerseRowFor({ verse }: { verse: DailyVerse }) {
+  const { t } = useTranslation();
+  const translated = useVerseInBibleLanguage(verse);
+  return (
+    <ListSection inset={44}>
+      <Row
+        title={t('verse.today')}
+        subtitle={translated.data?.reference ?? verse.reference}
+        left={<IconSquare icon="sparkles-outline" color="indigo" />}
+        onPress={() => router.push('/verse')}
+      />
+    </ListSection>
+  );
+}
+
+/** Today's verse in full, with the reflection: the screen a tap on the Home row opens. */
+export function TodaysVerse() {
+  const { t } = useTranslation();
+  const { church_id } = useActiveChurch();
+  const { isPastor } = usePermissions();
+  const verse = useTodaysVerse(church_id);
+
+  if (verse.isPending) return null;
+  if (!verse.data) {
+    return (
+      <Card>
+        <Heading>{t('verse.today')}</Heading>
+        <Body muted>{isPastor ? t('verse.notChosen') : t('verse.noneToday')}</Body>
+        {isPastor ? <Button title={t('verse.addToday')} onPress={() => router.push('/verse-edit')} /> : null}
+      </Card>
+    );
+  }
   return <VerseBody verse={verse.data} isPastor={isPastor} />;
 }
 
@@ -95,6 +136,6 @@ function VerseBody({ verse, isPastor }: { verse: DailyVerse; isPastor: boolean }
 }
 
 const styles = StyleSheet.create({
-  verse: { fontSize: 19, lineHeight: 28, fontWeight: 500, letterSpacing: -0.1 },
+  verse: { fontSize: 21, lineHeight: 31, fontWeight: 500, letterSpacing: -0.1 },
   reference: { fontSize: 14, lineHeight: 20, fontWeight: 500 },
 });
