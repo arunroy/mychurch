@@ -316,7 +316,12 @@
     "youtubeRemoveTitle": "Remove the YouTube channel?",
     "youtubeRemoveMessage": "Members will no longer see church videos.",
     "youtubeSaved": "Channel saved: {{channel}}. Its latest videos now show under Videos.",
-    "youtubeRemoved": "Channel removed."
+    "youtubeRemoved": "Channel removed.",
+    "banner": "Home photo",
+    "bannerHint": "A wide photo of your church, shown at the top of everyone’s Home with its name over it. Without one, Home shows the name and logo.",
+    "addBanner": "Choose a photo",
+    "changeBanner": "Change photo",
+    "removeBanner": "Remove photo"
   },
   "members": {
     "asking": "Asking to join",

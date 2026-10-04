@@ -264,6 +264,8 @@ export type Church = {
   contact_email: string;
   accent_color: string;
   logo_path: string | null;
+  /** A photo of the church for the top of Home. */
+  banner_path: string | null;
   status: ChurchStatus;
   requires_approval: boolean;
   directory_enabled: boolean;
@@ -755,7 +757,7 @@ export type Database = {
         Partial<
           Pick<
             Church,
-            'name' | 'city' | 'contact_email' | 'accent_color' | 'logo_path' | 'requires_approval' | 'directory_enabled'
+            'name' | 'city' | 'contact_email' | 'accent_color' | 'logo_path' | 'banner_path' | 'requires_approval' | 'directory_enabled'
           >
         >
       >;
