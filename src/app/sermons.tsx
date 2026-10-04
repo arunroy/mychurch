@@ -1,3 +1,4 @@
+import * as WebBrowser from 'expo-web-browser';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +11,7 @@ import { Spacing } from '@/constants/theme';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { formatDay } from '@/lib/dates';
 import type { SermonItem, SermonSource } from '@/lib/database.types';
-import { matchesSearch, SOURCES, useSermons } from '@/lib/sermons';
+import { directLink, matchesSearch, SOURCES, useSermons } from '@/lib/sermons';
 import { friendlyError } from '@/lib/supabase';
 
 // The church's sermons. The Pastor's own come first; members' articles and outside sermons sit under their own
@@ -99,26 +100,52 @@ function statusText(item: SermonItem, t: TFunction) {
 
 function List({ items, showStatus }: { items: SermonItem[]; showStatus?: boolean }) {
   const { t } = useTranslation();
+  const { isPastor } = usePermissions();
+  const [error, setError] = useState<string | null>(null);
+
+  const details = (sermon: SermonItem) => router.push({ pathname: '/sermon/[id]', params: { id: sermon.id } });
+
+  async function open(sermon: SermonItem) {
+    const link = directLink(sermon);
+    if (!link) {
+      details(sermon);
+      return;
+    }
+    setError(null);
+    try {
+      await WebBrowser.openBrowserAsync(link);
+    } catch {
+      setError(t('sermon.linkFail'));
+    }
+  }
+
+  const canManage = isPastor || items.some((s) => s.is_mine);
+
   return (
-    <Card>
-      {items.map((sermon) => (
-        <Row
-          key={sermon.id}
-          title={sermon.title}
-          subtitle={[
-            showStatus || sermon.status !== 'approved' ? statusText(sermon, t) : sermon.published ? null : t('sermons.statusDraft'),
-            sermon.author_name ? (sermon.source === 'external' ? t('sermons.sharedBy', { name: sermon.author_name }) : sermon.author_name) : null,
-            sermon.speaker || null,
-            formatDay(sermon.sermon_date),
-            sermon.reference || null,
-          ]
-            .filter(Boolean)
-            .join(' · ')}
-          right={<SourceTag source={sermon.source} />}
-          onPress={() => router.push({ pathname: '/sermon/[id]', params: { id: sermon.id } })}
-        />
-      ))}
-    </Card>
+    <>
+      <ErrorText>{error}</ErrorText>
+      <Card>
+        {items.map((sermon) => (
+          <Row
+            key={sermon.id}
+            title={sermon.title}
+            subtitle={[
+              showStatus || sermon.status !== 'approved' ? statusText(sermon, t) : sermon.published ? null : t('sermons.statusDraft'),
+              sermon.author_name ? (sermon.source === 'external' ? t('sermons.sharedBy', { name: sermon.author_name }) : sermon.author_name) : null,
+              sermon.speaker || null,
+              formatDay(sermon.sermon_date),
+              sermon.reference || null,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+            right={<SourceTag source={sermon.source} link={sermon.read_url || sermon.media_url} />}
+            onPress={() => open(sermon)}
+            onLongPress={isPastor || sermon.is_mine ? () => details(sermon) : undefined}
+          />
+        ))}
+      </Card>
+      {canManage && items.some((s) => directLink(s)) ? <Body muted>{t('sermons.holdToManage')}</Body> : null}
+    </>
   );
 }
 

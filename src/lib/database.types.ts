@@ -212,6 +212,31 @@ export type SongLibraryEntry = Pick<ChurchSong, 'id' | 'title' | 'artist' | 'lin
   next_planned: string | null;
 };
 
+export type FastingBreak = { start: string; end: string };
+
+/** The Pastor's choices for the fasting prayer day. Times come back from the database as 'HH:MM:SS'. */
+export type FastingSettings = {
+  church_id: string;
+  nth_friday: number;
+  start_time: string;
+  end_time: string;
+  breaks: FastingBreak[];
+  updated_by: string | null;
+  updated_at: string;
+};
+
+export type FastingSignup = {
+  id: string;
+  church_id: string;
+  day: string;
+  slot_start: string;
+  user_id: string;
+  created_at: string;
+};
+
+/** One person in one slot, with their name, for the timetable every member sees. */
+export type FastingSlotEntry = { slot_start: string; user_id: string; full_name: string; avatar_path: string | null };
+
 export type QuizLevel = 'little' | 'kids' | 'youth';
 
 /** A multiple-choice question a leader wrote. */
@@ -239,6 +264,8 @@ export type Church = {
   contact_email: string;
   accent_color: string;
   logo_path: string | null;
+  /** A photo of the church for the top of Home. */
+  banner_path: string | null;
   status: ChurchStatus;
   requires_approval: boolean;
   directory_enabled: boolean;
@@ -367,6 +394,10 @@ export type SermonItem = {
   author_name: string | null;
   is_mine: boolean;
   review_note: string | null;
+  /** Where to read it, such as a SermonCentral page. */
+  read_url: string | null;
+  /** A video or audio link. */
+  media_url: string | null;
 };
 
 export type SermonDetail = {
@@ -688,6 +719,18 @@ export type Database = {
         Partial<Pick<ChurchSong, 'title' | 'artist' | 'link' | 'language' | 'tags'>>,
         [Relationship<'church_songs_church_id_fkey', 'church_id', 'churches'>]
       >;
+      fasting_settings: Table<
+        FastingSettings,
+        Pick<FastingSettings, 'church_id'> & Partial<Pick<FastingSettings, 'nth_friday' | 'start_time' | 'end_time' | 'breaks'>>,
+        Partial<Pick<FastingSettings, 'nth_friday' | 'start_time' | 'end_time' | 'breaks'>>,
+        [Relationship<'fasting_settings_church_id_fkey', 'church_id', 'churches'>]
+      >;
+      fasting_signups: Table<
+        FastingSignup,
+        Pick<FastingSignup, 'church_id' | 'day' | 'slot_start'> & Partial<Pick<FastingSignup, 'user_id'>>,
+        never,
+        [Relationship<'fasting_signups_church_id_fkey', 'church_id', 'churches'>]
+      >;
       bible_notes: Table<
         BibleNote,
         Pick<BibleNote, 'user_id' | 'book' | 'chapter' | 'verse' | 'body'>,
@@ -714,7 +757,7 @@ export type Database = {
         Partial<
           Pick<
             Church,
-            'name' | 'city' | 'contact_email' | 'accent_color' | 'logo_path' | 'requires_approval' | 'directory_enabled'
+            'name' | 'city' | 'contact_email' | 'accent_color' | 'logo_path' | 'banner_path' | 'requires_approval' | 'directory_enabled'
           >
         >
       >;
@@ -887,6 +930,8 @@ export type Database = {
       fundraiser_summaries: { Args: { p_church: string }; Returns: FundraiserSummary[] };
       set_my_pledge: { Args: { p_fundraiser: string; p_amount: number | null }; Returns: undefined };
       song_library: { Args: { p_church: string }; Returns: SongLibraryEntry[] };
+      fasting_timetable: { Args: { p_church: string; p_day: string }; Returns: FastingSlotEntry[] };
+      fasting_slot_ok: { Args: { p_church: string; p_day: string; p_slot: string }; Returns: boolean };
       set_church_features: { Args: { p_church: string; p_features: string[] }; Returns: undefined };
       set_worship_leader: { Args: { p_church: string; p_user: string; p_value: boolean }; Returns: undefined };
       can_plan_worship: { Args: { p_church: string }; Returns: boolean };

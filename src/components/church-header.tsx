@@ -4,14 +4,16 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { ACCENT } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useActiveChurch, useChurch } from '@/lib/church';
 import { publicUrl } from '@/lib/supabase';
 
+/** The serif used for the church's name at the top of Home, loaded in the root layout. */
+export const CHURCH_NAME_FONT = 'PlayfairDisplay_700Bold';
+
 /**
- * The church's name as the screen's large title, with its logo beside it. Tapping it switches church when the person
- * belongs to more than one.
+ * The church's logo with its name in a serif beside it and the town in small capitals underneath, like the top of a
+ * printed bulletin. Tapping it switches church when the person belongs to more than one.
  */
 export function ChurchHeader() {
   const { t } = useTranslation();
@@ -35,28 +37,37 @@ export function ChurchHeader() {
       accessibilityRole={canSwitch ? 'button' : 'header'}
       accessibilityHint={canSwitch ? t('churchHeader.hint') : undefined}
       style={({ pressed }) => [styles.row, { opacity: pressed ? 0.7 : 1 }]}>
-      <View style={styles.titleRow}>
-        <Text style={[styles.name, { color: theme.text }]} numberOfLines={2}>
-          {church.name}
-        </Text>
-        {canSwitch ? <Ionicons name="chevron-down" size={22} color={theme.textSecondary} /> : null}
-      </View>
       {logo ? (
         <Image source={{ uri: logo }} style={styles.logo} contentFit="cover" accessibilityIgnoresInvertColors />
       ) : (
-        <View style={[styles.logo, styles.initials, { backgroundColor: ACCENT }]}>
-          <Text style={styles.initialsText}>{initials}</Text>
+        <View style={[styles.logo, styles.initials, { backgroundColor: theme.text }]}>
+          <Text style={[styles.initialsText, { color: theme.page }]}>{initials}</Text>
         </View>
       )}
+      <View style={styles.text}>
+        <View style={styles.nameRow}>
+          <Text style={[styles.name, { color: theme.text }]} numberOfLines={2}>
+            {church.name}
+          </Text>
+          {canSwitch ? <Ionicons name="chevron-down" size={20} color={theme.textSecondary} /> : null}
+        </View>
+        {church.city ? (
+          <Text style={[styles.city, { color: theme.textSecondary }]} numberOfLines={1}>
+            {church.city.toUpperCase()}
+          </Text>
+        ) : null}
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  titleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  name: { flexShrink: 1, fontSize: 34, lineHeight: 41, fontWeight: 700, letterSpacing: -0.4 },
-  logo: { width: 40, height: 40, borderRadius: 20 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  logo: { width: 48, height: 48, borderRadius: 24 },
   initials: { alignItems: 'center', justifyContent: 'center' },
-  initialsText: { color: '#FFFFFF', fontSize: 15, fontWeight: 700 },
+  initialsText: { fontFamily: CHURCH_NAME_FONT, fontSize: 18 },
+  text: { flex: 1, gap: 2 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  name: { flexShrink: 1, fontFamily: CHURCH_NAME_FONT, fontSize: 30, lineHeight: 36 },
+  city: { fontSize: 12, fontWeight: 700, letterSpacing: 2.2 },
 });

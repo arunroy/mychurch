@@ -1,10 +1,8 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
 
-import { Body, Button, Card, Chip, ErrorText, Heading, ToggleRow } from '@/components/ui';
-import { Spacing } from '@/constants/theme';
+import { Body, Button, Card, ErrorText, Heading, IconSquare, ListSection, Row, ToggleRow } from '@/components/ui';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { FEATURES, useSaveFeatures, type FeatureKey } from '@/lib/features';
 import { friendlyError } from '@/lib/supabase';
@@ -43,19 +41,25 @@ export function FeaturesCard() {
   }
 
   return (
-    <Card>
-      <Heading>{t('features.title')}</Heading>
-      <Body muted>{t('features.intro')}</Body>
+    <>
       <ErrorText>{error}</ErrorText>
-      <View style={styles.chips}>
-        <Chip label={t('features.allOn')} onPress={() => change(FEATURES.map((f) => f.key))} />
-        <Chip label={t('features.allOff')} onPress={() => change([])} />
-      </View>
-      {FEATURES.map((f) => (
-        <ToggleRow key={f.key} title={t(f.label)} value={on.has(f.key)} onValueChange={(value) => toggle(f.key, value)} disabled={busy} />
-      ))}
-      <Body muted>{t('features.alwaysOn')}</Body>
-    </Card>
+      <ListSection title={t('features.title')} footer={t('features.alwaysOn')} inset={44}>
+        {FEATURES.map((f) => (
+          <ToggleRow
+            key={f.key}
+            title={t(f.label)}
+            left={<IconSquare icon={f.icon} color={f.color} />}
+            value={on.has(f.key)}
+            onValueChange={(value) => toggle(f.key, value)}
+            disabled={busy}
+          />
+        ))}
+      </ListSection>
+      <ListSection footer={t('features.intro')}>
+        <Row title={t('features.allOn')} chevron={false} onPress={busy ? undefined : () => change(FEATURES.map((f) => f.key))} />
+        <Row title={t('features.allOff')} chevron={false} onPress={busy ? undefined : () => change([])} />
+      </ListSection>
+    </>
   );
 }
 
@@ -74,6 +78,3 @@ export function FeaturesPrompt() {
   );
 }
 
-const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-});

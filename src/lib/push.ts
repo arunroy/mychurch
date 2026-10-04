@@ -43,6 +43,8 @@ export function useOpenNotificationTarget(enabled: boolean) {
       router.push({ pathname: '/event/[id]', params: { id: data.event_id } });
     } else if (data.type === 'video') {
       router.push('/videos');
+    } else if (data.type === 'fasting') {
+      router.push('/fasting');
     } else if (data.type === 'sos' && typeof data.alert_id === 'string') {
       router.push({ pathname: '/sos-alert', params: { id: data.alert_id } });
     }

@@ -1,9 +1,10 @@
+import { Image } from 'expo-image';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { FeaturesCard } from '@/components/features-card';
 import { YoutubeChannelCard } from '@/components/youtube-channel-card';
-import { Avatar, Button, Card, ErrorText, Heading, Screen, TextField, ToggleRow } from '@/components/ui';
+import { Avatar, Button, Card, ErrorText, Heading, Screen, TextField, ToggleRow, Body } from '@/components/ui';
 import { ACCENT } from '@/constants/theme';
 import type { Church } from '@/lib/database.types';
 import { useActiveChurch, useChurch } from '@/lib/church';
@@ -11,7 +12,7 @@ import { pickAndUploadImage } from '@/lib/images';
 import { friendlyError, publicUrl, supabase } from '@/lib/supabase';
 
 type Editable = Partial<
-  Pick<Church, 'name' | 'city' | 'contact_email' | 'logo_path' | 'requires_approval' | 'directory_enabled'>
+  Pick<Church, 'name' | 'city' | 'contact_email' | 'logo_path' | 'banner_path' | 'requires_approval' | 'directory_enabled'>
 >;
 
 // Pastor and church admins only (the database enforces this too).
@@ -46,6 +47,19 @@ export default function ChurchSettingsScreen() {
     setBusy(null);
   }
 
+  async function changeBanner() {
+    setBusy('banner');
+    setError(null);
+    try {
+      // Uploaded as it is, so Home can show the whole photo at its own shape. Kept in the church's folder, beside the logo.
+      const path = await pickAndUploadImage('church-logos', `${church.id}/banner`, null);
+      if (path) await save({ banner_path: path }, 'banner');
+    } catch (e) {
+      setError(friendlyError(e));
+    }
+    setBusy(null);
+  }
+
   const detailsChanged = name.trim() !== church.name || city.trim() !== church.city || email.trim() !== church.contact_email;
 
   return (
@@ -56,6 +70,18 @@ export default function ChurchSettingsScreen() {
         <Heading>{t('settings.logo')}</Heading>
         <Avatar name={church.name} uri={publicUrl('church-logos', church.logo_path)} color={ACCENT} size={72} />
         <Button title={t('settings.changeLogo')} variant="secondary" onPress={changeLogo} loading={busy === 'logo'} />
+      </Card>
+
+      <Card>
+        <Heading>{t('settings.banner')}</Heading>
+        {church.banner_path ? (
+          <Image source={{ uri: publicUrl('church-logos', church.banner_path) ?? undefined }} style={{ width: '100%', aspectRatio: 2000 / 881, borderRadius: 10 }} contentFit="contain" />
+        ) : null}
+        <Body muted>{t('settings.bannerHint')}</Body>
+        <Button title={church.banner_path ? t('settings.changeBanner') : t('settings.addBanner')} variant="secondary" onPress={changeBanner} loading={busy === 'banner'} />
+        {church.banner_path ? (
+          <Button title={t('settings.removeBanner')} variant="danger" onPress={() => save({ banner_path: null }, 'banner')} disabled={busy === 'banner'} />
+        ) : null}
       </Card>
 
       <Card>

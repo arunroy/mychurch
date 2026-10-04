@@ -65,7 +65,8 @@
     "sosHistory": "SOS history",
     "fundraisers": "Fundraisers",
     "worship": "Worship",
-    "worshipPlanner": "Worship Planner"
+    "worshipPlanner": "Worship Planner",
+    "fasting": "Fasting prayer"
   },
   "verse": {
     "today": "Today's verse",
@@ -73,7 +74,8 @@
     "addToday": "Add today's verse",
     "ofTheDay": "Verse of the day · {{date}}",
     "reflection": "Reflection",
-    "edit": "Edit"
+    "edit": "Edit",
+    "noneToday": "There is no verse for today yet."
   },
   "more": {
     "title": "More",
@@ -272,7 +274,7 @@
     "intro": "You'll be the church's Pastor in the app. You can add other Pastors, elders and staff once it's set up.",
     "name": "Church name",
     "city": "City",
-    "cityPlaceholder": "Springfield",
+    "cityPlaceholder": "Cardiff",
     "email": "Church contact email",
     "emailHint": "We use this to confirm the church is real.",
     "submit": "Register church",
@@ -314,7 +316,12 @@
     "youtubeRemoveTitle": "Remove the YouTube channel?",
     "youtubeRemoveMessage": "Members will no longer see church videos.",
     "youtubeSaved": "Channel saved: {{channel}}. Its latest videos now show under Videos.",
-    "youtubeRemoved": "Channel removed."
+    "youtubeRemoved": "Channel removed.",
+    "banner": "Home photo",
+    "bannerHint": "A wide photo of your church, shown at the top of everyone’s Home with its name over it. Without one, Home shows the name and logo.",
+    "addBanner": "Choose a photo",
+    "changeBanner": "Change photo",
+    "removeBanner": "Remove photo"
   },
   "members": {
     "asking": "Asking to join",
@@ -540,7 +547,8 @@
     "statusPending": "Waiting for review",
     "statusDeclined": "Not approved",
     "statusDraft": "Draft",
-    "sharedBy": "Shared by {{name}}"
+    "sharedBy": "Shared by {{name}}",
+    "holdToManage": "Tap a sermon to read it. Press and hold one to edit or delete it."
   },
   "sermon": {
     "gone": "This sermon is no longer in the list.",
@@ -1221,5 +1229,37 @@
     "promptTitle": "Choose what your church uses",
     "promptBody": "Nothing is switched on yet, so members see a bare Home. Turn on the features you want, like the Bible, prayer requests or chat.",
     "promptButton": "Choose features"
+  },
+  "fasting": {
+    "settings": "Settings",
+    "covered": "{{covered}} of {{total}} slots have someone praying",
+    "yours_one": "You are praying in {{count}} slot.",
+    "yours_other": "You are praying in {{count}} slots.",
+    "tapToJoin": "Tap a half hour to pray in it. You can take as many as you like.",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening and night",
+    "meeting": "Church meeting, no prayer slots",
+    "nobody": "Nobody yet",
+    "footer": "Everyone in the church can see this timetable. Your phone reminds you 15 minutes before each of your slots.",
+    "reminderTitle": "Fasting prayer",
+    "reminderBody": "Your prayer slot starts at {{time}}.",
+    "settingsTitle": "Fasting prayer day",
+    "whichFriday": "Which Friday of the month",
+    "friday1": "1st",
+    "friday2": "2nd",
+    "friday3": "3rd",
+    "friday4": "4th",
+    "starts": "Starts",
+    "ends": "Ends",
+    "timeHint": "Use the 24-hour clock, on the hour or half hour. 24:00 is midnight.",
+    "timeBad": "Times must look like 06:00 or 21:30, on the hour or half hour, and the day must end after it starts.",
+    "breaks": "Breaks for church meetings",
+    "from": "From",
+    "to": "To",
+    "addBreak": "Add a break",
+    "breaksHint": "No prayer slots are offered during a break.",
+    "save": "Save",
+    "useDefaults": "Back to the usual times"
   }
 }

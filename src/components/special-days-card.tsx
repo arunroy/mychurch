@@ -3,9 +3,9 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
-import { Avatar, Body, Button, Card, ErrorText, Heading, Row, useAccentText } from '@/components/ui';
+import { Avatar, ErrorText, Row, useAccentText, ListSection } from '@/components/ui';
 import { useUserId } from '@/lib/auth';
 import { useActiveChurch, usePermissions } from '@/lib/church';
 import { startConversation } from '@/lib/messages';
@@ -62,10 +62,11 @@ export function SpecialDaysCard() {
   const today = coming.filter((entry) => entry.daysAway === 0);
 
   return (
-    <Card>
-      <Heading>{t('shortcuts.specialDays')}</Heading>
-      {today.length ? <Body>{t('specialDays.pray', { names: today.map((entry) => entry.name).join(', ') })}</Body> : null}
+    <>
       <ErrorText>{error}</ErrorText>
+      <ListSection
+        inset={54}
+        footer={today.length ? t('specialDays.pray', { names: today.map((entry) => entry.name).join(', ') }) : undefined}>
       {coming.map((entry) => {
         const canWish = entry.daysAway === 0 && !!entry.user_id && entry.user_id !== userId;
         return (
@@ -77,7 +78,9 @@ export function SpecialDaysCard() {
               entry.source === 'member' ? (
                 <Avatar name={entry.name} uri={publicUrl('avatars', entry.avatar_path)} />
               ) : (
-                <Ionicons name={entry.kind === 'birthday' ? 'gift' : 'heart'} size={28} color={accent} />
+                <View style={{ width: 40, alignItems: 'center' }}>
+                  <Ionicons name={entry.kind === 'birthday' ? 'gift-outline' : 'heart-outline'} size={26} color={accent} />
+                </View>
               )
             }
             right={busy === entry.id ? <ActivityIndicator /> : undefined}
@@ -85,7 +88,8 @@ export function SpecialDaysCard() {
           />
         );
       })}
-      {isLeader ? <Button title={t('specialDays.manage')} variant="secondary" onPress={() => router.push('/special-days')} /> : null}
-    </Card>
+      {isLeader ? <Row title={t('specialDays.manage')} onPress={() => router.push('/special-days')} /> : null}
+      </ListSection>
+    </>
   );
 }

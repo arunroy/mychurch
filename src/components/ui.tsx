@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Children, Fragment, isValidElement, useState, type ReactElement, type ReactNode } from 'react';
 import {
@@ -261,6 +261,7 @@ export function Row({
   left,
   right,
   onPress,
+  onLongPress,
   chevron = true,
 }: {
   title: string;
@@ -268,14 +269,18 @@ export function Row({
   left?: ReactNode;
   right?: ReactNode;
   onPress?: () => void;
+  /** A second action, such as opening a sermon's own screen to edit it. */
+  onLongPress?: () => void;
   /** Off for rows that pick a choice rather than open something. */
   chevron?: boolean;
 }) {
   const theme = useTheme();
   return (
     <Pressable
-      disabled={!onPress}
+      disabled={!onPress && !onLongPress}
       onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={350}
       accessibilityRole={onPress ? 'button' : undefined}
       style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}>
       {left}
@@ -324,10 +329,16 @@ export function ListSection({
 }
 
 /** The small coloured square with a white symbol at the start of a list row. */
-export function IconSquare({ icon, color }: { icon: keyof typeof Ionicons.glyphMap; color: keyof typeof IconColors }) {
+export type IconName = keyof typeof Ionicons.glyphMap | { material: keyof typeof MaterialCommunityIcons.glyphMap };
+
+export function IconSquare({ icon, color }: { icon: IconName; color: keyof typeof IconColors }) {
   return (
     <View style={[styles.iconSquare, { backgroundColor: IconColors[color] }]}>
-      <Ionicons name={icon} size={18} color="#FFFFFF" />
+      {typeof icon === 'string' ? (
+        <Ionicons name={icon} size={18} color="#FFFFFF" />
+      ) : (
+        <MaterialCommunityIcons name={icon.material} size={19} color="#FFFFFF" />
+      )}
     </View>
   );
 }
@@ -348,32 +359,39 @@ export function Divider() {
   return <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: theme.border }} />;
 }
 
+/** The green of an on switch, as on the phone's own settings. */
+const SWITCH_ON = '#34C759';
+
 export function ToggleRow({
   title,
   subtitle,
+  left,
   value,
   onValueChange,
   disabled,
 }: {
   title: string;
   subtitle?: string;
+  left?: ReactNode;
   value: boolean;
   onValueChange: (value: boolean) => void;
   disabled?: boolean;
 }) {
-  const accent = useAccent();
   const theme = useTheme();
   return (
     <Row
       title={title}
       subtitle={subtitle}
+      left={left}
       right={
         <Switch
           accessibilityLabel={title}
           value={value}
           onValueChange={onValueChange}
           disabled={disabled}
-          trackColor={{ true: accent, false: theme.backgroundSelected }}
+          trackColor={{ true: SWITCH_ON, false: theme.backgroundSelected }}
+          thumbColor="#FFFFFF"
+          ios_backgroundColor={theme.backgroundSelected}
         />
       }
     />

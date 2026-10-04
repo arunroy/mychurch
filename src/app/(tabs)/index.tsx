@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 
 import { AnnouncementCards } from '@/components/announcement-cards';
 import { ChurchHeader } from '@/components/church-header';
+import { PhotoBanner } from '@/components/photo-banner';
 import { FeaturesPrompt } from '@/components/features-card';
 import { HomeShortcuts } from '@/components/home-shortcuts';
 import { InviteCard } from '@/components/invite-card';
 import { SosBanner } from '@/components/sos-banner';
 import { SpecialDaysCard } from '@/components/special-days-card';
-import { VerseCard } from '@/components/verse-card';
+import { VerseRow } from '@/components/verse-card';
 import { WorshipCard } from '@/components/worship-card';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -30,16 +31,30 @@ export default function HomeScreen() {
   const pending = members.data?.filter((m) => m.status === 'pending') ?? [];
   const approvedCount = members.data?.filter((m) => m.status === 'approved').length ?? 0;
   const featureOn = useEnabledFeatures();
+  const hasBanner = !!active.church.banner_path;
   const firstName = profile.data?.full_name.split(' ')[0];
 
   return (
     <Screen edges={['top']}>
-      <View style={styles.header}>
-        <Text style={[styles.greeting, { color: theme.textSecondary }]}>
-          {t(greetingKey(), { name: firstName })} · {formatDay(dateKey())}
-        </Text>
-        <ChurchHeader />
-      </View>
+      {hasBanner ? (
+        <View style={styles.header}>
+          {/* Edge to edge: undo the screen's own side and top padding. */}
+          <View style={styles.bleed}>
+            <PhotoBanner />
+          </View>
+          <Text style={[styles.greeting, { color: theme.textSecondary }]}>
+            {t(greetingKey(), { name: firstName })} · {formatDay(dateKey())}
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.header}>
+          <ChurchHeader />
+          <View style={[styles.rule, { backgroundColor: theme.border }]} />
+          <Text style={[styles.greeting, { color: theme.textSecondary }]}>
+            {t(greetingKey(), { name: firstName })} · {formatDay(dateKey())}
+          </Text>
+        </View>
+      )}
 
       <SosBanner />
 
@@ -47,7 +62,7 @@ export default function HomeScreen() {
 
       {featureOn('announcements') ? <AnnouncementCards /> : null}
 
-      {featureOn('daily_verse') ? <VerseCard /> : null}
+      {featureOn('daily_verse') ? <VerseRow /> : null}
 
       {featureOn('worship') ? <WorshipCard /> : null}
 
@@ -74,6 +89,9 @@ function greetingKey() {
 }
 
 const styles = StyleSheet.create({
-  header: { gap: 2, marginTop: 4 },
-  greeting: { fontSize: 15, fontWeight: 500 },
+  header: { gap: 14, marginTop: 8 },
+  // The screen pads 16 at the top and the header adds 8, so the photo starts right under the status bar.
+  bleed: { marginHorizontal: -20, marginTop: -24 },
+  rule: { height: StyleSheet.hairlineWidth },
+  greeting: { fontSize: 17, lineHeight: 22 },
 });

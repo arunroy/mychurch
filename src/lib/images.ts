@@ -3,14 +3,16 @@ import * as ImagePicker from 'expo-image-picker';
 import { supabase } from './supabase';
 
 /**
- * Lets the person pick a square photo and uploads it to `bucket/folder/...`.
+ * Lets the person pick a photo, cropped square unless another shape (or null, for no crop) is given, and uploads it
+ * to `bucket/folder/...`.
  * Returns the stored path, or null if they cancelled.
  */
-export async function pickAndUploadImage(bucket: 'church-logos' | 'avatars', folder: string) {
+export async function pickAndUploadImage(bucket: 'church-logos' | 'avatars', folder: string, aspect: [number, number] | null = [1, 1]) {
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
-    allowsEditing: true,
-    aspect: [1, 1],
+    // No shape means the photo is used as it is, without a crop step.
+    allowsEditing: aspect !== null,
+    aspect: aspect ?? undefined,
     quality: 0.7,
   });
   if (result.canceled) return null;

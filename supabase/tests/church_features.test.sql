@@ -90,9 +90,9 @@ reset role;
 
 select pg_temp.act_as(:pastor_a);
 select pg_temp.fails(format('select public.set_church_features(%L, array[''bible'', ''teleporter''])', :'church_a'), 'a feature that does not exist is refused');
-select pg_temp.check((select count(*) = 17 from unnest(public.known_church_features())), 'there are 17 switchable features');
+select pg_temp.check((select count(*) = 18 from unnest(public.known_church_features())), 'there are 18 switchable features');
 select public.set_church_features(:'church_a', public.known_church_features());
-select pg_temp.check((select cardinality(enabled_features) = 17 from public.churches where id = :'church_a'), 'the Pastor can turn all of them on');
+select pg_temp.check((select cardinality(enabled_features) = 18 from public.churches where id = :'church_a'), 'the Pastor can turn all of them on');
 select public.set_church_features(:'church_a', '{}');
 select public.set_church_features(:'church_a', null);
 reset role;
